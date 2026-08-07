@@ -138,8 +138,8 @@ function renderHead(string $title, int $depth = 1): void {
         <div class="navbar-logo-fallback" style="display:none"><?= svgIcon('dashboard') ?></div>
 
         <div class="navbar-titles">
-            <span class="navbar-college-en">Government College of Engineering Aurangabad, Chhatrapati Sambhajinagar</span>
-            <span class="navbar-college-hi">शासकीय अभियांत्रिकी महाविद्यालय औरंगाबाद, छत्रपती संभाजीनगर</span>
+            <span class="navbar-college-en">Government College of Engineering, Chhatrapati Sambhajinagar</span>
+            <span class="navbar-college-hi">शासकीय अभियांत्रिकी महाविद्यालय, छत्रपती संभाजीनगर</span>
         </div>
     </div>
 
