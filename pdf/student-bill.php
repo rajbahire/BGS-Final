@@ -138,11 +138,11 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
     <hr class="thick">
     <div class="title">EARN AND LEARN STUDENT BILL</div>
 
-    <div class="row">Name of Student: <span class="fl" style="min-width:95mm"><?= h($bill['sname']) ?></span></div>
-    <div class="row">Department: <span class="fl" style="min-width:70mm"><?= h($bill['dept_name'] ?? '') ?></span>
-        &nbsp; Class / Year: <span class="fl" style="min-width:42mm"><?= h($bill['class_label'] ?? '') ?></span></div>
-    <div class="row">Bill for the month of: <span class="fl" style="min-width:50mm"><?= h($bill['month_year']) ?></span>
-        &nbsp; Period: <span class="fl" style="min-width:55mm"><?= showDate($bill['period_from']) ?> – <?= showDate($bill['period_to']) ?></span></div>
+    <div class="row">Name of Student: <span class="fl" style="min-width: 146mm;margin-left: 35px;"><?= h($bill['sname']) ?></span></div>
+    <div class="row">Department: <span class="fl" style="min-width:70mm;margin-left: 62px;"><?= h($bill['dept_name'] ?? '') ?></span>
+        &nbsp; Class / Year: <span class="fl" style="min-width:55mm"><?= h($bill['class_label'] ?? '') ?></span></div>
+    <div class="row">Bill for the month of: <span class="fl" style="min-width: 70mm;margin-left: 15px;"><?= h($bill['month_year']) ?></span>
+        &nbsp; Period: <span class="fl" style="min-width:63mm"><?= showDate($bill['period_from']) ?> – <?= showDate($bill['period_to']) ?></span></div>
 
     <table class="mt">
         <thead><tr><th style="width:14mm">Sr.No.</th><th>Particulars</th><th style="width:28mm">Days</th><th style="width:28mm">Hours</th><th style="width:28mm">Rate (Rs.)</th><th style="width:38mm">Amount Rs.</th></tr></thead>
