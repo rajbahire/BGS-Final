@@ -123,7 +123,7 @@ renderHead('Review Earn & Learn Bill');
                 <div class="card-header"><h3><?= svgIcon('calendar') ?> Work Breakdown</h3></div>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>#</th><th>Date</th><th>Hours</th><th>Description</th><th>Amount</th></tr></thead>
+                        <thead><tr><th>#</th><th>Date</th><th>Start Time</th><th>End Time</th><th>Hours</th><th>Description</th><th>Amount</th></tr></thead>
                         <tbody>
                         <?php foreach($work as $i=>$w):
                             $amt = (float)$w['hours'] * (float)$bill['rate_per_hour'];
@@ -131,13 +131,15 @@ renderHead('Review Earn & Learn Bill');
                         <tr>
                             <td class="text-muted"><?= $i+1 ?></td>
                             <td><?= fmtDate($w['work_date']) ?></td>
+                            <td><?= ($w['start_time'] ?? '') ? date('h:i A', strtotime($w['start_time'])) : '—' ?></td>
+                            <td><?= ($w['end_time'] ?? '') ? date('h:i A', strtotime($w['end_time'])) : '—' ?></td>
                             <td><?= number_format($w['hours'],1) ?></td>
                             <td class="text-sm text-muted"><?= e($w['description'] ?: '—') ?></td>
                             <td><?= formatINR($amt) ?></td>
                         </tr>
                         <?php endforeach; ?>
                         <tr style="background:var(--bg-light)">
-                            <td colspan="2" style="text-align:right;font-weight:600;padding:11px 14px">Total</td>
+                            <td colspan="4" style="text-align:right;font-weight:600;padding:11px 14px">Total</td>
                             <td class="fw-600"><?= number_format($bill['total_hours'],1) ?></td>
                             <td></td>
                             <td class="fw-600"><?= formatINR($bill['total_amount']) ?></td>

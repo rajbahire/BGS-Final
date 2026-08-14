@@ -16,8 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'profile') {
         $name  = trim($_POST['name']  ?? '');
         $phone = trim($_POST['phone'] ?? '');
+        $enrollment = trim($_POST['enrollment_number'] ?? '');
         if ($name) {
-            $pdo->prepare("UPDATE users SET name=?,phone=? WHERE id=?")->execute([$name,$phone,$uid]);
+            $pdo->prepare("UPDATE users SET name=?,phone=?,enrollment_number=? WHERE id=?")->execute([$name,$phone,$enrollment,$uid]);
             $_SESSION['user_name'] = $name;
             setFlash('success','Profile updated.');
         } else { setFlash('error','Name is required.'); }
@@ -88,6 +89,7 @@ renderHead('My Profile');
                     <input type="hidden" name="action" value="profile">
                     <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" required value="<?= e($row['name']) ?>"></div>
                     <div class="form-group"><label>Email</label><input type="email" class="form-control" value="<?= e($row['email']) ?>" disabled></div>
+                    <div class="form-group"><label>Enrollment Number</label><input type="text" name="enrollment_number" class="form-control" placeholder="Enrollment Number" value="<?= e($row['enrollment_number']??'') ?>"></div>
                     <div class="form-group"><label>Phone <span style="color:red">*</span></label><input type="text" name="phone" class="form-control" placeholder="Phone Number" required value="<?= e($row['phone']??'') ?>"></div>
                     <div class="form-group"><label>Department</label><input type="text" class="form-control" value="<?= e($row['dept_name']??'—') ?>" disabled></div>
                     <div class="form-group"><label>Class</label><input type="text" class="form-control" value="<?= e($row['class_label']??'—') ?>" disabled></div>

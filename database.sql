@@ -79,6 +79,7 @@ CREATE TABLE IF NOT EXISTS users (
     rate_other            DECIMAL(8,2)   DEFAULT 0.00,  -- rate for other work
 
     -- Student Earn & Learn specific
+    enrollment_number     VARCHAR(50)    DEFAULT NULL,  -- student enrollment number
     class_id              INT UNSIGNED   DEFAULT NULL,
     rate_per_hour         DECIMAL(8,2)   DEFAULT 0.00,
 
@@ -212,6 +213,8 @@ CREATE TABLE IF NOT EXISTS student_work (
     student_id  INT UNSIGNED  NOT NULL,
     work_date   DATE          NOT NULL,
     hours       DECIMAL(4,1)  NOT NULL DEFAULT 0.0,
+    start_time  TIME          DEFAULT NULL,
+    end_time    TIME          DEFAULT NULL,
     description VARCHAR(255)  DEFAULT NULL,
     created_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE

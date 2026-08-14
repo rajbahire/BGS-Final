@@ -6,21 +6,80 @@ requireStudent();
 $user = currentUser();
 $uid  = $user['id'];
 
+// Helper: format a TIME value to 12-hour string
+function fmtTime($t) { return $t ? date('h:i A', strtotime($t)) : '—'; }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'] ?? '';
-
+ 
     if ($action === 'add') {
         $date  = $_POST['work_date'] ?? '';
-        $hours = (float)($_POST['hours'] ?? 0);
+        $stime = $_POST['start_time'] ?? '';
+        $etime = $_POST['end_time'] ?? '';
         $desc  = trim($_POST['description'] ?? '');
 
         if (!$date) { setFlash('error','Date is required.'); }
-        elseif ($hours <= 0 || $hours > 12) { setFlash('error','Hours must be between 0 and 12.'); }
+        elseif (!$stime || !$etime) { setFlash('error','Start time and end time are required.'); }
         else {
-            $pdo->prepare("INSERT INTO student_work (student_id,work_date,hours,description) VALUES (?,?,?,?)")
-                ->execute([$uid,$date,$hours,$desc]);
-            logActivity($pdo,$uid,'add_work',"Added $hours hrs on $date");
-            setFlash('success','Work entry added.');
+            // Compute hours from time difference
+            $start = strtotime($stime);
+            $end   = strtotime($etime);
+            if ($end <= $start) { setFlash('error','End time must be after start time.'); }
+            else {
+                $hours = round(($end - $start) / 3600, 1);
+                if ($hours > 12) { setFlash('error','Work duration cannot exceed 12 hours.'); }
+                else {
+                    $pdo->prepare("INSERT INTO student_work (student_id,work_date,hours,start_time,end_time,description) VALUES (?,?,?,?,?,?)")
+                        ->execute([$uid,$date,$hours,$stime,$etime,$desc]);
+                    logActivity($pdo,$uid,'add_work',"Added $hours hrs on $date ($stime–$etime)");
+                    setFlash('success','Work entry added.');
+                }
+            }
+        }
+    }
+
+    if ($action === 'edit') {
+        $id    = (int)$_POST['work_id'];
+        $date  = $_POST['work_date'] ?? '';
+        $stime = $_POST['start_time'] ?? '';
+        $etime = $_POST['end_time'] ?? '';
+        $desc  = trim($_POST['description'] ?? '');
+
+        // Check if editing is allowed
+        $w = $pdo->prepare("SELECT work_date FROM student_work WHERE id=? AND student_id=?");
+        $w->execute([$id,$uid]);
+        $wd = $w->fetchColumn();
+
+        if (!$wd) {
+            setFlash('error','Work entry not found.');
+        } else {
+            $linked = $pdo->prepare("SELECT status FROM student_bills WHERE student_id=? AND ? BETWEEN period_from AND period_to");
+            $linked->execute([$uid,$wd]);
+            $billStatus = $linked->fetchColumn();
+
+            if ($billStatus && in_array($billStatus, ['pending','approved'])) {
+                setFlash('error','Cannot edit: this entry is part of a submitted or approved bill.');
+            } elseif (!$date) {
+                setFlash('error','Date is required.');
+            } elseif (!$stime || !$etime) {
+                setFlash('error','Start time and end time are required.');
+            } else {
+                $start = strtotime($stime);
+                $end   = strtotime($etime);
+                if ($end <= $start) {
+                    setFlash('error','End time must be after start time.');
+                } else {
+                    $hours = round(($end - $start) / 3600, 1);
+                    if ($hours > 12) {
+                        setFlash('error','Work duration cannot exceed 12 hours.');
+                    } else {
+                        $pdo->prepare("UPDATE student_work SET work_date=?, hours=?, start_time=?, end_time=?, description=? WHERE id=? AND student_id=?")
+                            ->execute([$date,$hours,$stime,$etime,$desc,$id,$uid]);
+                        logActivity($pdo,$uid,'edit_work',"Edited work entry #$id: $hours hrs on $date");
+                        setFlash('success','Work entry updated.');
+                    }
+                }
+            }
         }
     }
 
@@ -55,6 +114,16 @@ $sql.=" ORDER BY work_date DESC";
 $stmt=$pdo->prepare($sql); $stmt->execute($params); $work=$stmt->fetchAll();
 
 $totalHrs = array_sum(array_column($work,'hours'));
+
+// Helper: check if a work entry can be edited (only if no bill or bill is rejected)
+function canEditWork($pdo, $studentId, $workDate) {
+    $stmt = $pdo->prepare("SELECT status FROM student_bills WHERE student_id=? AND ? BETWEEN period_from AND period_to");
+    $stmt->execute([$studentId, $workDate]);
+    $billStatus = $stmt->fetchColumn();
+
+    // Can edit if: no bill exists OR bill is rejected
+    return !$billStatus || $billStatus === 'rejected';
+}
 
 renderHead('Add Work');
 ?>
@@ -116,22 +185,38 @@ renderHead('Add Work');
                 <?php if($work): ?>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>#</th><th>Date</th><th>Hours</th><th>Description</th><th>Action</th></tr></thead>
+                        <thead><tr><th>#</th><th>Date</th><th>Start Time</th><th>End Time</th><th>Hours</th><th>Description</th><th>Action</th></tr></thead>
                         <tbody>
-                        <?php foreach($work as $i=>$w): ?>
+                        <?php foreach($work as $i=>$w):
+                            $canEdit = canEditWork($pdo, $uid, $w['work_date']);
+                        ?>
                         <tr>
                             <td class="text-muted"><?= $i+1 ?></td>
                             <td><?= fmtDate($w['work_date']) ?></td>
+                            <td><?= fmtTime($w['start_time'] ?? '') ?></td>
+                            <td><?= fmtTime($w['end_time'] ?? '') ?></td>
                             <td class="fw-600"><?= number_format($w['hours'],1) ?></td>
                             <td class="text-sm text-muted"><?= e($w['description']?:'—') ?></td>
                             <td>
-                                <form method="POST">
-                                    <input type="hidden" name="action"  value="delete">
-                                    <input type="hidden" name="work_id" value="<?= $w['id'] ?>">
-                                    <input type="hidden" name="fm" value="<?= $fm ?>">
-                                    <input type="hidden" name="fy" value="<?= $fy ?>">
-                                    <button class="btn btn-outline btn-sm" style="color:var(--rejected);border-color:#FECACA" onclick="return confirmAction('Delete this entry?')"><?= svgIcon('delete') ?></button>
-                                </form>
+                                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                                    <button type="button" class="btn btn-outline btn-sm"
+                                            onclick="openModal('modal-work-<?= $w['id'] ?>-edit')"
+                                            <?= !$canEdit ? 'disabled title="Cannot edit: bill is submitted or approved"' : '' ?>>
+                                        <?= svgIcon('edit') ?>
+                                    </button>
+                                    <form method="POST" style="display:inline">
+                                        <input type="hidden" name="action"  value="delete">
+                                        <input type="hidden" name="work_id" value="<?= $w['id'] ?>">
+                                        <input type="hidden" name="fm" value="<?= $fm ?>">
+                                        <input type="hidden" name="fy" value="<?= $fy ?>">
+                                        <button class="btn btn-outline btn-sm"
+                                                style="color:var(--rejected);border-color:#FECACA"
+                                                onclick="return confirmAction('Delete this entry?')"
+                                                <?= !$canEdit ? 'disabled title="Cannot delete: bill is submitted or approved"' : '' ?>>
+                                            <?= svgIcon('delete') ?>
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -165,15 +250,64 @@ renderHead('Add Work');
             <input type="hidden" name="fy" value="<?= $fy ?>">
             <div class="modal-body">
                 <div class="form-group"><label>Date <span style="color:red">*</span></label><input type="date" name="work_date" class="form-control" data-today required max="<?= date('Y-m-d') ?>"></div>
-                <div class="form-group"><label>Hours <span style="color:red">*</span></label><input type="number" name="hours" class="form-control" step="0.5" min="0.5" max="12" value="2" required></div>
-                <div class="form-group"><label>Description (optional)</label><textarea name="description" class="form-control" rows="2" placeholder="What work did you do?"></textarea></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    <div class="form-group"><label>Start Time <span style="color:red">*</span></label><input type="time" name="start_time" class="form-control" required></div>
+                    <div class="form-group"><label>End Time <span style="color:red">*</span></label><input type="time" name="end_time" class="form-control" required></div>
+                </div>
+                <div class="form-group"><label>Description / Particulars of Work (optional)</label><textarea name="description" class="form-control" rows="2" placeholder="What work did you do?"></textarea></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-work-add')">Cancel</button>
-                <button type="submit" class="btn btn-primary"><?= svgIcon('add') ?> Add Entry</button>
+                <button type="submit" class="btn btn-primary">Add Entry</button>
             </div>
         </form>
     </div>
 </div>
+
+<?php foreach($work as $w): ?>
+<!-- Edit Work Entry Modal: work-<?= $w['id'] ?> -->
+<div class="modal-backdrop" id="modal-work-<?= $w['id'] ?>-edit">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <span style="display:flex;align-items:center;gap:8px"><?= svgIcon('edit') ?><h3>Edit Work Entry</h3></span>
+            <button class="modal-close" onclick="closeModal('modal-work-<?= $w['id'] ?>-edit')"><?= svgIcon('close') ?></button>
+        </div>
+        <form method="POST">
+            <input type="hidden" name="action" value="edit">
+            <input type="hidden" name="work_id" value="<?= $w['id'] ?>">
+            <input type="hidden" name="fm" value="<?= $fm ?>">
+            <input type="hidden" name="fy" value="<?= $fy ?>">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Date <span style="color:red">*</span></label>
+                    <input type="date" name="work_date" class="form-control" required
+                           max="<?= date('Y-m-d') ?>" value="<?= e($w['work_date']) ?>">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+                    <div class="form-group">
+                        <label>Start Time <span style="color:red">*</span></label>
+                        <input type="time" name="start_time" class="form-control" required
+                               value="<?= e($w['start_time']) ?>">
+                    </div>
+                    <div class="form-group">
+                        <label>End Time <span style="color:red">*</span></label>
+                        <input type="time" name="end_time" class="form-control" required
+                               value="<?= e($w['end_time']) ?>">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Description / Particulars of Work (optional)</label>
+                    <textarea name="description" class="form-control" rows="2"
+                              placeholder="What work did you do?"><?= e($w['description'] ?? '') ?></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeModal('modal-work-<?= $w['id'] ?>-edit')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Entry</button>
+            </div>
+        </form>
+    </div>
+</div>
+<?php endforeach; ?>
 
 <?php renderFooter(); ?>

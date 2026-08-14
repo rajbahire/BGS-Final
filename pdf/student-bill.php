@@ -13,7 +13,7 @@ $user   = currentUser();
 $billId = (int)($_GET['id'] ?? 0);
 
 $select =
-    "SELECT sb.*, u.name AS sname, u.email, u.phone,
+    "SELECT sb.*, u.name AS sname, u.email, u.phone, u.enrollment_number,
             u.bank_name, u.account_no, u.ifsc,
             c.label AS class_label, d.name AS dept_name
      FROM student_bills sb
@@ -58,6 +58,7 @@ $daysInMonth = $ts ? (int)date('t', $ts) : 31;
 function h($v){ return htmlspecialchars((string)$v, ENT_QUOTES, 'UTF-8'); }
 function money($v){ return number_format((float)$v, 2); }
 function showDate($d){ if(!$d || $d==='0000-00-00') return ''; $ts=strtotime($d); return $ts?date('d / m / Y',$ts):h($d); }
+function showTime($t){ return ($t && $t!=='00:00:00') ? date('h:i A', strtotime($t)) : ''; }
 
 function amountWords(float $number): string {
     $number = (int)round($number);
@@ -114,7 +115,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 .tl{text-align:left}.tr{text-align:right}
 .mt{margin-top:5mm}.mb{margin-bottom:5mm}
 .sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:12mm;font-size:10pt;line-height:2}
-.sign{text-align:center;padding-top:14mm}
+.sign{text-align:center;padding-top:6mm}
 .cert{font-size:10pt;line-height:1.7;text-align:justify;margin:5mm 0}
 .box{border:1px solid #000;padding:4mm;margin:4mm 0}
 .stamp-line{display:inline-block;border-bottom:1px solid #000;min-width:55mm;height:5mm}
@@ -138,67 +139,196 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
     <hr class="thick">
     <div class="title">EARN AND LEARN STUDENT BILL</div>
 
-    <div class="row">Name of Student: <span class="fl" style="min-width: 146mm;margin-left: 35px;"><?= h($bill['sname']) ?></span></div>
-    <div class="row">Department: <span class="fl" style="min-width:70mm;margin-left: 62px;"><?= h($bill['dept_name'] ?? '') ?></span>
-        &nbsp; Class / Year: <span class="fl" style="min-width:55mm"><?= h($bill['class_label'] ?? '') ?></span></div>
-    <div class="row">Bill for the month of: <span class="fl" style="min-width: 70mm;margin-left: 15px;"><?= h($bill['month_year']) ?></span>
-        &nbsp; Period: <span class="fl" style="min-width:63mm"><?= showDate($bill['period_from']) ?> – <?= showDate($bill['period_to']) ?></span></div>
+    <div class="row">Name of Student: <span class="fl" style="min-width: 81mm;margin-left: 5mm;"><?= h($bill['sname']) ?></span></div>
+    <div class="row">Enrollment Number: <span class="fl" style="margin-left: 2px;min-width: 81mm;"><?= h($bill['enrollment_number'] ?? '') ?></span></div>
+    <div class="row">Class and Branch: <span class="fl" style="margin-left: 16px;min-width: 60mm;"><?= h($bill['class_label'] ?? '') ?></span>
+        &nbsp; Department/Section: <span class="fl" style="min-width:50mm"><?= h($bill['dept_name'] ?? '') ?></span></div>
+    <div class="row">Bill for the Month of: <span class="fl" style="min-width:59mm"><?= h($bill['month_year']) ?></span>
+        &nbsp; Selection Order No.(If any): <span class="fl" style="min-width:40mm"></span></div>
 
     <table class="mt">
-        <thead><tr><th style="width:14mm">Sr.No.</th><th>Particulars</th><th style="width:28mm">Days</th><th style="width:28mm">Hours</th><th style="width:28mm">Rate (Rs.)</th><th style="width:38mm">Amount Rs.</th></tr></thead>
-        <tbody>
-            <tr><td class="c">1</td><td class="tl">Earn and Learn work done during the month</td><td class="c"><?= $workingDays ?></td><td class="c"><?= money($totalHours) ?></td><td class="tr"><?= money($rate) ?></td><td class="tr"><?= money($amount) ?></td></tr>
-            <tr><td colspan="5" class="tr b">Total Amount</td><td class="tr b"><?= money($amount) ?></td></tr>
-        </tbody>
-    </table>
-
-    <div class="row mt">Amount in words: <span class="fl" style="min-width:128mm"><?= h(amountWords($amount)) ?></span></div>
-
-    <p class="cert">Certified that the student has worked under the Earn and Learn scheme for the above duration and the amount claimed is correct according to the attendance and departmental record.</p>
-
-    <div class="sign-grid">
-        <div>Date: <span class="fl"><?= date('d / m / Y') ?></span><br>Place: Chhatrapati Sambhajinagar</div>
-        <div class="r">Signature of Student<br><span class="stamp-line"></span></div>
-    </div>
-    <div class="sign-grid">
-        <div class="sign">Faculty / Staff In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
-    </div>
-</div>
-
-<!-- ════════════════ PAGE 2: ATTENDANCE SHEET (actual logged work) ════════════════ -->
-<div class="page">
-    <div class="title">ATTENDANCE SHEET — EARN AND LEARN SCHEME</div>
-    <div class="row">Student Name: <span class="fl" style="min-width:78mm"><?= h($bill['sname']) ?></span>
-        &nbsp; Month: <span class="fl" style="min-width:42mm"><?= h($bill['month_year']) ?></span></div>
-
-    <table class="mt">
-        <thead><tr><th style="width:14mm">Sr.No.</th><th style="width:32mm">Date</th><th>Nature of Work</th><th style="width:28mm">Hours</th><th style="width:42mm">Signature</th></tr></thead>
+        <thead>
+            <tr>
+                <th style="width:12mm" rowspan="2">SR.<br>No</th>
+                <th style="width:26mm" rowspan="2">Day &amp;<br>Date</th>
+                <th rowspan="2">Particulars of work</th>
+                <th style="width:22mm">Start<br>Time</th>
+                <th style="width:22mm">End<br>Time</th>
+                <th style="width:22mm">Working<br>Hours</th>
+            </tr>
+        </thead>
         <tbody>
         <?php foreach ($work as $i => $w): ?>
             <tr>
                 <td class="c"><?= $i + 1 ?></td>
-                <td class="c"><?= showDate($w['work_date']) ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showDate($w['work_date']) ?></td>
                 <td class="tl"><?= h($w['description'] ?: 'Earn and Learn work') ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showTime($w['start_time'] ?? '') ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showTime($w['end_time'] ?? '') ?></td>
+                <td class="c"><?= money($w['hours']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php
+            // Pad empty rows up to 15 minimum for the official format
+            $minRows = 15;
+            for ($r = count($work); $r < $minRows; $r++):
+        ?>
+            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <?php endfor; ?>
+            <tr><td colspan="5" class="tr b">Total Number of working hours</td><td class="c b"><?= money($totalHours) ?></td></tr>
+        </tbody>
+    </table>
+
+    <p class="cert">Certified that the above work have actually been done by me & is in accordance with attendance register maintained, & the bill claimed herewith is correct according to the rates as per institute norms.</p>
+
+    <div class="sign-grid">
+        <div>Date: <span class="fl"><?= date('d / m / Y') ?></span></div>
+        <div class="r">Signature of Student<br><span class="stamp-line"></span></div>
+    </div>
+    <div class="sign-grid">
+        <div class="sign">Signature of Concern Faculty</div>
+        <div class="sign">Signature of Head of Department/Section</div>
+    </div>
+</div>
+
+<!-- ════════════════ PAGE 2: DAILY WORK RECORD (Annexure-2) ════════════════ -->
+<div class="page">
+    <div class="c" style="font-style:italic;font-size:11pt;margin-bottom:3mm">Annexure -2</div>
+    <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1></div>
+    <hr class="thin">
+    <div class="title">EARN & LEARN SCHEME<br><span style="font-weight:normal;font-size:10pt;text-decoration:none">Daily Work Record</span></div>
+
+    <div class="row">Name of the Student: <span class="fl" style="min-width:90mm"><?= h($bill['sname']) ?></span></div>
+    <div class="row">Enrollment No: <span class="fl" style="min-width:90mm;margin-left: 31px;"><?= h($bill['enrollment_number'] ?? '') ?></span></div>
+    <div class="row">Department /Section: <span class="fl" style="min-width:90mm"><?= h($bill['dept_name'] ?? '') ?></span></div>
+    <div class="row">Class: <span class="fl" style="min-width:90mm;margin-left: 81px;"><?= h($bill['class_label'] ?? '') ?></span></div>
+
+    <table class="mt">
+        <thead>
+            <tr>
+                <th style="width:24mm" rowspan="2">Date</th>
+                <th rowspan="2">Particulars of Work</th>
+                <th colspan="2">Time Duration</th>
+                <th style="width:18mm" rowspan="2">No. of<br>Hours</th>
+                <th style="width:28mm" rowspan="2">Signature of<br>Student</th>
+            </tr>
+            <tr>
+                <th style="width:22mm">From</th>
+                <th style="width:22mm">To</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($work as $i => $w): ?>
+            <tr>
+                <td class="c" style="font-size:8.5pt"><?= showDate($w['work_date']) ?></td>
+                <td class="tl"><?= h($w['description'] ?: 'Earn and Learn work') ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showTime($w['start_time'] ?? '') ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showTime($w['end_time'] ?? '') ?></td>
                 <td class="c"><?= money($w['hours']) ?></td>
                 <td></td>
             </tr>
         <?php endforeach; ?>
-        <?php if (!$work): ?>
-            <tr><td></td><td></td><td></td><td></td><td></td></tr>
-        <?php endif; ?>
-        <tr><td colspan="3" class="tr b">Total Hours</td><td class="c b"><?= money($totalHours) ?></td><td></td></tr>
+        <?php for ($r = count($work); $r < $minRows; $r++): ?>
+            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <?php endfor; ?>
         </tbody>
     </table>
 
-    <div class="sign-grid">
-        <div class="sign">Faculty / Staff In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+    <div style="text-align:right;margin-top:40mm;font-size:10pt">
+        <strong>(Name and signature)</strong><br>
+        Faculty/Head of the department/Section in Charge
     </div>
 </div>
 
-<!-- ════════════════ PAGE 3: CERTIFICATE + BANK ════════════════ -->
+<!-- ════════════════ PAGE 3: ABSTRACT ════════════════ -->
 <div class="page">
+    <div class="title">ABSTRACT</div>
+
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">Particulars of work</th>
+                <th rowspan="2">Total Hours worked</th>
+                <th>Rate of<br>Remuneration</th>
+                <th>Total<br>Amount</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td class="tl">Earn and Learn work during <?= h($bill['month_year']) ?></td>
+                <td class="c"><?= money($totalHours) ?></td>
+                <td class="c"><?= money($rate) ?>/- per hour</td>
+                <td class="tr"><?= money($amount) ?></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <p class="cert">Certified that the work under earn and learn scheme as stated above has been checked and amount claimed is correct and hence submitted for sanction.</p>
+
+    <span style="display: flex;justify-content: space-between;">
+    <div class="row mt">Date: <span class="fl"></span></div>
+    <div style="text-align:right;margin-top:5mm;font-size:10pt">Signature of Head of Dept./Section</div>
+    </span>
+
+    <table style="margin-top:6mm;border-collapse:collapse;width:100%">
+        <tr>
+            <td style="border:1px solid #000;width:55%;vertical-align:middle;padding:3mm 4mm" class="tl">
+                <div class="b">Name of department: Dean SA</div>
+            </td>
+            <td style="border:1px solid #000;vertical-align:top;padding:3mm 4mm" class="tl">
+                <div class="b">Head of Account:</div>
+                <div>Activities of the functionaries (E-08)</div>
+                <div class="b">Sub Head of Account:</div>
+                <div>Earn and Learn Scheme</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="border:1px solid #000;padding:3mm 4mm">
+                <div style="font-size:9.5pt;line-height:2.2">
+                    <div style="display:flex;align-items:baseline;gap:2mm">
+                        <span style="white-space:nowrap">1- Sanctioned budget for the year <?= $year ?> :</span>
+                        <span style="flex:1;border-bottom:1px solid #000;min-width:20mm;margin-bottom:2px"></span>
+                    </div>
+                    <div style="display:flex;align-items:baseline;gap:2mm">
+                        <span style="white-space:nowrap">2- Expenditure in this bill :</span>
+                        <span style="flex:1;border-bottom:1px solid #000;min-width:20mm;margin-bottom:2px"></span>
+                    </div>
+                    <div style="display:flex;align-items:baseline;gap:2mm">
+                        <span style="white-space:nowrap">3- Expenditure including this bill :</span>
+                        <span style="flex:1;border-bottom:1px solid #000;min-width:20mm;margin-bottom:2px"></span>
+                    </div>
+                    <div style="display:flex;align-items:baseline;gap:2mm">
+                        <span style="white-space:nowrap">4- Remaining budget :</span>
+                        <span style="flex:1;border-bottom:1px solid #000;min-width:20mm;margin-bottom:2px"></span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+    </table>
+
+    <p class="cert">Bills verified by me & found correct.</p>
+
+    <div class="row mt">Bill Entry Register Page No <span class="stamp-line" style="min-width:30mm"></span> Sr.No <span class="stamp-line" style="min-width:30mm"></span></div>
+
+    <div style="text-align:right;margin-top:15mm;font-size:10pt">Storekeeper/Instructor (Dean SA register)</div>
+
+    <div class="sign-grid" style="margin-top:20mm">
+        <div>Date: <span class="fl"></span></div>
+        <div class="r">Signature of Dean (Students'Activities)</div>
+    </div>
+
+    <div class="row mt">Passed for payment: Rs.<span class="stamp-line" style="min-width:100mm"></span></div>
+    <div class="row">In words Rs. <span class="stamp-line" style="min-width:115mm"></span></div>
+
+    <div class="c" style="margin-top:25mm;font-size:10pt">
+        <div class="b">Principal</div>
+        <div><?= $college ?></div>
+        <div><?= $city ?></div>
+    </div>
+</div>
+
+<!-- ════════════════ PAGE 4: CERTIFICATE + BANK ════════════════ -->
+<!-- <div class="page">
     <div class="title">CERTIFICATE</div>
     <p class="cert">I certify that the above bill claimed by me for the said duration of work under Earn and Learn scheme is actually completed by me and is in accordance with attendance register and department record. I know that I will be responsible and accountable for any wrongful claim and will return any excess amount disbursed, if found in future.</p>
 
@@ -219,10 +349,10 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
         <div class="sign">Faculty / Staff In-charge</div>
         <div class="sign">Signature of HoD with Stamp</div>
     </div>
-</div>
+</div> -->
 
 <!-- ════════════════ PAGE 4: OFFICE USE / SANCTION ════════════════ -->
-<div class="page">
+<!-- <div class="page">
     <div class="title">OFFICE USE / SANCTION</div>
     <table>
         <tbody>
@@ -244,7 +374,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
         <div class="sign">Accounts Section</div>
         <div class="sign">Registrar / Principal</div>
     </div>
-</div>
+</div> -->
 
 <script>
 if (new URLSearchParams(window.location.search).get('print') === '1') {

@@ -109,11 +109,13 @@ renderHead('Generate Bill');
 
                     <div class="table-wrap">
                         <table>
-                            <thead><tr><th>Date</th><th>Hours</th><th>Description</th></tr></thead>
+                            <thead><tr><th>Date</th><th>Start Time</th><th>End Time</th><th>Hours</th><th>Description</th></tr></thead>
                             <tbody>
                             <?php foreach($preview as $w): ?>
                             <tr>
                                 <td><?= fmtDate($w['work_date']) ?></td>
+                                <td><?= ($w['start_time'] ?? '') ? date('h:i A', strtotime($w['start_time'])) : '—' ?></td>
+                                <td><?= ($w['end_time'] ?? '') ? date('h:i A', strtotime($w['end_time'])) : '—' ?></td>
                                 <td><?= number_format($w['hours'],1) ?></td>
                                 <td class="text-sm text-muted"><?= e($w['description']?:'—') ?></td>
                             </tr>

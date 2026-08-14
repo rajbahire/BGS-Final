@@ -36,18 +36,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'add_student') {
-        $name    = trim($_POST['name']   ?? '');
-        $email   = trim($_POST['email']  ?? '');
-        $phone   = trim($_POST['phone']  ?? '');
-        $classId = (int)$_POST['class_id'];
-        $rate    = (float)$_POST['rate_per_hour'];
-        $pass    = $_POST['password'] ?? 'student@1234';
+        $name       = trim($_POST['name']              ?? '');
+        $email      = trim($_POST['email']             ?? '');
+        $phone      = trim($_POST['phone']             ?? '');
+        $enrollment = trim($_POST['enrollment_number'] ?? '');
+        $classId    = (int)$_POST['class_id'];
+        $rate       = (float)$_POST['rate_per_hour'];
+        $pass       = $_POST['password'] ?? 'student@1234';
         if ($name && $email) {
             $dup = $pdo->prepare("SELECT id FROM users WHERE email=?"); $dup->execute([$email]);
             if ($dup->fetch()) { setFlash('error','Email already exists.'); }
             else {
-                $pdo->prepare("INSERT INTO users (name,email,password,role,department_id,class_id,rate_per_hour,phone) VALUES (?,?,?,'student',?,?,?,?)")
-                    ->execute([$name,$email,password_hash($pass,PASSWORD_DEFAULT),$deptId,$classId?:null,$rate,$phone]);
+                $pdo->prepare("INSERT INTO users (name,email,password,role,department_id,class_id,rate_per_hour,phone,enrollment_number) VALUES (?,?,?,'student',?,?,?,?,?)")
+                    ->execute([$name,$email,password_hash($pass,PASSWORD_DEFAULT),$deptId,$classId?:null,$rate,$phone,$enrollment]);
                 logActivity($pdo,$user['id'],'add_student',"Added student: $name");
                 setFlash('success',"Student \"$name\" added. Password: $pass");
             }
@@ -55,20 +56,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'edit') {
-        $id     = (int)$_POST['id'];
-        $name   = trim($_POST['name']  ?? '');
-        $email  = trim($_POST['email'] ?? '');
-        $phone  = trim($_POST['phone'] ?? '');
-        $active = (int)$_POST['is_active'];
-        $type   = $_POST['teacher_type']  ?? null;
-        $mode   = $_POST['teacher_mode']  ?? null;
-        $subj   = (int)($_POST['subject_id'] ?? 0);
-        $subj2  = (int)($_POST['subject_id_2'] ?? 0);
-        $rateT  = (float)($_POST['rate_theory']     ?? 0);
-        $rateP  = (float)($_POST['rate_practical']   ?? 0);
-        $rateO  = (float)($_POST['rate_other']       ?? 0);
-        $rateH  = (float)($_POST['rate_per_hour']    ?? 0);
-        $appNo  = trim($_POST['appointment_order_no']?? '');
+        $id         = (int)$_POST['id'];
+        $name       = trim($_POST['name']              ?? '');
+        $email      = trim($_POST['email']             ?? '');
+        $phone      = trim($_POST['phone']             ?? '');
+        $enrollment = trim($_POST['enrollment_number'] ?? '');
+        $active     = (int)$_POST['is_active'];
+        $type       = $_POST['teacher_type']  ?? null;
+        $mode       = $_POST['teacher_mode']  ?? null;
+        $subj       = (int)($_POST['subject_id'] ?? 0);
+        $subj2      = (int)($_POST['subject_id_2'] ?? 0);
+        $rateT      = (float)($_POST['rate_theory']     ?? 0);
+        $rateP      = (float)($_POST['rate_practical']   ?? 0);
+        $rateO      = (float)($_POST['rate_other']       ?? 0);
+        $rateH      = (float)($_POST['rate_per_hour']    ?? 0);
+        $appNo      = trim($_POST['appointment_order_no']?? '');
 
         // Email uniqueness check (exclude current user)
         if ($email) {
@@ -80,8 +82,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,is_active=?,teacher_type=?,teacher_mode=?,subject_id=?,subject_id_2=?,rate_theory=?,rate_practical=?,rate_other=?,rate_per_hour=?,appointment_order_no=? WHERE id=? AND department_id=?")
-            ->execute([$name,$email,$phone,$active,$type?:null,$mode?:null,$subj?:null,$subj2?:null,$rateT,$rateP,$rateO,$rateH,$appNo,$id,$deptId]);
+        $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,is_active=?,teacher_type=?,teacher_mode=?,subject_id=?,subject_id_2=?,rate_theory=?,rate_practical=?,rate_other=?,rate_per_hour=?,appointment_order_no=?,enrollment_number=? WHERE id=? AND department_id=?")
+            ->execute([$name,$email,$phone,$active,$type?:null,$mode?:null,$subj?:null,$subj2?:null,$rateT,$rateP,$rateO,$rateH,$appNo,$enrollment,$id,$deptId]);
         logActivity($pdo,$user['id'],'edit_user',"Updated user: $name");
         setFlash('success','User updated.');
     }
@@ -260,12 +262,13 @@ renderHead('Manage Users');
             <?php if($students): ?>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Class</th><th>Rate/Hr</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>#</th><th>Name</th><th>Enrollment No.</th><th>Email</th><th>Class</th><th>Rate/Hr</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
                     <?php foreach($students as $i => $s): ?>
                     <tr>
                         <td class="text-muted"><?= $i + 1 ?></td>
                         <td class="fw-500"><?= e($s['name']) ?></td>
+                        <td class="text-sm"><?= e($s['enrollment_number'] ?? '—') ?></td>
                         <td class="text-sm"><?= e($s['email']) ?></td>
                         <td class="text-sm"><?= e($s['class_label']??'—') ?></td>
                         <td><?= formatINR($s['rate_per_hour']) ?>/hr</td>
@@ -417,6 +420,7 @@ renderHead('Manage Users');
             <div class="modal-body">
                 <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" placeholder="Enter Full Name" required></div>
                 <div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" class="form-control" required placeholder="student@gcea.edu"></div>
+                <div class="form-group"><label>Enrollment Number</label><input type="text" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001"></div>
                 <div class="form-group"><label>Password</label><input type="text" name="password" class="form-control" value="student@1234"></div>
                 <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control" placeholder="Phone Number"></div>
                 <div class="form-group"><label>Class <span style="color:red">*</span></label>
@@ -452,6 +456,7 @@ renderHead('Manage Users');
             <div class="modal-body">
                 <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" required value="<?= e($s['name']) ?>"></div>
                 <div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" class="form-control" required placeholder="student@gcea.edu" value="<?= e($s['email']) ?>"></div>
+                <div class="form-group"><label>Enrollment Number</label><input type="text" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001" value="<?= e($s['enrollment_number']??'') ?>"></div>
                 <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control" value="<?= e($s['phone']??'') ?>"></div>
                 <div class="form-group"><label>Class <span style="color:red">*</span></label>
                     <select name="class_id" class="form-control" required>
