@@ -132,66 +132,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
     <a href="javascript:history.back()">← Back</a>
 </div>
 
-<!-- ════════════════ PAGE 1: BILL ════════════════ -->
-<div class="page">
-    <div class="bill-id">Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
-    <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1><h2>(An Autonomous Institute of Government of Maharashtra)</h2></div>
-    <hr class="thick">
-    <div class="title">EARN AND LEARN STUDENT BILL</div>
-
-    <div class="row">Name of Student: <span class="fl" style="min-width: 81mm;margin-left: 5mm;"><?= h($bill['sname']) ?></span></div>
-    <div class="row">Enrollment Number: <span class="fl" style="margin-left: 2px;min-width: 81mm;"><?= h($bill['enrollment_number'] ?? '') ?></span></div>
-    <div class="row">Class and Branch: <span class="fl" style="margin-left: 16px;min-width: 60mm;"><?= h($bill['class_label'] ?? '') ?></span>
-        &nbsp; Department/Section: <span class="fl" style="min-width:50mm"><?= h($bill['dept_name'] ?? '') ?></span></div>
-    <div class="row">Bill for the Month of: <span class="fl" style="min-width:59mm"><?= h($bill['month_year']) ?></span>
-        &nbsp; Selection Order No.(If any): <span class="fl" style="min-width:40mm"></span></div>
-
-    <table class="mt">
-        <thead>
-            <tr>
-                <th style="width:12mm" rowspan="2">SR.<br>No</th>
-                <th style="width:26mm" rowspan="2">Day &amp;<br>Date</th>
-                <th rowspan="2">Particulars of work</th>
-                <th style="width:22mm">Start<br>Time</th>
-                <th style="width:22mm">End<br>Time</th>
-                <th style="width:22mm">Working<br>Hours</th>
-            </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($work as $i => $w): ?>
-            <tr>
-                <td class="c"><?= $i + 1 ?></td>
-                <td class="c" style="font-size:8.5pt"><?= showDate($w['work_date']) ?></td>
-                <td class="tl"><?= h($w['description'] ?: 'Earn and Learn work') ?></td>
-                <td class="c" style="font-size:8.5pt"><?= showTime($w['start_time'] ?? '') ?></td>
-                <td class="c" style="font-size:8.5pt"><?= showTime($w['end_time'] ?? '') ?></td>
-                <td class="c"><?= money($w['hours']) ?></td>
-            </tr>
-        <?php endforeach; ?>
-        <?php
-            // Pad empty rows up to 15 minimum for the official format
-            $minRows = 15;
-            for ($r = count($work); $r < $minRows; $r++):
-        ?>
-            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
-        <?php endfor; ?>
-            <tr><td colspan="5" class="tr b">Total Number of working hours</td><td class="c b"><?= money($totalHours) ?></td></tr>
-        </tbody>
-    </table>
-
-    <p class="cert">Certified that the above work have actually been done by me & is in accordance with attendance register maintained, & the bill claimed herewith is correct according to the rates as per institute norms.</p>
-
-    <div class="sign-grid">
-        <div>Date: <span class="fl"><?= date('d / m / Y') ?></span></div>
-        <div class="r">Signature of Student<br><span class="stamp-line"></span></div>
-    </div>
-    <div class="sign-grid">
-        <div class="sign">Signature of Concern Faculty</div>
-        <div class="sign">Signature of Head of Department/Section</div>
-    </div>
-</div>
-
-<!-- ════════════════ PAGE 2: DAILY WORK RECORD (Annexure-2) ════════════════ -->
+<!-- ════════════════ PAGE 1: DAILY WORK RECORD (Annexure-2) ════════════════ -->
 <div class="page">
     <div class="c" style="font-style:italic;font-size:11pt;margin-bottom:3mm">Annexure -2</div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1></div>
@@ -228,7 +169,11 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
                 <td></td>
             </tr>
         <?php endforeach; ?>
-        <?php for ($r = count($work); $r < $minRows; $r++): ?>
+        <?php
+            // Pad empty rows up to 15 minimum for the official format
+            $minRows = 15;
+            for ($r = count($work); $r < $minRows; $r++):
+        ?>
             <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
         <?php endfor; ?>
         </tbody>
@@ -237,6 +182,61 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
     <div style="text-align:right;margin-top:40mm;font-size:10pt">
         <strong>(Name and signature)</strong><br>
         Faculty/Head of the department/Section in Charge
+    </div>
+</div>
+
+<!-- ════════════════ PAGE 2: BILL ════════════════ -->
+<div class="page">
+    <div class="bill-id">Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
+    <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1><h2>(An Autonomous Institute of Government of Maharashtra)</h2></div>
+    <hr class="thick">
+    <div class="title">EARN AND LEARN STUDENT BILL</div>
+
+    <div class="row">Name of Student: <span class="fl" style="min-width: 81mm;margin-left: 5mm;"><?= h($bill['sname']) ?></span></div>
+    <div class="row">Enrollment Number: <span class="fl" style="margin-left: 2px;min-width: 81mm;"><?= h($bill['enrollment_number'] ?? '') ?></span></div>
+    <div class="row">Class and Branch: <span class="fl" style="margin-left: 16px;min-width: 60mm;"><?= h($bill['class_label'] ?? '') ?></span>
+        &nbsp; Department/Section: <span class="fl" style="min-width:50mm"><?= h($bill['dept_name'] ?? '') ?></span></div>
+    <div class="row">Bill for the Month of: <span class="fl" style="min-width:59mm"><?= h($bill['month_year']) ?></span>
+        &nbsp; Selection Order No.(If any): <span class="fl" style="min-width:40mm"></span></div>
+
+    <table class="mt">
+        <thead>
+            <tr>
+                <th style="width:12mm" rowspan="2">SR.<br>No</th>
+                <th style="width:26mm" rowspan="2">Day &amp;<br>Date</th>
+                <th rowspan="2">Particulars of work</th>
+                <th style="width:22mm">Start<br>Time</th>
+                <th style="width:22mm">End<br>Time</th>
+                <th style="width:22mm">Working<br>Hours</th>
+            </tr>
+        </thead>
+        <tbody>
+        <?php foreach ($work as $i => $w): ?>
+            <tr>
+                <td class="c"><?= $i + 1 ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showDate($w['work_date']) ?></td>
+                <td class="tl"><?= h($w['description'] ?: 'Earn and Learn work') ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showTime($w['start_time'] ?? '') ?></td>
+                <td class="c" style="font-size:8.5pt"><?= showTime($w['end_time'] ?? '') ?></td>
+                <td class="c"><?= money($w['hours']) ?></td>
+            </tr>
+        <?php endforeach; ?>
+        <?php for ($r = count($work); $r < $minRows; $r++): ?>
+            <tr><td>&nbsp;</td><td></td><td></td><td></td><td></td><td></td></tr>
+        <?php endfor; ?>
+            <tr><td colspan="5" class="tr b">Total Number of working hours</td><td class="c b"><?= money($totalHours) ?></td></tr>
+        </tbody>
+    </table>
+
+    <p class="cert">Certified that the above work have actually been done by me & is in accordance with attendance register maintained, & the bill claimed herewith is correct according to the rates as per institute norms.</p>
+
+    <div class="sign-grid">
+        <div>Date: <span class="fl"><?= date('d / m / Y') ?></span></div>
+        <div class="r">Signature of Student<br><span class="stamp-line"></span></div>
+    </div>
+    <div class="sign-grid">
+        <div class="sign">Signature of Concern Faculty</div>
+        <div class="sign">Signature of Head of Department/Section</div>
     </div>
 </div>
 
