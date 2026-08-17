@@ -30,8 +30,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ->execute([$uid,$my,$from,$to,$totalHrs,$rate,$total]);
     $billId = $pdo->lastInsertId();
 
-    logActivity($pdo,$uid,'submit_student_bill',"Submitted student bill #$billId for $my — ".formatINR($total));
-    setFlash('success',"Bill for $my submitted. Total: ".formatINR($total));
+    // Generate unique bill number (EL-YYYY-MM-NNNNN)
+    $billNumber = generateStudentBillNumber($from, $billId);
+    $pdo->prepare("UPDATE student_bills SET bill_number=? WHERE id=?")->execute([$billNumber, $billId]);
+
+    logActivity($pdo,$uid,'submit_student_bill',"Submitted student bill $billNumber for $my — ".formatINR($total));
+    setFlash('success',"Bill $billNumber for $my submitted. Total: ".formatINR($total));
     header('Location: my-bills.php'); exit;
 }
 

@@ -10,7 +10,7 @@ $billId = (int)($_GET['id'] ?? 0);
 
 // Scoped to the logged-in student's OWN bill (ownership check)
 $bill = $pdo->prepare(
-    "SELECT sb.*, u.name AS sname, u.email, u.phone,
+    "SELECT sb.*, u.name AS sname, u.email, u.phone, u.enrollment_number,
             c.label AS class_label, d.name AS dept_name
      FROM student_bills sb
      JOIN users u ON u.id=sb.student_id
@@ -20,6 +20,7 @@ $bill = $pdo->prepare(
 );
 $bill->execute([$billId, $uid]); $bill = $bill->fetch();
 if (!$bill) { setFlash('error','Bill not found.'); header('Location: my-bills.php'); exit; }
+$billNumber = $bill['bill_number'] ?? generateStudentBillNumber($bill['period_from'], $bill['id']);
 
 // Work entries that make up this bill (within the bill period)
 $work = $pdo->prepare(
@@ -39,10 +40,6 @@ renderHead('Bill Detail');
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
-
-    <div class="breadcrumb">
-        <a href="my-bills.php">My Bills</a><span class="sep">›</span><span>Bill #<?= $billId ?></span>
-    </div>
 
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
@@ -70,7 +67,7 @@ renderHead('Bill Detail');
             <div class="card-header"><h3><?= svgIcon('list') ?> Bill Summary</h3></div>
             <div class="card-body">
                 <table style="font-size:.88rem;width:100%">
-                    <tr><td class="text-muted" style="padding:5px 0;width:160px">Bill ID</td><td><strong>#<?= $billId ?></strong></td></tr>
+                    <tr><td class="text-muted" style="padding:5px 0;width:160px">Bill ID</td><td><strong><?= e($billNumber) ?></strong></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Month</td><td><?= e($bill['month_year']) ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Period</td><td><?= fmtDate($bill['period_from']) ?> – <?= fmtDate($bill['period_to']) ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Total Hours</td><td><?= number_format($bill['total_hours'],1) ?> @ <?= formatINR($bill['rate_per_hour']) ?>/hr</td></tr>
@@ -88,6 +85,7 @@ renderHead('Bill Detail');
             <div class="card-body">
                 <table style="font-size:.88rem;width:100%">
                     <tr><td class="text-muted" style="padding:5px 0;width:120px">Name</td><td><?= e($bill['sname']) ?></td></tr>
+                    <tr><td class="text-muted" style="padding:5px 0">Enrollment No.</td><td><?= e($bill['enrollment_number'] ?: '—') ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Email</td><td><?= e($bill['email'] ?: '—') ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Class</td><td><?= e($bill['class_label'] ?? '—') ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Department</td><td><?= e($bill['dept_name'] ?? '—') ?></td></tr>

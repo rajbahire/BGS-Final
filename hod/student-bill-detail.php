@@ -25,6 +25,7 @@ $bill = $pdo->prepare(
 $bill->execute([$billId, $deptId]);
 $bill = $bill->fetch();
 if (!$bill) { setFlash('error','Bill not found.'); header('Location: ' . $listPage); exit; }
+$billNumber = $bill['bill_number'] ?? generateStudentBillNumber($bill['period_from'], $bill['id']);
 
 // Work entries that make up this bill (within the bill period)
 $work = $pdo->prepare(
@@ -39,8 +40,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'approve_student') {
         $pdo->prepare("UPDATE student_bills SET status='approved',reviewed_at=NOW(),reviewed_by=? WHERE id=?")
             ->execute([$user['id'], $billId]);
-        logActivity($pdo,$user['id'],'approve_student_bill',"Approved Earn & Learn bill #$billId for {$bill['sname']}");
-        setFlash('success',"Earn & Learn bill #$billId approved successfully.");
+        logActivity($pdo,$user['id'],'approve_student_bill',"Approved Earn & Learn bill $billNumber for {$bill['sname']}");
+        setFlash('success',"Earn & Learn bill $billNumber approved successfully.");
         header('Location: ' . $listPage); exit;
     }
     if ($action === 'reject_student') {
@@ -48,8 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$reason) { setFlash('error','Please provide a rejection reason.'); header("Location: student-bill-detail.php?id=$billId&from=$from"); exit; }
         $pdo->prepare("UPDATE student_bills SET status='rejected',rejection_reason=?,reviewed_at=NOW(),reviewed_by=? WHERE id=?")
             ->execute([$reason, $user['id'], $billId]);
-        logActivity($pdo,$user['id'],'reject_student_bill',"Rejected Earn & Learn bill #$billId: $reason");
-        setFlash('success',"Earn & Learn bill #$billId rejected.");
+        logActivity($pdo,$user['id'],'reject_student_bill',"Rejected Earn & Learn bill $billNumber: $reason");
+        setFlash('success',"Earn & Learn bill $billNumber rejected.");
         header('Location: ' . $listPage); exit;
     }
 }
@@ -70,7 +71,7 @@ renderHead('Review Earn & Learn Bill');
     <div class="breadcrumb">
         <a href="<?= $listPage ?>"><?= $listLbl ?></a>
         <span class="sep">›</span>
-        <span>Earn & Learn Bill #<?= $billId ?></span>
+        <span>Earn & Learn Bill — <?= e($billNumber) ?></span>
     </div>
 
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">

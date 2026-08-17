@@ -328,3 +328,11 @@ function subjectLabel(PDO $pdo, int $id): string {
     }
     return $cache[$id];
 }
+
+// ── Student Bill Number Generator ────────────────────────────
+// Format: EL-YYYY-MM-NNNNN  (e.g. EL-2026-08-00012)
+function generateStudentBillNumber(string $periodFrom, int $billId): string {
+    $ts = strtotime($periodFrom);
+    $ym = $ts ? date('Y-m', $ts) : date('Y-m');
+    return 'EL-' . $ym . '-' . str_pad($billId, 5, '0', STR_PAD_LEFT);
+}

@@ -16,15 +16,52 @@ function formatINR(amount) {
     });
 }
 
-// ── Auto-dismiss alerts after 4s ────────────────────────────
+// ── Convert auto-dismiss alerts into floating toasts ─────────
 document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.alert.auto-dismiss').forEach(function (el) {
-        setTimeout(function () {
-            el.style.transition = 'opacity 0.4s';
-            el.style.opacity = '0';
-            setTimeout(function () { el.remove(); }, 400);
-        }, 4000);
+    var alerts = document.querySelectorAll('.alert.auto-dismiss');
+    if (!alerts.length) return;
+
+    // Create toast container if it doesn't exist
+    var container = document.querySelector('.toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+    }
+
+    alerts.forEach(function (el) {
+        // Determine the type from existing alert class
+        var type = 'info';
+        if (el.classList.contains('alert-success')) type = 'success';
+        else if (el.classList.contains('alert-error')) type = 'error';
+        else if (el.classList.contains('alert-warning')) type = 'warning';
+
+        // Build the toast element
+        var toast = document.createElement('div');
+        toast.className = 'toast toast-' + type;
+        toast.innerHTML = el.innerHTML +
+            '<button class="toast-close" aria-label="Close">&times;</button>' +
+            '<div class="toast-progress"></div>';
+
+        container.appendChild(toast);
+
+        // Close button
+        toast.querySelector('.toast-close').addEventListener('click', function () {
+            dismissToast(toast);
+        });
+
+        // Auto dismiss after 4s
+        setTimeout(function () { dismissToast(toast); }, 4000);
+
+        // Remove the original inline alert
+        el.remove();
     });
+
+    function dismissToast(toast) {
+        if (toast.classList.contains('toast-exit')) return;
+        toast.classList.add('toast-exit');
+        setTimeout(function () { toast.remove(); }, 350);
+    }
 });
 
 // ── Set today as default in date inputs ─────────────────────

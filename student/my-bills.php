@@ -43,11 +43,12 @@ renderHead('My Bills');
         <?php if($bills): ?>
         <div class="table-wrap">
             <table>
-                <thead><tr><th>#</th><th>Month</th><th>Period</th><th>Hours</th><th>Rate</th><th>Amount</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead>
+                <thead><tr><th>#</th><th>Bill ID</th><th>Month</th><th>Period</th><th>Hours</th><th>Rate</th><th>Amount</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead>
                 <tbody>
                 <?php foreach($bills as  $i => $b): ?>
                 <tr>
-                    <td class="text-muted"><?= $i + 1 ?></td>
+                    <td class="text-muted"><?= $i+1 ?></td>
+                    <td class="fw-500" style="white-space:nowrap"><?= e($b['bill_number'] ?? 'EL-'.date('Y-m',strtotime($b['period_from'])).'-'.str_pad($b['id'],5,'0',STR_PAD_LEFT)) ?></td>
                     <td class="fw-500"><?= e($b['month_year']) ?></td>
                     <td class="text-sm text-muted"><?= fmtDate($b['period_from'],'d M') ?> – <?= fmtDate($b['period_to'],'d M') ?></td>
                     <td><?= number_format($b['total_hours'],1) ?></td>
@@ -64,7 +65,7 @@ renderHead('My Bills');
                         <div class="d-flex gap-8">
                             <a href="bill-detail.php?id=<?= $b['id'] ?>" class="btn btn-outline btn-sm">View</a>
                             <?php if($b['status']==='approved'): ?>
-                            <a href="../pdf/student-bill.php?id=<?= $b['id'] ?>" class="btn btn-success btn-sm" target="_blank">PDF</a>
+                            <a href="../pdf/student-bill.php?id=<?= $b['id'] ?>" class="btn btn-success btn-sm" target="_blank">Print</a>
                             <?php endif; ?>
                         </div>
                     </td>

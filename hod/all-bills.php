@@ -53,7 +53,7 @@ if ($fType === '' || $fType === 'teacher') {
 
 // 2) Earn & Learn student bills (student_bills) — skipped when a specific teacher is picked
 if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
-    $sql = "SELECT sb.id, sb.month_year, sb.period_from, sb.total_hours,
+    $sql = "SELECT sb.id, sb.bill_number, sb.month_year, sb.period_from, sb.total_hours,
                    sb.total_amount, sb.status, sb.submitted_at,
                    u.name AS pname, c.label AS class_label,
                    COALESCE(sb.submitted_at, '1970-01-01 00:00:00') AS sort_date
@@ -67,10 +67,11 @@ if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
     if ($fYear)  { $sql .= " AND YEAR(sb.period_from)=?";    $params[] = $fYear; }
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     foreach ($stmt->fetchAll() as $b) {
+        $sbBillNum = $b['bill_number'] ?? generateStudentBillNumber($b['period_from'], $b['id']);
         $rows[] = [
             'source'    => 'student',
             'name'      => $b['pname'],
-            'sub'       => '<span class="text-sm text-muted">' . e($b['class_label'] ?: '—') . '</span>',
+            'sub'       => '<span class="text-sm fw-500" style="color:var(--primary)">' . e($sbBillNum) . '</span> <span class="text-sm text-muted">' . e($b['class_label'] ?: '—') . '</span>',
             'period'    => e($b['month_year']),
             'hours'     => (float)$b['total_hours'],
             'amount'    => (float)$b['total_amount'],

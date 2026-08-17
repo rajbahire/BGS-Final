@@ -46,12 +46,13 @@ foreach ($bills as $b) {
     ];
 }
 foreach ($sbills as $sb) {
+    $sbBillNumber = $sb['bill_number'] ?? generateStudentBillNumber($sb['period_from'], $sb['id']);
     $queue[] = [
         'kind'         => 'student',
         'name'         => $sb['sname'],
         'submitted_at' => $sb['submitted_at'],
         'detail'       => $sb['class_label'] ?? '',
-        'detail_code'  => '',
+        'detail_code'  => $sbBillNumber,
         'month_year'   => $sb['month_year'],
         'hours'        => number_format((float)$sb['total_hours'], 1),
         'amount'       => (float)$sb['total_amount'],

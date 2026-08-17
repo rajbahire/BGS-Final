@@ -226,6 +226,7 @@ CREATE TABLE IF NOT EXISTS student_work (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS student_bills (
     id               INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
+    bill_number      VARCHAR(20)   DEFAULT NULL,          -- e.g. EL-2026-08-00012
     student_id       INT UNSIGNED  NOT NULL,
     month_year       VARCHAR(20)   NOT NULL,
     period_from      DATE          NOT NULL,
@@ -238,6 +239,7 @@ CREATE TABLE IF NOT EXISTS student_bills (
     submitted_at     TIMESTAMP     NULL DEFAULT NULL,
     reviewed_at      TIMESTAMP     NULL DEFAULT NULL,
     reviewed_by      INT UNSIGNED  DEFAULT NULL,
+    UNIQUE KEY idx_student_bill_number (bill_number),
     FOREIGN KEY (student_id)  REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (reviewed_by) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

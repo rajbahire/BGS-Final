@@ -196,7 +196,7 @@ renderHead('Add Work');
                             <td><?= fmtTime($w['start_time'] ?? '') ?></td>
                             <td><?= fmtTime($w['end_time'] ?? '') ?></td>
                             <td class="fw-600"><?= number_format($w['hours'],1) ?></td>
-                            <td class="text-sm text-muted"><?= e($w['description']?:'—') ?></td>
+                            <td class="text-sm text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="<?= e($w['description']?:'') ?>"><?= e($w['description']?:'—') ?></td>
                             <td>
                                 <div style="display:flex;gap:8px;flex-wrap:wrap">
                                     <button type="button" class="btn btn-outline btn-sm"
