@@ -134,6 +134,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 
 <!-- ════════════════ PAGE 1: DAILY WORK RECORD (Annexure-2) ════════════════ -->
 <div class="page">
+    <div class="bill-id">Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
     <div class="c" style="font-style:italic;font-size:11pt;margin-bottom:3mm">Annexure -2</div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1></div>
     <hr class="thin">
@@ -187,7 +188,6 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 
 <!-- ════════════════ PAGE 2: BILL ════════════════ -->
 <div class="page">
-    <div class="bill-id">Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1><h2>(An Autonomous Institute of Government of Maharashtra)</h2></div>
     <hr class="thick">
     <div class="title">EARN AND LEARN STUDENT BILL</div>
