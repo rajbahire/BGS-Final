@@ -2,13 +2,14 @@
 require_once '../includes/db.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
-requireHOD();
-$user   = currentUser();
-$deptId = $user['dept_id'];
+requireAdmin();
+$user = currentUser();
 
+// Admin sees every department, so there is no dept scoping by default.
+// Filters — note the Department filter replaces the HOD page's single-dept Teacher filter.
 $fStatus  = $_GET['status']  ?? '';
 $fType    = $_GET['type']    ?? '';          // '' | teacher | student | other
-$fTeacher = (int)($_GET['teacher'] ?? 0);
+$fDept    = (int)($_GET['dept']    ?? 0);
 $fMonth   = (int)($_GET['month']   ?? 0);
 $fYear    = (int)($_GET['year']    ?? 0);
 
@@ -23,19 +24,22 @@ if ($fType === '' || $fType === 'teacher') {
     $sql = "SELECT b.id, b.month_year, b.period_from,
                    b.total_theory_hrs, b.total_practical_hrs, b.total_other_hrs,
                    b.total_amount, b.status, b.submitted_at, b.created_at,
-                   u.name AS pname, u.teacher_type,
+                   u.name AS pname, u.teacher_type, d.name AS dept_name,
                    COALESCE(b.submitted_at, b.created_at) AS sort_date
-            FROM bills b JOIN users u ON u.id=b.teacher_id
-            WHERE u.department_id=?";
-    $params = [$deptId];
-    if ($fStatus)  { $sql .= " AND b.status=?";                $params[] = $fStatus; }
-    if ($fTeacher) { $sql .= " AND b.teacher_id=?";           $params[] = $fTeacher; }
-    if ($fMonth)   { $sql .= " AND MONTH(b.period_from)=?";   $params[] = $fMonth; }
-    if ($fYear)    { $sql .= " AND YEAR(b.period_from)=?";    $params[] = $fYear; }
+            FROM bills b
+            JOIN users u ON u.id=b.teacher_id
+            LEFT JOIN departments d ON d.id=u.department_id
+            WHERE 1=1";
+    $params = [];
+    if ($fDept)   { $sql .= " AND u.department_id=?";      $params[] = $fDept;   }
+    if ($fStatus) { $sql .= " AND b.status=?";            $params[] = $fStatus; }
+    if ($fMonth)  { $sql .= " AND MONTH(b.period_from)=?"; $params[] = $fMonth;  }
+    if ($fYear)   { $sql .= " AND YEAR(b.period_from)=?";  $params[] = $fYear;   }
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     foreach ($stmt->fetchAll() as $b) {
         $rows[] = [
             'source'    => 'teacher',
+            'dept'      => $b['dept_name'] ?? '—',
             'name'      => $b['pname'],
             'sub'       => teacherTypeBadge($b['teacher_type'] ?? 'regular'),
             'period'    => e($b['month_year']),
@@ -44,32 +48,34 @@ if ($fType === '' || $fType === 'teacher') {
             'status'    => $b['status'],
             'date'      => $b['submitted_at'],
             'sort_date' => $b['sort_date'],
-            'view'      => 'request-detail.php?id=' . $b['id'] . '&from=all-bills',
             'pdf'       => '../pdf/generate.php?id=' . $b['id'],
             'pdf_show'  => $b['status'] === 'approved',
         ];
     }
 }
 
-// 2) Earn & Learn student bills (student_bills) — skipped when a specific teacher is picked
-if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
+// 2) Earn & Learn student bills (student_bills)
+if ($fType === '' || $fType === 'student') {
     $sql = "SELECT sb.id, sb.bill_number, sb.month_year, sb.period_from, sb.total_hours,
                    sb.total_amount, sb.status, sb.submitted_at,
-                   u.name AS pname, c.label AS class_label,
+                   u.name AS pname, c.label AS class_label, d.name AS dept_name,
                    COALESCE(sb.submitted_at, '1970-01-01 00:00:00') AS sort_date
             FROM student_bills sb
             JOIN users u ON u.id=sb.student_id
             LEFT JOIN classes c ON c.id=u.class_id
-            WHERE u.department_id=?";
-    $params = [$deptId];
-    if ($fStatus) { $sql .= " AND sb.status=?";              $params[] = $fStatus; }
-    if ($fMonth) { $sql .= " AND MONTH(sb.period_from)=?";   $params[] = $fMonth; }
-    if ($fYear)  { $sql .= " AND YEAR(sb.period_from)=?";    $params[] = $fYear; }
+            LEFT JOIN departments d ON d.id=u.department_id
+            WHERE 1=1";
+    $params = [];
+    if ($fDept)   { $sql .= " AND u.department_id=?";       $params[] = $fDept;   }
+    if ($fStatus) { $sql .= " AND sb.status=?";            $params[] = $fStatus; }
+    if ($fMonth) { $sql .= " AND MONTH(sb.period_from)=?"; $params[] = $fMonth;  }
+    if ($fYear)  { $sql .= " AND YEAR(sb.period_from)=?";   $params[] = $fYear;   }
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     foreach ($stmt->fetchAll() as $b) {
         $sbBillNum = $b['bill_number'] ?? generateStudentBillNumber($b['period_from'], $b['id']);
         $rows[] = [
             'source'    => 'student',
+            'dept'      => $b['dept_name'] ?? '—',
             'name'      => $b['pname'],
             'sub'       => '<span class="text-sm fw-500" style="color:var(--primary)">' . e($sbBillNum) . '</span> <span class="text-sm text-muted">' . e($b['class_label'] ?: '—') . '</span>',
             'period'    => e($b['month_year']),
@@ -78,7 +84,6 @@ if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
             'status'    => $b['status'],
             'date'      => $b['submitted_at'],
             'sort_date' => $b['sort_date'],
-            'view'      => 'student-bill-detail.php?id=' . $b['id'] . '&from=all-bills',
             'pdf'       => '../pdf/student-bill.php?id=' . $b['id'],
             'pdf_show'  => $b['status'] === 'approved',
         ];
@@ -86,19 +91,22 @@ if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
 }
 
 // 3) HOD-created other bills (other_bills) — no approval workflow, always finalized
-//    Shown with no status filter or with the "Finalized" filter, and no teacher picked.
-if ($fTeacher === 0 && in_array($fStatus, ['', 'finalized'], true) && ($fType === '' || $fType === 'other')) {
-    $sql = "SELECT id, bill_type, title, claimant_name, bill_date, total_amount, created_at
-            FROM other_bills
-            WHERE department_id=?";
-    $params = [$deptId];
-    if ($fMonth) { $sql .= " AND MONTH(bill_date)=?";   $params[] = $fMonth; }
-    if ($fYear)  { $sql .= " AND YEAR(bill_date)=?";    $params[] = $fYear; }
+if ($fType === '' || $fType === 'other') {
+    $sql = "SELECT ob.id, ob.bill_type, ob.title, ob.claimant_name, ob.bill_date,
+                   ob.total_amount, ob.created_at, d.name AS dept_name
+            FROM other_bills ob
+            LEFT JOIN departments d ON d.id=ob.department_id
+            WHERE 1=1";
+    $params = [];
+    if ($fDept)   { $sql .= " AND ob.department_id=?"; $params[] = $fDept;  }
+    if ($fMonth)  { $sql .= " AND MONTH(ob.bill_date)=?"; $params[] = $fMonth; }
+    if ($fYear)   { $sql .= " AND YEAR(ob.bill_date)=?";  $params[] = $fYear;  }
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     foreach ($stmt->fetchAll() as $b) {
         $otype = $typeLabels[$b['bill_type']] ?? ucfirst($b['bill_type']);
         $rows[] = [
             'source'    => 'other',
+            'dept'      => $b['dept_name'] ?? '—',
             'name'      => $b['claimant_name'],
             'sub'       => '<span class="text-sm text-muted">' . e($otype . ' — ' . $b['title']) . '</span>',
             'period'    => fmtDate($b['bill_date'], 'M Y'),
@@ -107,7 +115,6 @@ if ($fTeacher === 0 && in_array($fStatus, ['', 'finalized'], true) && ($fType ==
             'status'    => 'finalized',
             'date'      => $b['created_at'],
             'sort_date' => $b['created_at'],
-            'view'      => 'other-bill-detail.php?id=' . $b['id'] . '&from=all-bills',
             'pdf'       => '../pdf/other-bill.php?id=' . $b['id'],
             'pdf_show'  => true,
         ];
@@ -122,24 +129,20 @@ $perPage = 15;
 $page    = currentPage();
 $offset  = paginationOffset($page, $perPage);
 
-// Sort newest first across all sources
-usort($rows, function ($a, $b) { return strcmp($b['sort_date'], $a['sort_date']); });
-
 $totalRecords = count($rows);
 $totalPages   = totalPages($totalRecords, $perPage);
 
 // Paginate the merged array
 $rows = array_slice($rows, $offset, $perPage);
 
-$teachers = $pdo->prepare("SELECT id,name FROM users WHERE role='teacher' AND department_id=? AND is_active=1 ORDER BY name");
-$teachers->execute([$deptId]); $teachers = $teachers->fetchAll();
+$departments = $pdo->query("SELECT id,name FROM departments WHERE is_active=1 ORDER BY name")->fetchAll();
 
 $totalAmt = array_sum(array_column($rows, 'amount'));
 
 renderHead('All Bills');
 ?>
 <div class="app-layout">
-<?php renderSidebar('all-bills','hod',$user); ?>
+<?php renderSidebar('all-bills','admin',$user); ?>
 <div class="main-content">
 <?php renderTopbar('All Bills', [
     ['label' => 'Home',      'href' => 'dashboard.php'],
@@ -147,7 +150,7 @@ renderHead('All Bills');
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
-    <div class="page-header"><h1>All Bills</h1><p>Teacher, Earn & Learn student, and other bills across your department</p></div>
+    <div class="page-header"><h1>All Bills</h1><p>Teacher, Earn & Learn student, and other bills across all departments</p></div>
 
     <!-- Filters -->
     <div class="card" style="margin-bottom:1.2rem">
@@ -174,11 +177,11 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Teacher</label>
-                    <select name="teacher" class="form-control" style="width:200px">
-                        <option value="">All Teachers</option>
-                        <?php foreach($teachers as $t): ?>
-                        <option value="<?= $t['id'] ?>" <?= $fTeacher==$t['id']?'selected':'' ?>><?= e($t['name']) ?></option>
+                    <label>Department</label>
+                    <select name="dept" class="form-control" style="width:200px">
+                        <option value="">All Departments</option>
+                        <?php foreach($departments as $dept): ?>
+                        <option value="<?= $dept['id'] ?>" <?= $fDept==$dept['id']?'selected':'' ?>><?= e($dept['name']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
@@ -218,12 +221,13 @@ renderHead('All Bills');
         <?php if($rows): ?>
         <div class="table-wrap">
             <table>
-                <thead><tr><th>#</th><th>Type</th><th>Payee / Title</th><th>Period</th><th>Hours</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+                <thead><tr><th>#</th><th>Type</th><th>Department</th><th>Payee / Title</th><th>Period</th><th>Hours</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
                 <tbody>
                 <?php foreach($rows as $i => $r): ?>
                 <tr>
                     <td class="text-muted"><?= $i + 1 ?></td>
                     <td><?= billTypeBadge($r['source']) ?></td>
+                    <td class="fw-500"><?= e($r['dept']) ?></td>
                     <td>
                         <div class="fw-500"><?= e($r['name']) ?></div>
                         <div><?= $r['sub'] ?></div>
@@ -234,12 +238,11 @@ renderHead('All Bills');
                     <td><?= statusBadge($r['status']) ?></td>
                     <td class="text-sm text-muted"><?= fmtDate($r['date'],'d M Y') ?></td>
                     <td>
-                        <div class="d-flex gap-8">
-                            <a href="<?= $r['view'] ?>" class="btn btn-outline btn-sm">View</a>
-                            <?php if(!empty($r['pdf_show'])): ?>
-                            <a href="<?= $r['pdf'] ?>" class="btn btn-success btn-sm" target="_blank">PDF</a>
-                            <?php endif; ?>
-                        </div>
+                        <?php if(!empty($r['pdf_show'])): ?>
+                        <a href="<?= $r['pdf'] ?>" class="btn btn-success btn-sm" target="_blank">PDF</a>
+                        <?php else: ?>
+                        <span class="text-muted text-xs">—</span>
+                        <?php endif; ?>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -247,7 +250,7 @@ renderHead('All Bills');
             </table>
         </div>
         <?php else: ?>
-        <div class="empty-state"><div class="icon"><?= svgIcon('check') ?></div><h3>No bills found</h3><p>Try adjusting your filters, or create bills from the relevant pages.</p></div>
+        <div class="empty-state"><div class="icon"><?= svgIcon('check') ?></div><h3>No bills found</h3><p>Try adjusting your filters.</p></div>
         <?php endif; ?>
         <?php if ($totalPages > 1): ?>
             <?= renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'bills', 'All bills pagination') ?>
@@ -256,4 +259,4 @@ renderHead('All Bills');
 </div>
 </div>
 </div>
-<?php renderFooter(); ?>
+<?php renderFooter();

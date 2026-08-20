@@ -16,6 +16,37 @@ function requireLogin(): void {
     }
 }
 
+// Bill-generation gate (teacher / student only).
+// A user whose profile is not yet complete is blocked from generating a
+// bill — the bill pulls their bank / appointment / enrollment details,
+// so those must be filled first — and is bounced to their profile page
+// with an alert. Admin and HOD are exempt: they don't generate their
+// own bills, and the user asked for no restrictions on those roles (an
+// alert at login is enough for them). index.php sets 'profile_completed'
+// at login from isProfileComplete(); each profile.php refreshes it after
+// a save, so the moment the last required field is filled the gate opens.
+// Sessions created before this feature existed lack the flag and are
+// assumed complete, so we never trap someone who was already logged in.
+function requireProfileForBilling(): void {
+    if (!in_array($_SESSION['user_role'] ?? '', ['teacher', 'student'], true)) return;
+    if (!array_key_exists('profile_completed', $_SESSION)) {
+        $_SESSION['profile_completed'] = 1;
+    }
+    if (empty($_SESSION['profile_completed'])) {
+        $root = rootUrl();
+        $map  = [
+            'teacher' => $root . 'teacher/profile.php',
+            'student' => $root . 'student/profile.php',
+        ];
+        $_SESSION['flash'] = [
+            'type' => 'warning',
+            'msg'  => 'Please complete your profile before generating a bill.',
+        ];
+        header('Location: ' . ($map[$_SESSION['user_role']] ?? $root . 'index.php?msg=login_required'));
+        exit;
+    }
+}
+
 // ── Role-specific guards ─────────────────────────────────────
 function requireAdmin(): void {
     requireLogin();

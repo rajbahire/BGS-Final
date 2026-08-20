@@ -16,7 +16,20 @@ $totalStudents= (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='student
 $pendingFunds = (int)$pdo->query("SELECT COUNT(*) FROM fund_requests WHERE status='pending'")->fetchColumn();
 $approvedFunds= (int)$pdo->query("SELECT COUNT(*) FROM fund_requests WHERE status='approved'")->fetchColumn();
 $totalDisbursed=(float)$pdo->query("SELECT COALESCE(SUM(amount),0) FROM fund_requests WHERE status='approved'")->fetchColumn();
-$totalBills   = (int)$pdo->query("SELECT COUNT(*) FROM bills WHERE status='approved'")->fetchColumn();
+
+// Approved / finalized bills across ALL three bill tables, so the "Approved Bills"
+// count matches the All Bills page:
+//   • teacher bills with status='approved'
+//   • Earn & Learn student bills with status='approved'
+//   • all other_bills (no approval workflow — every row is finalized on creation)
+$totalBills   = (int)$pdo->query("SELECT COUNT(*) FROM bills WHERE status='approved'")->fetchColumn()
+              + (int)$pdo->query("SELECT COUNT(*) FROM student_bills WHERE status='approved'")->fetchColumn()
+              + (int)$pdo->query("SELECT COUNT(*) FROM other_bills")->fetchColumn();
+
+// Total billed amount across the same three tables (approved teacher + approved student + all other)
+$totalBilled  = (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM bills WHERE status='approved'")->fetchColumn()
+              + (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM student_bills WHERE status='approved'")->fetchColumn()
+              + (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM other_bills")->fetchColumn();
 
 // Recent fund requests
 $recentFunds = $pdo->query(
@@ -77,6 +90,10 @@ renderHead('Admin Dashboard');
             <div class="stat-icon green"><?= svgIcon('approved') ?></div>
             <div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $totalBills ?></div></div>
         </div>
+        <div class="stat-card stat-card--red">
+            <div class="stat-icon red"><?= svgIcon('receipt') ?></div>
+            <div><div class="stat-label">Total Billed</div><div class="stat-value sm"><?= formatINR($totalBilled) ?></div></div>
+        </div>
         <div class="stat-card stat-card--orange">
             <div class="stat-icon orange"><?= svgIcon('fund-requests') ?></div>
             <div><div class="stat-label">Total Disbursed</div><div class="stat-value sm"><?= formatINR($totalDisbursed) ?></div></div>
@@ -92,6 +109,7 @@ renderHead('Admin Dashboard');
                   padding:1px 6px;border-radius:20px"><?= $pendingFunds ?></span>
             <?php endif; ?>
         </a>
+        <a href="all-bills.php"        class="btn btn-outline"><?= svgIcon('all-bills') ?> All Bills</a>
         <a href="departments.php"   class="btn btn-outline"><?= svgIcon('departments') ?> Departments</a>
         <a href="classes.php"       class="btn btn-outline"><?= svgIcon('classes') ?> Classes</a>
         <a href="subjects.php"      class="btn btn-outline"><?= svgIcon('subjects') ?> Subjects</a>

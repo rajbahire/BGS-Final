@@ -57,8 +57,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $linked->execute([$uid,$wd]);
             $billStatus = $linked->fetchColumn();
 
-            if ($billStatus && in_array($billStatus, ['pending','approved'])) {
-                setFlash('error','Cannot edit: this entry is part of a submitted or approved bill.');
+            if ($billStatus && in_array($billStatus, ['submitted','pending','approved'])) {
+                setFlash('error','Cannot edit: this entry is part of a submitted, pending, or approved bill.');
             } elseif (!$date) {
                 setFlash('error','Date is required.');
             } elseif (!$stime || !$etime) {
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($wd) {
             $linked->execute([$uid,$wd]);
             if ($linked->fetch()) {
-                setFlash('error','Cannot delete: this date is part of a submitted bill.');
+                setFlash('error','Cannot delete: this date is part of a submitted, pending, or approved bill.');
             } else {
                 $pdo->prepare("DELETE FROM student_work WHERE id=? AND student_id=?")->execute([$id,$uid]);
                 setFlash('success','Entry deleted.');
@@ -106,14 +106,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $fm = (int)($_GET['month'] ?? 0);
 $fy = (int)($_GET['year']  ?? date('Y'));
 
+// Pagination settings
+$perPage = 10;
+$page   = currentPage();
+$offset = paginationOffset($page, $perPage);
+
+// Base query for counting
+$countSql = "SELECT COUNT(*) FROM student_work WHERE student_id=?";
+$countParams = [$uid];
+if ($fm) { $countSql.=" AND MONTH(work_date)=?"; $countParams[]=$fm; }
+if ($fy) { $countSql.=" AND YEAR(work_date)=?";  $countParams[]=$fy; }
+$stmtCount = $pdo->prepare($countSql);
+$stmtCount->execute($countParams);
+$totalRecords = (int)$stmtCount->fetchColumn();
+$totalPages = totalPages($totalRecords, $perPage);
+
+// Main query with pagination
 $sql = "SELECT * FROM student_work WHERE student_id=?";
 $params = [$uid];
 if ($fm) { $sql.=" AND MONTH(work_date)=?"; $params[]=$fm; }
 if ($fy) { $sql.=" AND YEAR(work_date)=?";  $params[]=$fy; }
-$sql.=" ORDER BY work_date DESC";
+$sql.=" ORDER BY work_date DESC LIMIT $perPage OFFSET $offset";
 $stmt=$pdo->prepare($sql); $stmt->execute($params); $work=$stmt->fetchAll();
 
-$totalHrs = array_sum(array_column($work,'hours'));
+// Total hours for filtered records (all pages)
+$totalHrsSql = "SELECT SUM(hours) FROM student_work WHERE student_id=?";
+$totalHrsParams = [$uid];
+if ($fm) { $totalHrsSql.=" AND MONTH(work_date)=?"; $totalHrsParams[]=$fm; }
+if ($fy) { $totalHrsSql.=" AND YEAR(work_date)=?";  $totalHrsParams[]=$fy; }
+$stmtTotal = $pdo->prepare($totalHrsSql);
+$stmtTotal->execute($totalHrsParams);
+$totalHrs = (float)$stmtTotal->fetchColumn();
+$totalHrs = $totalHrs ?? 0;
 
 // Helper: check if a work entry can be edited (only if no bill or bill is rejected)
 function canEditWork($pdo, $studentId, $workDate) {
@@ -189,9 +213,11 @@ renderHead('Add Work');
                         <tbody>
                         <?php foreach($work as $i=>$w):
                             $canEdit = canEditWork($pdo, $uid, $w['work_date']);
+                            // Calculate the actual record number with pagination
+                            $recordNum = $offset + $i + 1;
                         ?>
                         <tr>
-                            <td class="text-muted"><?= $i+1 ?></td>
+                            <td class="text-muted"><?= $recordNum ?></td>
                             <td><?= fmtDate($w['work_date']) ?></td>
                             <td><?= fmtTime($w['start_time'] ?? '') ?></td>
                             <td><?= fmtTime($w['end_time'] ?? '') ?></td>
@@ -223,6 +249,8 @@ renderHead('Add Work');
                         </tbody>
                     </table>
                 </div>
+
+                <?php renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'entries', 'Work entries pagination'); ?>
                 <?php else: ?>
             <div class="empty-state"><div class="icon"><?= svgIcon('pending') ?></div><h3>No work entries found</h3></div>
                 <?php endif; ?>

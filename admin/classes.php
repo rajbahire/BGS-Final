@@ -68,6 +68,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $filterDept = (int)($_GET['dept'] ?? 0);
 $depts = $pdo->query("SELECT * FROM departments WHERE is_active=1 ORDER BY name")->fetchAll();
 
+// Pagination settings
+$perPage = 15;
+$page    = currentPage();
+$offset  = paginationOffset($page, $perPage);
+
+// Count query
+$countSql = "SELECT COUNT(*) FROM classes c JOIN departments d ON d.id=c.department_id WHERE 1=1";
+$countParams = [];
+if ($filterDept) { $countSql .= " AND c.department_id=?"; $countParams[] = $filterDept; }
+$stmtCount = $pdo->prepare($countSql);
+$stmtCount->execute($countParams);
+$totalRecords = (int)$stmtCount->fetchColumn();
+$totalPages = totalPages($totalRecords, $perPage);
+
+// Main query with pagination
 $sql    = "SELECT c.*, d.name AS dept_name, d.short_name AS dept_short,
             (SELECT COUNT(*) FROM subjects s WHERE s.class_id=c.id) AS subject_count
            FROM classes c JOIN departments d ON d.id=c.department_id WHERE 1=1";
@@ -81,7 +96,7 @@ foreach ($takenRaw as $t) {
     $takenMap[(int)$t['department_id']][] = [(int)$t['year'], (int)$t['semester']];
 }
 
-$sql .= " ORDER BY d.name, c.year, c.semester";
+$sql .= " ORDER BY d.name, c.year, c.semester LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql); $stmt->execute($params);
 $classes = $stmt->fetchAll();
 
@@ -173,6 +188,9 @@ renderHead('Classes');
                 </div>
                 <?php else: ?>
                 <div class="empty-state"><div class="icon"><?= svgIcon('classes') ?></div><h3>No classes found</h3><p>Add a class using the button above.</p></div>
+                <?php endif; ?>
+                <?php if ($totalPages > 1): ?>
+                    <?= renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'classes', 'Classes pagination', ['dept' => $filterDept]) ?>
                 <?php endif; ?>
             </div>
         </div>

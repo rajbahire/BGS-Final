@@ -90,14 +90,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $fm = (int)($_GET['month'] ?? 0);
 $fy = (int)($_GET['year']  ?? date('Y'));
 
+// Pagination settings
+$perPage = 10;
+$page    = currentPage();
+$offset  = paginationOffset($page, $perPage);
+
+// Base count query
+$countSql = "SELECT COUNT(*) FROM lectures l WHERE l.teacher_id=?";
+$countParams = [$uid];
+if ($fm) { $countSql.=" AND MONTH(l.lecture_date)=?"; $countParams[]=$fm; }
+if ($fy) { $countSql.=" AND YEAR(l.lecture_date)=?";  $countParams[]=$fy; }
+$stmtCount = $pdo->prepare($countSql);
+$stmtCount->execute($countParams);
+$totalRecords = (int)$stmtCount->fetchColumn();
+$totalPages = totalPages($totalRecords, $perPage);
+
+// Main query with pagination
 $sql    = "SELECT l.*,s.subject_name,s.subject_code,c.label AS class_label FROM lectures l LEFT JOIN subjects s ON s.id=l.subject_id LEFT JOIN classes c ON c.id=l.class_id WHERE l.teacher_id=?";
 $params = [$uid];
 if ($fm) { $sql.=" AND MONTH(l.lecture_date)=?"; $params[]=$fm; }
 if ($fy) { $sql.=" AND YEAR(l.lecture_date)=?";  $params[]=$fy; }
-$sql.=" ORDER BY l.lecture_date DESC";
+$sql.=" ORDER BY l.lecture_date DESC LIMIT $perPage OFFSET $offset";
 $stmt=$pdo->prepare($sql); $stmt->execute($params); $lectures=$stmt->fetchAll();
 
-$tTotals = ['theory'=>array_sum(array_column($lectures,'theory_hours')),'practical'=>array_sum(array_column($lectures,'practical_hours')),'other'=>array_sum(array_column($lectures,'other_hours'))];
+// Total hours for filtered records (all pages, for summary)
+$totalHrsSql = "SELECT SUM(theory_hours) AS theory, SUM(practical_hours) AS practical, SUM(other_hours) AS other FROM lectures WHERE teacher_id=?";
+$totalHrsParams = [$uid];
+if ($fm) { $totalHrsSql.=" AND MONTH(lecture_date)=?"; $totalHrsParams[]=$fm; }
+if ($fy) { $totalHrsSql.=" AND YEAR(lecture_date)=?";  $totalHrsParams[]=$fy; }
+$stmtTotal = $pdo->prepare($totalHrsSql);
+$stmtTotal->execute($totalHrsParams);
+$tTotals = $stmtTotal->fetch(PDO::FETCH_ASSOC) ?: ['theory'=>0,'practical'=>0,'other'=>0];
+$tTotals = ['theory'=>(float)$tTotals['theory'], 'practical'=>(float)$tTotals['practical'], 'other'=>(float)$tTotals['other']];
 
 // (assignedSubjects already built above — no extra query needed)
 
@@ -174,9 +198,11 @@ renderHead('My Lectures');
                     <table>
                         <thead><tr><th>#</th><th>Date</th><th>Subject</th><th>Class</th><?php if($showTheory): ?><th>Theory Hrs</th><?php endif; ?><?php if($showPractical): ?><th>Practical Hrs</th><?php endif; ?><th>Other Hrs</th><th>Action</th></tr></thead>
                         <tbody>
-                        <?php foreach($lectures as $i=>$l): ?>
+                        <?php foreach($lectures as $i=>$l):
+                            $recordNum = $offset + $i + 1;
+                        ?>
                         <tr>
-                            <td class="text-muted"><?= $i+1 ?></td>
+                            <td class="text-muted"><?= $recordNum ?></td>
                             <td><?= fmtDate($l['lecture_date']) ?></td>
                             <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'' ?></td>
                             <td class="text-sm text-muted"><?= e($l['class_label']??'—') ?></td>
@@ -200,6 +226,9 @@ renderHead('My Lectures');
                 </div>
                 <?php else: ?>
                 <div class="empty-state"><div class="icon"><?= svgIcon('calendar') ?></div><h3>No lectures found</h3><p>Add entries using the form.</p></div>
+                <?php endif; ?>
+                <?php if ($totalPages > 1): ?>
+                    <?= renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'lectures', 'Lecture entries pagination') ?>
                 <?php endif; ?>
             </div>
         </div>

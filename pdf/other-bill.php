@@ -99,10 +99,10 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 <body>
 
 <div class="pbar">
-    <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
     <span><?= h($bill['title']) ?></span>
     <span class="bill-ref">Bill #<?= str_pad($id,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; <?= h($bill['claimant_name']) ?></span>
-    <a href="javascript:history.back()">← Back</a>
+    <a></a>
+    <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
 </div>
 
 <?php

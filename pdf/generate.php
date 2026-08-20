@@ -144,9 +144,9 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
 <body>
 
 <div class="pbar">
-  <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
-  <span>Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; <?= h($month) ?> &nbsp;|&nbsp; <?= h($bill['tname']) ?></span>
-  <a href="javascript:history.back()">← Back</a>
+    <span>Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; <?= h($month) ?> &nbsp;|&nbsp; <?= h($bill['tname']) ?></span>
+    <a></a>
+    <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
 </div>
 
 <!-- ======================================================

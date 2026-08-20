@@ -236,3 +236,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// ── Profile page tab switcher ────────────────────────────────
+// One .profile-card holds a .profile-tabs strip and several
+// .profile-panel[data-panel] sections. Clicking a .prof-tab
+// reveals its matching panel and hides the rest.
+document.addEventListener('DOMContentLoaded', function () {
+    var card = document.querySelector('.profile-card');
+    if (!card) return;
+    var tabBar = card.querySelector('.profile-tabs');
+    if (!tabBar) return;
+
+    tabBar.addEventListener('click', function (e) {
+        var btn = e.target.closest('.prof-tab');
+        if (!btn || !btn.dataset.tab) return;
+
+        card.querySelectorAll('.prof-tab').forEach(function (t) {
+            t.classList.toggle('active', t === btn);
+        });
+
+        var name = btn.dataset.tab;
+        card.querySelectorAll('.profile-panel').forEach(function (p) {
+            p.hidden = p.dataset.panel !== name;
+        });
+    });
+});

@@ -5,6 +5,7 @@ require_once '../includes/functions.php';
 requireStudent();
 $user = currentUser();
 $uid  = $user['id'];
+requireProfileForBilling();   // block billing until profile is complete
 
 $student = $pdo->prepare("SELECT * FROM users WHERE id=?"); $student->execute([$uid]); $student=$student->fetch();
 

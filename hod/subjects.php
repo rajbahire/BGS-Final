@@ -121,6 +121,14 @@ $sql .= " ORDER BY c.year, c.semester, s.subject_name";
 $stmt = $pdo->prepare($sql); $stmt->execute($params);
 $subjects = $stmt->fetchAll();
 
+// Pagination config
+$perPage    = 15;
+$page       = currentPage();
+$offset     = paginationOffset($page, $perPage);
+$totalRec   = count($subjects);
+$totalPages = totalPages($totalRec, $perPage);
+$subjects   = array_slice($subjects, $offset, $perPage);
+
 $deptName = $user['dept_name'] ?: 'Your Department';
 
 renderHead('HOD — Subjects');
@@ -240,6 +248,10 @@ renderHead('HOD — Subjects');
                 <?php endif; ?>
             </div>
         </div>
+        <?php if ($totalPages > 1): ?>
+            <?= renderPagination($page, $totalPages, $totalRec, $perPage, $offset, 'subjects', 'Subjects pagination') ?>
+        <?php endif; ?>
+</div>
 </div>
 </div>
 </div>

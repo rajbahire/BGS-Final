@@ -64,6 +64,17 @@ usort($queue, function ($a, $b) {
     return strcmp($a['submitted_at'] ?? '', $b['submitted_at'] ?? '');
 });
 
+// Pagination config
+$perPage = 15;
+$page    = currentPage();
+$offset  = paginationOffset($page, $perPage);
+
+$totalRecords = count($queue);
+$totalPages   = totalPages($totalRecords, $perPage);
+
+// Paginate the merged queue
+$queue = array_slice($queue, $offset, $perPage);
+
 renderHead('Pending Requests');
 ?>
 <div class="app-layout">
@@ -115,6 +126,9 @@ renderHead('Pending Requests');
     </div>
     <?php else: ?>
     <div class="card"><div class="empty-state"><div class="icon"><?= svgIcon('check') ?></div><h3>No pending requests</h3><p>All bills have been reviewed.</p></div></div>
+    <?php endif; ?>
+    <?php if ($totalPages > 1): ?>
+        <?= renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'requests', 'Pending requests pagination') ?>
     <?php endif; ?>
 </div>
 </div>

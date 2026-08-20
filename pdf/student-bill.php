@@ -97,7 +97,7 @@ body{font-family:"Times New Roman",Times,serif;color:#000;background:#ccc}
 .pbar a{color:rgba(255,255,255,.78);text-decoration:none;margin-left:auto}
 .pbar .bill-ref{font-size:11px;opacity:.8}
 .pbar button svg{width:16px;height:16px;display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:4px}
-.page{width:210mm;min-height:297mm;background:#fff;margin:0 auto 14px;padding:12mm 14mm;page-break-after:always;position:relative}
+.page{width:210mm;min-height:297mm;background:#fff;margin:0 auto 14px;padding:10mm 14mm;page-break-after:always;position:relative}
 @media screen{body{padding-top:50px}.page{box-shadow:0 2px 10px rgba(0,0,0,.3)}}
 @media print{body{background:#fff;padding-top:0}.pbar{display:none!important}.page{box-shadow:none;margin:0;break-after:page}}
 .c{text-align:center}.r{text-align:right}.b{font-weight:bold}
@@ -127,15 +127,15 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 <body>
 
 <div class="pbar">
-    <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
     <span>Earn & Learn Bill — <?= h($bill['sname']) ?></span>
     <span class="bill-ref"><?= h($billNumber) ?> &nbsp;|&nbsp; <?= h($bill['month_year']) ?></span>
-    <a href="javascript:history.back()">← Back</a>
+    <a></a>
+    <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
 </div>
 
 <!-- ════════════════ PAGE 1: DAILY WORK RECORD (Annexure-2) ════════════════ -->
 <div class="page">
-    <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
+    <!-- <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div> -->
     <div class="c" style="font-style:italic;font-size:11pt;margin-bottom:3mm">Annexure -2</div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1></div>
     <hr class="thin">
@@ -181,7 +181,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
         </tbody>
     </table>
 
-    <div style="text-align:right;margin-top:40mm;font-size:10pt">
+    <div style="text-align:right;margin-top:20mm;font-size:10pt">
         <strong>(Name and signature)</strong><br>
         Faculty/Head of the department/Section in Charge
     </div>
@@ -231,11 +231,11 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 
     <p class="cert">Certified that the above work have actually been done by me & is in accordance with attendance register maintained, & the bill claimed herewith is correct according to the rates as per institute norms.</p>
 
-    <div class="sign-grid">
+    <div class="sign-grid" style="margin-top: 25px;">
         <div>Date: <span class="fl"><?= date('d / m / Y') ?></span></div>
-        <div class="r">Signature of Student<br><span class="stamp-line"></span></div>
+        <div class="r">Signature of Student</div>
     </div>
-    <div class="sign-grid">
+    <div class="sign-grid" style="margin-top: 30px;">
         <div class="sign">Signature of Concern Faculty</div>
         <div class="sign">Signature of Head of Department/Section</div>
     </div>

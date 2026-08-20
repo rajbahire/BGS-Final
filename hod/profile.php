@@ -44,6 +44,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     header('Location: profile.php'); exit;
 }
 
+// Refresh the first-login gate on each profile page load (see auth.php).
+$_SESSION['profile_completed'] = isProfileComplete($row) ? 1 : 0;
+
 $deptName = $row['department_id'] ? deptName($pdo,(int)$row['department_id']) : '—';
 
 renderHead('HOD Profile');

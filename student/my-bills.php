@@ -7,10 +7,26 @@ $user = currentUser();
 $uid  = $user['id'];
 
 $fStatus = $_GET['status'] ?? '';
+
+// Pagination settings
+$perPage = 10;
+$page    = currentPage();
+$offset  = paginationOffset($page, $perPage);
+
+// Base query for counting
+$countSql = "SELECT COUNT(*) FROM student_bills WHERE student_id=?";
+$countParams = [$uid];
+if ($fStatus) { $countSql.=" AND status=?"; $countParams[]=$fStatus; }
+$stmtCount = $pdo->prepare($countSql);
+$stmtCount->execute($countParams);
+$totalRecords = (int)$stmtCount->fetchColumn();
+$totalPages   = totalPages($totalRecords, $perPage);
+
+// Main query with pagination
 $sql     = "SELECT * FROM student_bills WHERE student_id=?";
 $params  = [$uid];
 if ($fStatus) { $sql.=" AND status=?"; $params[]=$fStatus; }
-$sql .= " ORDER BY submitted_at DESC";
+$sql .= " ORDER BY submitted_at DESC LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql); $stmt->execute($params); $bills=$stmt->fetchAll();
 
 renderHead('My Bills');
@@ -45,9 +61,12 @@ renderHead('My Bills');
             <table>
                 <thead><tr><th>#</th><th>Bill ID</th><th>Month</th><th>Period</th><th>Hours</th><th>Rate</th><th>Amount</th><th>Status</th><th>Submitted</th><th>Action</th></tr></thead>
                 <tbody>
-                <?php foreach($bills as  $i => $b): ?>
+                <?php foreach($bills as  $i => $b):
+                    // Calculate the actual record number with pagination
+                    $recordNum = $offset + $i + 1;
+                ?>
                 <tr>
-                    <td class="text-muted"><?= $i+1 ?></td>
+                    <td class="text-muted"><?= $recordNum ?></td>
                     <td class="fw-500" style="white-space:nowrap"><?= e($b['bill_number'] ?? 'EL-'.date('Y-m',strtotime($b['period_from'])).'-'.str_pad($b['id'],5,'0',STR_PAD_LEFT)) ?></td>
                     <td class="fw-500"><?= e($b['month_year']) ?></td>
                     <td class="text-sm text-muted"><?= fmtDate($b['period_from'],'d M') ?> – <?= fmtDate($b['period_to'],'d M') ?></td>
@@ -74,6 +93,8 @@ renderHead('My Bills');
                 </tbody>
             </table>
         </div>
+
+                <?php renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'entries', 'Bills pagination'); ?>
         <?php else: ?>
         <div class="empty-state">
             <div class="icon"><?= svgIcon('list') ?></div>

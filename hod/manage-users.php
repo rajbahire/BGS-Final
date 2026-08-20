@@ -151,6 +151,22 @@ $students = $pdo->prepare(
      WHERE u.role='student' AND u.department_id=? ORDER BY u.name"
 ); $students->execute([$deptId]); $students=$students->fetchAll();
 
+// Pagination config for teachers
+$tPerPage = 15;
+$tPage    = currentPage();
+$tOffset  = paginationOffset($tPage, $tPerPage);
+$tTotal   = count($teachers);
+$tPages   = totalPages($tTotal, $tPerPage);
+$teachers = array_slice($teachers, $tOffset, $tPerPage);
+
+// Pagination config for students
+$sPerPage = 15;
+$sPage    = currentPage();
+$sOffset  = paginationOffset($sPage, $sPerPage);
+$sTotal   = count($students);
+$sPages   = totalPages($sTotal, $sPerPage);
+$students = array_slice($students, $sOffset, $sPerPage);
+
 // All active subjects in this dept (for the teacher subject selectors).
 // Availability per teacher is enforced client-side via $subjectOwners
 // (a subject is selectable if it is owned by no one, or only by the teacher being edited).
@@ -250,6 +266,9 @@ renderHead('Manage Users');
                 </table>
             </div>
             <?php else: ?><div class="empty-state"><div class="icon"><?= svgIcon('teacher') ?></div><h3>No teachers added yet</h3></div><?php endif; ?>
+        <?php if ($tPages > 1): ?>
+            <?= renderPagination($tPage, $tPages, $tTotal, $tPerPage, $tOffset, 'teachers', 'Teachers pagination') ?>
+        <?php endif; ?>
         </div>
     </div>
 
@@ -291,6 +310,9 @@ renderHead('Manage Users');
                 </table>
             </div>
             <?php else: ?><div class="empty-state"><div class="icon"><?= svgIcon('student') ?></div><h3>No students added yet</h3></div><?php endif; ?>
+        <?php if ($sPages > 1): ?>
+            <?= renderPagination($sPage, $sPages, $sTotal, $sPerPage, $sOffset, 'students', 'Students pagination') ?>
+        <?php endif; ?>
         </div>
     </div>
     <?php endif; ?>

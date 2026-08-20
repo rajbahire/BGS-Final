@@ -482,7 +482,7 @@ svg.icon {
    ============================================= */
 .stats-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 1rem;
     margin-bottom: 1.5rem;
 }
@@ -676,6 +676,13 @@ svg.icon {
 
 .card-body {
     padding: 1.3rem;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.card-body > *:last-child {
+    margin-top: auto;
 }
 
 /* =============================================
@@ -1497,6 +1504,15 @@ body.modal-open{
     }
 }
 
+/* Dashboard stat cards: 4 cols on desktop, 2 on tablet, 1 on phone.
+   A fixed column count keeps the 8-card admin/HOD dashboards in a clean 4x2 grid
+   instead of auto-fit stretching a 2-card last row across the full width. */
+@media (max-width: 1100px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
 @media (max-width: 640px) {
     .sidebar {
         display: none;
@@ -1515,6 +1531,428 @@ body.modal-open{
     }
 
     .stats-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =============================================
+   PAGINATION
+   ============================================= */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.pagination-info {
+    color: var(--text-muted);
+    font-size: .875rem;
+    white-space: nowrap;
+}
+
+.pagination-list {
+    display: flex;
+    gap: 4px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.page-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--card-bg);
+    color: var(--text);
+    text-decoration: none;
+    font-size: .875rem;
+    transition: all .15s;
+}
+
+.page-link:hover {
+    background: var(--bg);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.page-link.current {
+    border-color: var(--primary);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+    cursor: default;
+}
+
+.page-link.disabled {
+    background: var(--card-bg);
+    color: var(--text-muted);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.page-link svg.icon {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 640px) {
+    .pagination {
+        gap: 6px;
+    }
+    .page-link {
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        font-size: .8rem;
+    }
+}
+
+/* =============================================
+   PROFILE PAGE — unified banner + tabs
+   ============================================= */
+
+/* Identity banner ------------------------------------------------ */
+.profile-header {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+
+.profile-cover {
+    height: 88px;
+    background: linear-gradient(135deg, var(--primary) 0%, #3268b8 60%, #4078c8 100%);
+}
+
+.profile-id-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.2rem;
+    padding: 0 1.5rem 1.1rem;
+    margin-top: -44px;
+    flex-wrap: wrap;
+}
+
+.profile-avatar-lg {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 4px solid var(--white);
+    background: var(--primary-lt);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    font-weight: 600;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-identity {
+    padding-bottom: .25rem;
+}
+
+.profile-identity h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+}
+
+.profile-identity .pi-email {
+    color: var(--muted);
+    font-size: .85rem;
+    margin-top: 1px;
+}
+
+.profile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 7px;
+}
+
+/* Completion indicator (ties into the first-login gate) */
+.profile-status {
+    margin-left: auto;
+    padding-bottom: .25rem;
+    min-width: 170px;
+}
+
+.completion-label {
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    letter-spacing: .02em;
+}
+
+.completion-label .pct {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.completion-track {
+    height: 7px;
+    border-radius: 20px;
+    background: var(--bg);
+    overflow: hidden;
+}
+
+.completion-fill {
+    height: 100%;
+    border-radius: 20px;
+    background: var(--primary);
+    transition: width .4s ease;
+}
+
+.completion-fill.done {
+    background: var(--approved);
+}
+
+.completion-note {
+    font-size: .72rem;
+    color: var(--muted);
+    margin-top: 5px;
+}
+
+.completion-note.warn {
+    color: var(--pending);
+    font-weight: 600;
+}
+
+/* Read-only institutional data grid ------------------------------ */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: .8rem;
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: .75rem .95rem;
+}
+
+.info-item .ilabel {
+    font-size: .66rem;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    color: var(--muted);
+    font-weight: 600;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.info-item .ival {
+    font-weight: 600;
+    color: var(--text);
+    font-size: .86rem;
+    word-break: break-word;
+}
+
+/* Tabbed panel --------------------------------------------------- */
+.profile-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.profile-tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.profile-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.prof-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--muted);
+    font-family: 'Inter', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    padding: .9rem 1.2rem;
+    cursor: pointer;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: color .15s, border-color .15s;
+}
+
+.prof-tab svg.icon {
+    width: 18px;
+    height: 18px;
+}
+
+.prof-tab:hover {
+    color: var(--text);
+}
+
+.prof-tab.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    font-weight: 600;
+}
+
+/* Right-aligned tab (e.g. Danger / Security) */
+.prof-tab.tab-right {
+    margin-left: auto;
+}
+
+.profile-panel {
+    padding: 1.4rem;
+}
+
+.profile-panel[hidden] {
+    display: none;
+}
+
+/* Personal tab: identity block holding the photo uploader */
+.id-block {
+    display: flex;
+    gap: 1.2rem;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    margin-bottom: 1.4rem;
+    flex-wrap: wrap;
+}
+
+.id-block .avatar-edit {
+    position: relative;
+    width: 76px;
+    height: 76px;
+    flex-shrink: 0;
+}
+
+.id-block .avatar-edit img,
+.id-block .avatar-edit .avatar-fallback {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--primary-lt);
+    color: var(--primary);
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.id-block .avatar-edit .photo-hint {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--white);
+    cursor: pointer;
+}
+
+.id-block .avatar-edit .photo-hint svg.icon {
+    width: 13px;
+    height: 13px;
+}
+
+.id-block .id-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.id-block .id-text .id-name {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.id-block .id-text .id-note {
+    font-size: .8rem;
+    color: var(--muted);
+    margin-top: 2px;
+}
+
+.id-block .btn {
+    margin-left: auto;
+}
+
+/* Side-by-side form grid inside a panel */
+.form-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-pair .form-group {
+    margin-bottom: 0;
+}
+
+.form-actions {
+    margin-top: 1.2rem;
+}
+
+/* Responsive ---------------------------------------------------- */
+@media (max-width: 1100px) {
+    .info-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
+}
+
+@media (max-width: 640px) {
+    .profile-id-row {
+        margin-top: -38px;
+    }
+    .profile-avatar-lg {
+        width: 72px;
+        height: 72px;
+        font-size: 1.4rem;
+    }
+    .profile-status {
+        margin-left: 0;
+        width: 100%;
+        min-width: 0;
+    }
+    .id-block .btn {
+        margin-left: 0;
+    }
+    .form-pair {
+        grid-template-columns: 1fr;
     }
 }

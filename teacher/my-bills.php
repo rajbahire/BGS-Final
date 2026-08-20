@@ -7,10 +7,26 @@ $user = currentUser();
 $uid  = $user['id'];
 
 $fStatus = $_GET['status'] ?? '';
+
+// Pagination settings
+$perPage = 10;
+$page    = currentPage();
+$offset  = paginationOffset($page, $perPage);
+
+// Count query
+$countSql = "SELECT COUNT(*) FROM bills WHERE teacher_id=?";
+$countParams = [$uid];
+if ($fStatus) { $countSql .= " AND status=?"; $countParams[] = $fStatus; }
+$stmtCount = $pdo->prepare($countSql);
+$stmtCount->execute($countParams);
+$totalRecords = (int)$stmtCount->fetchColumn();
+$totalPages = totalPages($totalRecords, $perPage);
+
+// Main query with pagination
 $sql     = "SELECT * FROM bills WHERE teacher_id=?";
 $params  = [$uid];
 if ($fStatus) { $sql .= " AND status=?"; $params[] = $fStatus; }
-$sql .= " ORDER BY submitted_at DESC";
+$sql .= " ORDER BY submitted_at DESC LIMIT $perPage OFFSET $offset";
 $stmt = $pdo->prepare($sql); $stmt->execute($params);
 $bills = $stmt->fetchAll();
 
@@ -78,6 +94,9 @@ renderHead('My Bills');
             <p><?= $fStatus ? "No $fStatus bills." : 'You have not submitted any bills yet.' ?></p>
             <a href="generate-bill.php" class="btn btn-primary" style="margin-top:1rem">Generate First Bill</a>
         </div>
+        <?php endif; ?>
+        <?php if ($totalPages > 1): ?>
+            <?= renderPagination($page, $totalPages, $totalRecords, $perPage, $offset, 'bills', 'My bills pagination', ['status' => $fStatus]) ?>
         <?php endif; ?>
     </div>
 </div>

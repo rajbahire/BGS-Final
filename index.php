@@ -50,6 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['profile_photo'] = $user['profile_photo'] ?? '';
 
+            // First-login gate: 0 until the user fills the required profile
+            // fields for their role (phone for admin/hod; + bank/appointment
+            // for teacher; + enrollment/bank for student). Checked by
+            // forceProfileComplete() in auth.php on every guarded page.
+            $_SESSION['profile_completed'] = isProfileComplete($user) ? 1 : 0;
+
+            // First-login nudge: show a one-time alert on the dashboard when the
+            // profile is still incomplete (Teacher/Student are additionally blocked
+            // from generating a bill until it's filled; Admin/HOD are not blocked).
+            if (!$_SESSION['profile_completed']) {
+                $_SESSION['flash'] = [
+                    'type' => 'warning',
+                    'msg'  => 'Welcome! Please complete your profile to finish setting up your account.',
+                ];
+            }
+
             // Log login
             $pdo->prepare(
                 "INSERT INTO activity_log (user_id, action, description, ip_address)

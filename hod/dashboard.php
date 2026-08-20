@@ -6,19 +6,31 @@ requireHOD();
 $user   = currentUser();
 $deptId = $user['dept_id'];
 
-$pending   = (int)$pdo->prepare("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='pending' AND u.department_id=?")->execute([$deptId]) ? $pdo->prepare("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='pending' AND u.department_id=?")->execute([$deptId]) || 0 : 0;
-
-// Re-run queries cleanly
+// One-line helper for scalar counts/sums.
 $q = function($sql, $p=[]) use($pdo){ $s=$pdo->prepare($sql); $s->execute($p); return $s->fetchColumn(); };
 
-$pending    = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='pending' AND u.department_id=?",[$deptId])
-           + (int)$q("SELECT COUNT(*) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='pending' AND u.department_id=?",[$deptId]);
-$approved   = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved' AND u.department_id=?",[$deptId]);
-$rejected   = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='rejected' AND u.department_id=?",[$deptId]);
-$teachers   = (int)$q("SELECT COUNT(*) FROM users WHERE role='teacher' AND department_id=? AND is_active=1",[$deptId]);
-$students   = (int)$q("SELECT COUNT(*) FROM users WHERE role='student' AND department_id=? AND is_active=1",[$deptId]);
-$totalPaid  = (float)$q("SELECT COALESCE(SUM(b.total_amount),0) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved' AND u.department_id=?",[$deptId]);
-$monthPaid  = (float)$q("SELECT COALESCE(SUM(b.total_amount),0) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved' AND u.department_id=? AND MONTH(b.reviewed_at)=MONTH(NOW()) AND YEAR(b.reviewed_at)=YEAR(NOW())",[$deptId]);
+// Approval-flow bills (the ones the HOD actively approves / rejects): teacher + student bills.
+// other_bills are created already-finalized, so they're tracked separately as $otherBills.
+$pending    = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='pending'  AND u.department_id=?",[$deptId])
+           + (int)$q("SELECT COUNT(*) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='pending'  AND u.department_id=?",[$deptId]);
+$approved   = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved' AND u.department_id=?",[$deptId])
+           + (int)$q("SELECT COUNT(*) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='approved' AND u.department_id=?",[$deptId]);
+$rejected   = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='rejected' AND u.department_id=?",[$deptId])
+           + (int)$q("SELECT COUNT(*) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='rejected' AND u.department_id=?",[$deptId]);
+$otherBills = (int)$q("SELECT COUNT(*) FROM other_bills WHERE department_id=?",[$deptId]);
+
+$teachers = (int)$q("SELECT COUNT(*) FROM users WHERE role='teacher' AND department_id=? AND is_active=1",[$deptId]);
+$students = (int)$q("SELECT COUNT(*) FROM users WHERE role='student' AND department_id=? AND is_active=1",[$deptId]);
+
+// Department outflows — every finalized/approved bill amount. Includes other_bills (finalized
+// on creation, so the money is always disbursed) alongside the approved teacher + student
+// bills the HOD signed off on. Teacher/student use reviewed_at; other_bills use created_at.
+$totalPaid = (float)$q("SELECT COALESCE(SUM(b.total_amount),0) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved' AND u.department_id=?",[$deptId])
+           + (float)$q("SELECT COALESCE(SUM(sb.total_amount),0) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='approved' AND u.department_id=?",[$deptId])
+           + (float)$q("SELECT COALESCE(SUM(total_amount),0) FROM other_bills WHERE department_id=?",[$deptId]);
+$monthPaid = (float)$q("SELECT COALESCE(SUM(b.total_amount),0) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved' AND u.department_id=? AND MONTH(b.reviewed_at)=MONTH(NOW()) AND YEAR(b.reviewed_at)=YEAR(NOW())",[$deptId])
+           + (float)$q("SELECT COALESCE(SUM(sb.total_amount),0) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='approved' AND u.department_id=? AND MONTH(sb.reviewed_at)=MONTH(NOW()) AND YEAR(sb.reviewed_at)=YEAR(NOW())",[$deptId])
+           + (float)$q("SELECT COALESCE(SUM(total_amount),0) FROM other_bills WHERE department_id=? AND MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW())",[$deptId]);
 
 $pendingBills = $pdo->prepare(
     "SELECT b.*, u.name AS tname, u.teacher_type FROM bills b
@@ -53,6 +65,7 @@ renderHead('HOD Dashboard');
         <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending Requests</div><div class="stat-value"><?= $pending ?></div></div></div>
         <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $approved ?></div></div></div>
         <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected</div><div class="stat-value"><?= $rejected ?></div></div></div>
+        <div class="stat-card stat-card--teal"><div class="stat-icon teal"><?= svgIcon('other-bills') ?></div><div><div class="stat-label">Other Bills</div><div class="stat-value"><?= $otherBills ?></div></div></div>
         <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('teacher') ?></div><div><div class="stat-label">Teachers</div><div class="stat-value"><?= $teachers ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('student') ?></div><div><div class="stat-label">E&amp;L Students</div><div class="stat-value"><?= $students ?></div></div></div>
         <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('fund-requests') ?></div><div><div class="stat-label">This Month Paid</div><div class="stat-value sm"><?= formatINR($monthPaid) ?></div></div></div>

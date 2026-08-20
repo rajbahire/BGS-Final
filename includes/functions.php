@@ -40,6 +40,24 @@ function getFlash(): string {
     return '<div class="alert ' . $cls . ' auto-dismiss">' . ($icons[$type] ?? '') . ' ' . e($msg) . '</div>';
 }
 
+// ── Profile completeness (first-login gate) ──────────────────
+// Drives the "complete your profile first" redirect on first login.
+// Only the text fields the user fills on their own profile page are
+// counted; KYC image uploads are intentionally excluded so a failed
+// upload can never lock a user out of their dashboard.
+function isProfileComplete(array $u): bool {
+    $required = match($u['role'] ?? '') {
+        'admin', 'hod' => ['phone'],
+        'teacher'       => ['phone', 'appointment_order_no', 'bank_name', 'account_no', 'ifsc', 'pan'],
+        'student'       => ['enrollment_number', 'phone', 'bank_name', 'account_no', 'ifsc', 'pan'],
+        default         => [],
+    };
+    foreach ($required as $f) {
+        if (empty(trim((string)($u[$f] ?? '')))) return false;
+    }
+    return true;
+}
+
 // ── Activity log ─────────────────────────────────────────────
 function logActivity(PDO $pdo, int $userId, string $action, string $desc = ''): void {
     $pdo->prepare(
@@ -191,6 +209,7 @@ function renderSidebar(string $active, string $role, array $user): void {
             ['key'=>'subjects',      'href'=>'subjects.php',      'icon'=>svgIcon('subjects'), 'label'=>'Subjects'],
             ['key'=>'manage-hods',   'href'=>'manage-hods.php',   'icon'=>svgIcon('manage-hods'), 'label'=>'Manage HODs'],
             ['key'=>'fund-requests', 'href'=>'fund-requests.php', 'icon'=>svgIcon('fund-requests'), 'label'=>'Fund Requests'],
+            ['key'=>'all-bills',     'href'=>'all-bills.php',     'icon'=>svgIcon('all-bills'), 'label'=>'All Bills'],
             ['key'=>'profile',       'href'=>'profile.php',       'icon'=>svgIcon('profile'), 'label'=>'Profile'],
         ],
         'hod' => [
@@ -335,4 +354,112 @@ function generateStudentBillNumber(string $periodFrom, int $billId): string {
     $ts = strtotime($periodFrom);
     $ym = $ts ? date('Y-m', $ts) : date('Y-m');
     return 'EL-' . $ym . '-' . str_pad($billId, 5, '0', STR_PAD_LEFT);
+}
+
+// ── Pagination helpers ───────────────────────────────────────
+// Build URL for a given page number, preserving current query params
+function paginateUrl(int $newPage): string {
+    $params = $_GET;
+    $params['page'] = $newPage;
+    $query = http_build_query($params);
+    return basename($_SERVER['PHP_SELF']) . ($query ? '?' . $query : '');
+}
+
+// Get current page (1-indexed). Defaults to 1 if missing/invalid.
+function currentPage(): int {
+    return max(1, (int)($_GET['page'] ?? 1));
+}
+
+// Compute offset for SQL LIMIT/OFFSET
+function paginationOffset(int $page, int $perPage = 10): int {
+    return ($page - 1) * $perPage;
+}
+
+// Compute total pages from record count
+function totalPages(int $totalRecords, int $perPage = 10): int {
+    return max(1, (int)ceil($totalRecords / $perPage));
+}
+
+/**
+ * Render pagination controls.
+ *
+ * @param int    $page          Current page (1-indexed)
+ * @param int    $totalPages    Total number of pages
+ * @param int    $totalRecords  Total record count (across all pages)
+ * @param int    $perPage       Records per page
+ * @param int    $offset        Records already skipped (page-1)*perPage
+ * @param string $label         Word shown in "X of N {label}" — defaults to "entries"
+ * @param string $ariaLabel     ARIA label for the <nav> wrapper
+ */
+function renderPagination(
+    int $page,
+    int $totalPages,
+    int $totalRecords,
+    int $perPage = 10,
+    int $offset = 0,
+    string $label = 'entries',
+    string $ariaLabel = 'Pagination'
+): void {
+    if ($totalPages <= 1) return;
+
+    $from = $offset + 1;
+    $to   = min($offset + $perPage, $totalRecords);
+    ?>
+    <div class="pagination">
+        <span class="pagination-info">
+            Showing <?= $from ?>–<?= $to ?> of <?= $totalRecords ?> <?= e($label) ?>
+       </span>
+        <nav aria-label="<?= e($ariaLabel) ?>">
+            <ul class="pagination-list">
+                <?php if ($page > 1): ?>
+                <li>
+                    <a href="<?= e(paginateUrl($page - 1)) ?>" class="page-link" aria-label="Previous">
+                        <?= svgIcon('chevron-left') ?>
+                   </a>
+               </li>
+                <?php else: ?>
+                <li>
+                    <span class="page-link disabled" aria-label="Previous" aria-disabled="true">
+                        <?= svgIcon('chevron-left') ?>
+                   </span>
+               </li>
+                <?php endif; ?>
+
+                <?php
+                $startPage = max(1, $page - 2);
+                $endPage   = min($totalPages, $page + 2);
+                if ($page <= 3)               $endPage   = min(5, $totalPages);
+                if ($page > $totalPages - 2)  $startPage = max(1, $totalPages - 4);
+                for ($p = $startPage; $p <= $endPage; $p++):
+                ?>
+                <li>
+                    <?php if ($p == $page): ?>
+                    <span class="page-link current" aria-current="page">
+                        <?= $p ?>
+                   </span>
+                    <?php else: ?>
+                    <a href="<?= e(paginateUrl($p)) ?>" class="page-link" aria-label="Page <?= $p ?>">
+                        <?= $p ?>
+                   </a>
+                    <?php endif; ?>
+               </li>
+                <?php endfor; ?>
+
+                <?php if ($page < $totalPages): ?>
+                <li>
+                    <a href="<?= e(paginateUrl($page + 1)) ?>" class="page-link" aria-label="Next">
+                        <?= svgIcon('chevron-right') ?>
+                   </a>
+               </li>
+                <?php else: ?>
+                <li>
+                    <span class="page-link disabled" aria-label="Next" aria-disabled="true">
+                        <?= svgIcon('chevron-right') ?>
+                   </span>
+               </li>
+                <?php endif; ?>
+           </ul>
+       </nav>
+   </div>
+    <?php
 }
