@@ -143,14 +143,14 @@ renderHead('Subjects');
                 <div class="table-wrap">
                     <table>
                         <thead>
-                            <tr><th>#</th><th>Subject</th><th>Code</th><th>Class</th><th>Mode</th><th>Status</th><th>Action</th></tr>
+                            <tr><th>#</th><th>Subject code</th><th>Subject</th><th>Class</th><th>Mode</th><th>Status</th><th>Action</th></tr>
                         </thead>
                         <tbody>
                         <?php foreach ($subjects as $i => $s): ?>
                         <tr>
                             <td class="text-muted"><?= $i+1 ?></td>
-                            <td class="fw-500"><?= e($s['subject_name']) ?></td>
                             <td><span class="badge badge-expert"><?= e($s['subject_code']) ?></span></td>
+                            <td class="fw-500"><?= e($s['subject_name']) ?></td>
                             <td class="text-sm"><?= e($s['class_label']) ?><br><span class="text-muted text-xs"><?= e($s['dept_name']) ?></span></td>
                             <td><?= modeBadge($s['mode']) ?></td>
                             <td><?= $s['is_active'] ? '<span class="badge badge-approved">Active</span>' : '<span class="badge badge-rejected">Inactive</span>' ?></td>

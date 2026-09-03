@@ -97,7 +97,7 @@ renderHead('Pending Requests');
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr><th>#</th><th>Person</th><th>Subject / Class</th><th>Month</th><th>Hours</th><th>Amount</th><th>Submitted</th><th>Action</th></tr>
+                    <tr><th>#</th><th>Person</th><th>Subject Code</th><th>Subject</th><th>Month</th><th>Hours</th><th>Amount</th><th>Submitted</th><th>Action</th></tr>
                 </thead>
                 <tbody>
                 <?php foreach ($queue as $i => $row): ?>
@@ -108,11 +108,11 @@ renderHead('Pending Requests');
                         <div class="text-sm" style="margin-top:3px"><?= $row['badge'] ?></div>
                     </td>
                     <td class="text-sm">
-                        <?= e($row['detail'] ?: '—') ?>
                         <?php if ($row['detail_code']): ?>
-                        <br><span class="badge badge-expert" style="font-size:.66rem"><?= e($row['detail_code']) ?></span>
-                        <?php endif; ?>
+                        <span class="badge badge-expert" style="font-size:.66rem"><?= e($row['detail_code']) ?></span>
+                        <?php else: ?>—<?php endif; ?>
                     </td>
+                    <td class="text-sm"><?= e($row['detail'] ?: '—') ?></td>        
                     <td class="fw-500"><?= e($row['month_year']) ?></td>
                     <td><?= $row['hours'] ?> hrs</td>
                     <td class="fw-600"><?= formatINR($row['amount']) ?></td>

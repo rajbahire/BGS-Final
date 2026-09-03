@@ -64,7 +64,7 @@ renderHead('HOD Dashboard');
     <div class="stats-grid">
         <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending Requests</div><div class="stat-value"><?= $pending ?></div></div></div>
         <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $approved ?></div></div></div>
-        <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected</div><div class="stat-value"><?= $rejected ?></div></div></div>
+        <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected Bills</div><div class="stat-value"><?= $rejected ?></div></div></div>
         <div class="stat-card stat-card--teal"><div class="stat-icon teal"><?= svgIcon('other-bills') ?></div><div><div class="stat-label">Other Bills</div><div class="stat-value"><?= $otherBills ?></div></div></div>
         <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('teacher') ?></div><div><div class="stat-label">Teachers</div><div class="stat-value"><?= $teachers ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('student') ?></div><div><div class="stat-label">E&amp;L Students</div><div class="stat-value"><?= $students ?></div></div></div>

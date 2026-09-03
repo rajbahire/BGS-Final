@@ -188,8 +188,8 @@ renderHead('HOD — Subjects');
                         <thead>
                             <tr>
                                 <th>#</th>
+                                <th>Subject Code</th>
                                 <th>Subject</th>
-                                <th>Code</th>
                                 <th>Class</th>
                                 <th>Mode</th>
                                 <th>Status</th>
@@ -200,8 +200,8 @@ renderHead('HOD — Subjects');
                         <?php foreach ($subjects as $i => $s): ?>
                         <tr>
                             <td class="text-muted"><?= $i + 1 ?></td>
-                            <td class="fw-500"><?= e($s['subject_name']) ?></td>
                             <td><span class="badge badge-expert"><?= e($s['subject_code']) ?></span></td>
+                            <td class="fw-500"><?= e($s['subject_name']) ?></td>
                             <td class="text-sm"><?= e($s['class_label']) ?></td>
                             <td><?= modeBadge($s['mode']) ?></td>
                             <td>

@@ -196,7 +196,7 @@ renderHead('My Lectures');
                 <?php if($lectures): ?>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>#</th><th>Date</th><th>Subject</th><th>Class</th><?php if($showTheory): ?><th>Theory Hrs</th><?php endif; ?><?php if($showPractical): ?><th>Practical Hrs</th><?php endif; ?><th>Other Hrs</th><th>Action</th></tr></thead>
+                        <thead><tr><th>#</th><th>Date</th><th>Subject Code</th><th>Subject</th><th>Class</th><?php if($showTheory): ?><th>Theory Hrs</th><?php endif; ?><?php if($showPractical): ?><th>Practical Hrs</th><?php endif; ?><th>Other Hrs</th><th>Action</th></tr></thead>
                         <tbody>
                         <?php foreach($lectures as $i=>$l):
                             $recordNum = $offset + $i + 1;
@@ -204,7 +204,8 @@ renderHead('My Lectures');
                         <tr>
                             <td class="text-muted"><?= $recordNum ?></td>
                             <td><?= fmtDate($l['lecture_date']) ?></td>
-                            <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'' ?></td>
+                            <td class="text-sm"><?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'—' ?></td>
+                            <td><?= e($l['subject_name']??'—') ?></td>
                             <td class="text-sm text-muted"><?= e($l['class_label']??'—') ?></td>
                             <?php if($showTheory): ?><td><?= number_format($l['theory_hours'],1) ?></td><?php endif; ?>
                             <?php if($showPractical): ?><td><?= number_format($l['practical_hours'],1) ?></td><?php endif; ?>

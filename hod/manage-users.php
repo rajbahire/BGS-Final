@@ -230,7 +230,7 @@ renderHead('Manage Users');
             <?php if($teachers): ?>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Subject</th><th>Rate T/P</th><th>Status</th><th>Actions</th></tr></thead>
+                    <thead><tr><th>#</th><th>Name</th><th>Type</th><th>Subject Code</th><th>Subject</th><th>Rate T/P</th><th>Status</th><th>Actions</th></tr></thead>
                     <tbody>
                     <?php foreach($teachers as $i => $t): ?>
                     <tr>
@@ -242,8 +242,14 @@ renderHead('Manage Users');
                         <td><?= teacherTypeBadge($t['teacher_type']??'regular') ?></td>
                         <td class="text-sm">
                             <?php if($t['subject_name']): ?>
-                                <?= e($t['subject_name']) ?> <span class="badge badge-expert" style="font-size:.66rem"><?= e($t['subject_code']) ?></span>
-                                <?php if($t['subject_name_2']): ?><br><?= e($t['subject_name_2']) ?> <span class="badge badge-draft" style="font-size:.66rem"><?= e($t['subject_code_2']) ?></span><?php endif; ?>
+                                <span class="badge badge-expert" style="font-size:.66rem"><?= e($t['subject_code']) ?></span>
+                                    <?php if($t['subject_name_2']): ?><br><span class="badge badge-draft" style="font-size:.66rem"><?= e($t['subject_code_2']) ?></span><?php endif; ?>
+                            <?php else: ?>—<?php endif; ?>
+                        </td>
+                        <td class="text-sm">
+                            <?php if($t['subject_name']): ?>
+                                <?= e($t['subject_name']) ?>
+                            <?php if($t['subject_name_2']): ?><br><?= e($t['subject_name_2']) ?><?php endif; ?>
                             <?php else: ?>—<?php endif; ?>
                         </td>
                         <td class="text-sm"><?= formatINR($t['rate_theory']) ?> / <?= formatINR($t['rate_practical']) ?></td>

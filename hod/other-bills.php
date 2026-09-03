@@ -78,7 +78,7 @@ renderHead('Other Bills');
     <div class="d-flex gap-8 flex-wrap mb-2">
         <a href="?tab=list"             class="btn <?= $tab==='list'?'btn-primary':'btn-outline' ?> btn-sm"><?= svgIcon('other-bills') ?> All Other Bills</a>
         <a href="?tab=create&type=practical"  class="btn <?= $tab==='create'&&$billType==='practical' ?'btn-primary':'btn-outline' ?> btn-sm"><?= svgIcon('add') ?> Practical Exam</a>
-        <a href="?tab=create&type=earn_learn" class="btn <?= $tab==='create'&&$billType==='earn_learn'?'btn-primary':'btn-outline' ?> btn-sm"><?= svgIcon('add') ?> Earn &amp; Learn</a>
+        <!-- <a href="?tab=create&type=earn_learn" class="btn <?= $tab==='create'&&$billType==='earn_learn'?'btn-primary':'btn-outline' ?> btn-sm"><?= svgIcon('add') ?> Earn &amp; Learn</a> -->
         <a href="?tab=create&type=seminar"    class="btn <?= $tab==='create'&&$billType==='seminar'   ?'btn-primary':'btn-outline' ?> btn-sm"><?= svgIcon('add') ?> Seminar</a>
     </div>
 

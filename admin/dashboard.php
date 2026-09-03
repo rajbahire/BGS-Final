@@ -82,22 +82,22 @@ renderHead('Admin Dashboard');
             <div class="stat-icon teal"><?= svgIcon('student') ?></div>
             <div><div class="stat-label">E&L Students</div><div class="stat-value"><?= $totalStudents ?></div></div>
         </div>
-        <div class="stat-card stat-card--amber">
+        <!-- <div class="stat-card stat-card--amber">
             <div class="stat-icon amber"><?= svgIcon('pending') ?></div>
             <div><div class="stat-label">Pending Fund Req.</div><div class="stat-value"><?= $pendingFunds ?></div></div>
-        </div>
+        </div> -->
         <div class="stat-card stat-card--green">
             <div class="stat-icon green"><?= svgIcon('approved') ?></div>
             <div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $totalBills ?></div></div>
         </div>
         <div class="stat-card stat-card--red">
-            <div class="stat-icon red"><?= svgIcon('receipt') ?></div>
+            <div class="stat-icon red"><?= svgIcon('fund-requests') ?></div>
             <div><div class="stat-label">Total Billed</div><div class="stat-value sm"><?= formatINR($totalBilled) ?></div></div>
         </div>
-        <div class="stat-card stat-card--orange">
+        <!-- <div class="stat-card stat-card--orange">
             <div class="stat-icon orange"><?= svgIcon('fund-requests') ?></div>
             <div><div class="stat-label">Total Disbursed</div><div class="stat-value sm"><?= formatINR($totalDisbursed) ?></div></div>
-        </div>
+        </div> -->
     </div>
 
     <!-- Quick Actions -->
