@@ -204,7 +204,7 @@ renderHead('My Lectures');
                         <tr>
                             <td class="text-muted"><?= $recordNum ?></td>
                             <td><?= fmtDate($l['lecture_date']) ?></td>
-                            <td class="text-sm"><?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'—' ?></td>
+                            <td class="text-sm"><?= $l['subject_code']?e($l['subject_code']):'—' ?></td>
                             <td><?= e($l['subject_name']??'—') ?></td>
                             <td class="text-sm text-muted"><?= e($l['class_label']??'—') ?></td>
                             <?php if($showTheory): ?><td><?= number_format($l['theory_hours'],1) ?></td><?php endif; ?>

@@ -111,12 +111,12 @@ renderHead('Pending Requests');
                         <div class="fw-500"><?= e($row['name']) ?></div>
                         <div class="text-sm" style="margin-top:3px"><?= $row['badge'] ?></div>
                     </td>
-                    <td class="text-sm">
+                    <td class="fw-500">
                         <?php if ($row['detail_code']): ?>
-                        <span class="badge badge-expert" style="font-size:.66rem"><?= e($row['detail_code']) ?></span>
+                        <?= e($row['detail_code']) ?>
                         <?php else: ?>—<?php endif; ?>
                     </td>
-                    <td class="text-sm"><?= e($row['detail'] ?: '—') ?></td>        
+                    <td class="fw-500"><?= e($row['detail'] ?: '—') ?></td>        
                     <td class="fw-500"><?= e($row['month_year']) ?></td>
                     <td><?= $row['hours'] ?> hrs</td>
                     <td class="fw-600"><?= formatINR($row['amount']) ?></td>

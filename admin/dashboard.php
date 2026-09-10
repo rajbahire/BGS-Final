@@ -13,9 +13,10 @@ $totalDepts   = (int)$pdo->query("SELECT COUNT(*) FROM departments WHERE is_acti
 $totalHODs    = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='hod' AND is_active=1")->fetchColumn();
 $totalTeachers= (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='teacher' AND is_active=1")->fetchColumn();
 $totalStudents= (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role='student' AND is_active=1")->fetchColumn();
-$pendingFunds = (int)$pdo->query("SELECT COUNT(*) FROM fund_requests WHERE status='pending'")->fetchColumn();
-$approvedFunds= (int)$pdo->query("SELECT COUNT(*) FROM fund_requests WHERE status='approved'")->fetchColumn();
-$totalDisbursed=(float)$pdo->query("SELECT COALESCE(SUM(amount),0) FROM fund_requests WHERE status='approved'")->fetchColumn();
+$pendingBillsCount = (int)$pdo->query("SELECT COUNT(*) FROM bills WHERE status='pending'")->fetchColumn()
+                   + (int)$pdo->query("SELECT COUNT(*) FROM student_bills WHERE status='pending'")->fetchColumn();
+$rejectedBillsCount= (int)$pdo->query("SELECT COUNT(*) FROM bills WHERE status='rejected'")->fetchColumn()
+                   + (int)$pdo->query("SELECT COUNT(*) FROM student_bills WHERE status='rejected'")->fetchColumn();
 
 // Approved / finalized bills across ALL three bill tables, so the "Approved Bills"
 // count matches the All Bills page:
@@ -31,13 +32,22 @@ $totalBilled  = (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM bi
               + (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM student_bills WHERE status='approved'")->fetchColumn()
               + (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM other_bills")->fetchColumn();
 
-// Recent fund requests
-$recentFunds = $pdo->query(
-    "SELECT fr.*, u.name AS hod_name, d.name AS dept_name
-     FROM fund_requests fr
-     JOIN users u ON u.id=fr.hod_id
-     JOIN departments d ON d.id=fr.department_id
-     ORDER BY fr.requested_at DESC LIMIT 6"
+// Recent bills (latest 6 across all bill types)
+$recentBills = $pdo->query(
+    "(SELECT 'teacher' AS source, b.total_amount, b.month_year,
+             u.name AS pname, u.teacher_type, COALESCE(b.submitted_at, b.created_at) AS sort_date
+      FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved'
+      ORDER BY sort_date DESC LIMIT 6)
+     UNION ALL
+     (SELECT 'student' AS source, sb.total_amount, sb.month_year,
+             u.name AS pname, NULL AS teacher_type, sb.submitted_at AS sort_date
+      FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='approved'
+      ORDER BY sort_date DESC LIMIT 6)
+     UNION ALL
+     (SELECT 'other' AS source, ob.total_amount, DATE_FORMAT(ob.bill_date,'%M %Y') AS month_year,
+             ob.claimant_name AS pname, ob.bill_type AS teacher_type, ob.created_at AS sort_date
+      FROM other_bills ob ORDER BY ob.created_at DESC LIMIT 6)
+     ORDER BY sort_date DESC LIMIT 6"
 )->fetchAll();
 
 // Recent activity
@@ -82,34 +92,28 @@ renderHead('Admin Dashboard');
             <div class="stat-icon teal"><?= svgIcon('student') ?></div>
             <div><div class="stat-label">E&L Students</div><div class="stat-value"><?= $totalStudents ?></div></div>
         </div>
-        <!-- <div class="stat-card stat-card--amber">
+        <div class="stat-card stat-card--amber">
             <div class="stat-icon amber"><?= svgIcon('pending') ?></div>
-            <div><div class="stat-label">Pending Fund Req.</div><div class="stat-value"><?= $pendingFunds ?></div></div>
-        </div> -->
+            <div><div class="stat-label">Pending Bills</div><div class="stat-value"><?= $pendingBillsCount ?></div></div>
+        </div>
         <div class="stat-card stat-card--green">
             <div class="stat-icon green"><?= svgIcon('approved') ?></div>
             <div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $totalBills ?></div></div>
         </div>
         <div class="stat-card stat-card--red">
-            <div class="stat-icon red"><?= svgIcon('fund-requests') ?></div>
+            <div class="stat-icon red"><?= svgIcon('rejected') ?></div>
+            <div><div class="stat-label">Rejected Bills</div><div class="stat-value"><?= $rejectedBillsCount ?></div></div>
+        </div>
+        <div class="stat-card stat-card--orange">
+            <div class="stat-icon orange"><?= svgIcon('distributed') ?></div>
             <div><div class="stat-label">Total Billed</div><div class="stat-value sm"><?= formatINR($totalBilled) ?></div></div>
         </div>
-        <!-- <div class="stat-card stat-card--orange">
-            <div class="stat-icon orange"><?= svgIcon('fund-requests') ?></div>
-            <div><div class="stat-label">Total Disbursed</div><div class="stat-value sm"><?= formatINR($totalDisbursed) ?></div></div>
-        </div> -->
+
     </div>
 
     <!-- Quick Actions -->
     <div class="d-flex gap-10 flex-wrap mb-2">
-        <a href="fund-requests.php"    class="btn btn-primary">
-            <?= svgIcon('fund-requests') ?> Fund Requests
-            <?php if ($pendingFunds): ?>
-            <span style="background:#EF4444;color:#fff;font-size:.68rem;font-weight:700;
-                  padding:1px 6px;border-radius:20px"><?= $pendingFunds ?></span>
-            <?php endif; ?>
-        </a>
-        <a href="all-bills.php"        class="btn btn-outline"><?= svgIcon('all-bills') ?> All Bills</a>
+        <a href="all-bills.php"        class="btn btn-primary"><?= svgIcon('all-bills') ?> All Bills</a>
         <a href="departments.php"   class="btn btn-outline"><?= svgIcon('departments') ?> Departments</a>
         <a href="classes.php"       class="btn btn-outline"><?= svgIcon('classes') ?> Classes</a>
         <a href="subjects.php"      class="btn btn-outline"><?= svgIcon('subjects') ?> Subjects</a>
@@ -118,30 +122,39 @@ renderHead('Admin Dashboard');
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem">
 
-        <!-- Fund Requests -->
+        <!-- Recent Bills -->
         <div class="card">
             <div class="card-header">
-                <h3>Recent Fund Requests</h3>
-                <a href="fund-requests.php" class="btn btn-outline btn-sm">View All</a>
+                <h3>Recent Bills</h3>
+                <a href="all-bills.php" class="btn btn-outline btn-sm">View All</a>
             </div>
-            <?php if ($recentFunds): ?>
+            <?php if ($recentBills): ?>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>HOD</th><th>Department</th><th>Amount</th><th>Status</th></tr></thead>
+                    <thead><tr><th>Name</th><th>Type</th><th>Month</th><th>Amount</th></tr></thead>
                     <tbody>
-                    <?php foreach ($recentFunds as $fr): ?>
+                    <?php foreach ($recentBills as $rb):
+                        if ($rb['source'] === 'student') {
+                            $badge = '<span class="badge" style="background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4">Earn & Learn</span>';
+                        } elseif ($rb['source'] === 'other') {
+                            $typeLabels = ['practical'=>'Practical','earn_learn'=>'Earn & Learn','seminar'=>'Seminar'];
+                            $badge = '<span class="badge" style="background:#FFF7ED;color:#C2410C;border:1px solid #FDBA74">' . e($typeLabels[$rb['teacher_type']] ?? ucfirst($rb['teacher_type'] ?? 'Other')) . '</span>';
+                        } else {
+                            $badge = teacherTypeBadge($rb['teacher_type'] ?? 'regular');
+                        }
+                    ?>
                     <tr>
-                        <td class="fw-500"><?= e($fr['hod_name']) ?></td>
-                        <td><?= e($fr['dept_name']) ?></td>
-                        <td class="fw-600"><?= formatINR($fr['amount']) ?></td>
-                        <td><?= statusBadge($fr['status']) ?></td>
+                        <td class="fw-500"><?= e($rb['pname']) ?></td>
+                        <td><?= $badge ?></td>
+                        <td><?= e($rb['month_year']) ?></td>
+                        <td class="fw-600"><?= formatINR($rb['total_amount']) ?></td>
                     </tr>
                     <?php endforeach; ?>
                     </tbody>
                 </table>
             </div>
             <?php else: ?>
-            <div class="empty-state"><div class="icon"><?= svgIcon('fund-requests') ?></div><h3>No fund requests yet</h3></div>
+            <div class="empty-state"><div class="icon"><?= svgIcon('all-bills') ?></div><h3>No bills yet</h3></div>
             <?php endif; ?>
         </div>
 
@@ -158,7 +171,6 @@ renderHead('Admin Dashboard');
                           'add_subject'=>svgIcon('subjects'),'edit_subject'=>svgIcon('edit'),'delete_subject'=>svgIcon('delete'),
                           'add_class'=>svgIcon('classes'),'edit_class'=>svgIcon('edit'),'delete_class'=>svgIcon('delete'),
                           'add_department'=>svgIcon('departments'),'edit_department'=>svgIcon('edit'),'delete_department'=>svgIcon('delete'),
-                          'approve_fund'=>svgIcon('approved'),'reject_fund'=>svgIcon('rejected'),
                           'add_work'=>svgIcon('add-work')];
                 foreach ($activity as $a):
                     $icon = $icons[$a['action']] ?? svgIcon('list');

@@ -161,13 +161,14 @@ renderHead('Generate Bill');
                 <!-- Lecture table -->
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>#</th><th>Date</th><th>Subject</th><?php if($showTheory): ?><th>Theory Hrs</th><?php endif; ?><?php if($showPractical): ?><th>Practical Hrs</th><?php endif; ?><th>Other Hrs</th></tr></thead>
+                        <thead><tr><th>#</th><th>Date</th><th>Subject Code</th><th>Subject</th><?php if($showTheory): ?><th>Theory Hrs</th><?php endif; ?><?php if($showPractical): ?><th>Practical Hrs</th><?php endif; ?><th>Other Hrs</th></tr></thead>
                         <tbody>
                         <?php foreach($preview as $i=>$l): ?>
                         <tr>
                             <td class="text-muted"><?= $i+1 ?></td>
                             <td><?= fmtDate($l['lecture_date']) ?></td>
-                            <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'' ?></td>
+                            <td><?= e($l['subject_code']??'—') ?></td>
+                            <td><?= e($l['subject_name']??'—') ?></td>
                             <?php if($showTheory): ?><td><?= number_format($l['theory_hours'],1) ?></td><?php endif; ?>
                             <?php if($showPractical): ?><td><?= number_format($l['practical_hours'],1) ?></td><?php endif; ?>
                             <td><?= number_format($l['other_hours'],1) ?></td>

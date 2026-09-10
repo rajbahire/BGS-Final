@@ -80,7 +80,8 @@ renderHead('Bill Detail');
                     <tr><td class="text-muted" style="padding:5px 0">Email</td><td><?= e($bill['email']) ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Type</td><td><?= teacherTypeBadge($bill['teacher_type']??'regular') ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Mode</td><td><?= modeBadge($bill['teacher_mode']??'theory') ?></td></tr>
-                    <tr><td class="text-muted" style="padding:5px 0">Subject</td><td><?= e($bill['subject_name']??'—') ?> <?= $bill['subject_code']?'<span class="badge badge-expert">'.e($bill['subject_code']).'</span>':'' ?></td></tr>
+                    <tr><td class="text-muted" style="padding:5px 0">Subject</td><td><?= e($bill['subject_name']??'—') ?></td></tr>
+                    <tr><td class="text-muted" style="padding:5px 0">Subject Code</td><td><?= e($bill['subject_code']??'—') ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Class</td><td><?= e($bill['class_label']??'—') ?></td></tr>
                 </table>
             </div>
@@ -99,7 +100,7 @@ renderHead('Bill Detail');
                 <tr>
                     <td class="text-muted"><?= $i+1 ?></td>
                     <td><?= fmtDate($l['lecture_date']) ?></td>
-                    <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'' ?></td>
+                    <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?e($l['subject_code']):'' ?></td>
                     <td><?= number_format($l['theory_hours'],1) ?></td>
                     <td><?= number_format($l['practical_hours'],1) ?></td>
                     <td><?= number_format($l['other_hours'],1) ?></td>

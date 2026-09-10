@@ -90,7 +90,7 @@ renderHead('Timetable');
                     <tr>
                         <td class="fw-500"><?= $days[$e['day_of_week']]??$e['day_of_week'] ?></td>
                         <td><?= e($e['time_slot']) ?></td>
-                        <td><?= e($e['subject_name']) ?> <span class="badge badge-expert" style="font-size:.66rem"><?= e($e['subject_code']) ?></span></td>
+                        <td><?= e($e['subject_name']) ?> <?= e($e['subject_code']) ?></td>
                         <td><?= e($e['teacher_name']) ?></td>
                         <td><?= modeBadge($e['mode']) ?></td>
                         <td>

@@ -242,8 +242,8 @@ renderHead('Manage Users');
                         <td><?= teacherTypeBadge($t['teacher_type']??'regular') ?></td>
                         <td class="text-sm">
                             <?php if($t['subject_name']): ?>
-                                <span class="badge badge-expert" style="font-size:.66rem"><?= e($t['subject_code']) ?></span>
-                                    <?php if($t['subject_name_2']): ?><br><span class="badge badge-draft" style="font-size:.66rem"><?= e($t['subject_code_2']) ?></span><?php endif; ?>
+                                <?= e($t['subject_code']) ?>
+                                    <?php if($t['subject_name_2']): ?><br><?= e($t['subject_code_2']) ?><?php endif; ?>
                             <?php else: ?>—<?php endif; ?>
                         </td>
                         <td class="text-sm">

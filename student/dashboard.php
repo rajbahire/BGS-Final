@@ -40,7 +40,7 @@ renderHead('Student Dashboard');
         <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending</div><div class="stat-value"><?= $pendingBills ?></div></div></div>
         <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved</div><div class="stat-value"><?= $approvedBills ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('month') ?></div><div><div class="stat-label">Hrs This Month</div><div class="stat-value"><?= number_format($hrsThisMonth,1) ?></div></div></div>
-        <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('fund-requests') ?></div><div><div class="stat-label">Total Earned</div><div class="stat-value sm"><?= formatINR($totalEarned) ?></div></div></div>
+        <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('distributed') ?></div><div><div class="stat-label">Total Earned</div><div class="stat-value sm"><?= formatINR($totalEarned) ?></div></div></div>
     </div>
 
     <div class="d-flex gap-10 flex-wrap mb-2">

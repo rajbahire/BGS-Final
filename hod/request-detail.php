@@ -118,7 +118,7 @@ renderHead('Review Bill');
                         <div><span class="text-muted">Email:</span> <?= e($bill['email']) ?></div>
                         <div><span class="text-muted">Type:</span> <?= teacherTypeBadge($bill['teacher_type']??'regular') ?></div>
                         <div><span class="text-muted">Mode:</span> <?= modeBadge($bill['teacher_mode']??'theory') ?></div>
-                        <div><span class="text-muted">Subject:</span> <?= e($bill['subject_name']??'—') ?> <?= $bill['subject_code'] ? '<span class="badge badge-expert">'.e($bill['subject_code']).'</span>' : '' ?></div>
+                        <div><span class="text-muted">Subject:</span> <?= e($bill['subject_name']??'—') ?> (<?= $bill['subject_code'] ? e($bill['subject_code']) : '' ?>)</div>
                         <div><span class="text-muted">Class:</span> <?= e($bill['class_label']??'—') ?></div>
                         <div><span class="text-muted">Rate/Theory hr:</span> <?= formatINR($bill['rate_theory']) ?></div>
                         <div><span class="text-muted">Rate/Practical hr:</span> <?= formatINR($bill['rate_practical']) ?></div>
@@ -141,7 +141,7 @@ renderHead('Review Bill');
                         <tr>
                             <td class="text-muted"><?= $i+1 ?></td>
                             <td><?= fmtDate($l['lecture_date']) ?></td>
-                            <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code'] ? '<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>' : '' ?></td>
+                            <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code'] ? e($l['subject_code']) : '' ?></td>
                             <td><?= number_format($l['theory_hours'],1) ?></td>
                             <td><?= number_format($l['practical_hours'],1) ?></td>
                             <td><?= number_format($l['other_hours'],1) ?></td>

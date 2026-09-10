@@ -264,27 +264,7 @@ CREATE TABLE IF NOT EXISTS other_bills (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ============================================================
--- TABLE 12: fund_requests
--- HOD requests funds from Admin
--- ============================================================
-CREATE TABLE IF NOT EXISTS fund_requests (
-    id            INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
-    hod_id        INT UNSIGNED  NOT NULL,
-    department_id INT UNSIGNED  NOT NULL,
-    amount        DECIMAL(12,2) NOT NULL,
-    purpose       TEXT          NOT NULL,
-    status        ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending',
-    admin_note    TEXT          DEFAULT NULL,
-    reviewed_by   INT UNSIGNED  DEFAULT NULL,
-    requested_at  TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    reviewed_at   TIMESTAMP     NULL DEFAULT NULL,
-    FOREIGN KEY (hod_id)       REFERENCES users(id)       ON DELETE CASCADE,
-    FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
-    FOREIGN KEY (reviewed_by)  REFERENCES users(id)       ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- ============================================================
--- TABLE 13: activity_log
+-- TABLE 12: activity_log
 -- Audit trail for all key actions
 -- ============================================================
 CREATE TABLE IF NOT EXISTS activity_log (
@@ -307,7 +287,6 @@ CREATE INDEX idx_lectures_date      ON lectures(lecture_date);
 CREATE INDEX idx_bills_teacher      ON bills(teacher_id);
 CREATE INDEX idx_bills_status       ON bills(status);
 CREATE INDEX idx_other_bills_type   ON other_bills(bill_type);
-CREATE INDEX idx_fund_req_status    ON fund_requests(status);
 CREATE INDEX idx_activity_user      ON activity_log(user_id);
 CREATE INDEX idx_activity_at        ON activity_log(created_at);
 

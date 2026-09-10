@@ -149,7 +149,7 @@ renderHead('Subjects');
                         <?php foreach ($subjects as $i => $s): ?>
                         <tr>
                             <td class="text-muted"><?= $i+1 ?></td>
-                            <td><span class="badge badge-expert"><?= e($s['subject_code']) ?></span></td>
+                            <td class="fw-500"><?= e($s['subject_code']) ?></td>
                             <td class="fw-500"><?= e($s['subject_name']) ?></td>
                             <td class="text-sm"><?= e($s['class_label']) ?><br><span class="text-muted text-xs"><?= e($s['dept_name']) ?></span></td>
                             <td><?= modeBadge($s['mode']) ?></td>

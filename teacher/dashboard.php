@@ -34,7 +34,7 @@ renderHead('Teacher Dashboard');
     <?= getFlash() ?>
     <div class="page-header">
         <h1>Welcome, <?= e(explode(' ',$user['name'])[0]) ?></h1>
-        <p><?= e($teacher['subject_name']??'') ?> <?= $teacher['subject_code']?'<span class="badge badge-expert">'.e($teacher['subject_code']).'</span>':'' ?> &nbsp;<?= teacherTypeBadge($teacher['teacher_type']??'regular') ?> &nbsp;<?= modeBadge($teacher['teacher_mode']??'theory') ?></p>
+        <p><?= e($teacher['subject_name']??'') ?> &nbsp;<?= teacherTypeBadge($teacher['teacher_type']??'regular') ?> &nbsp;<?= modeBadge($teacher['teacher_mode']??'theory') ?></p>
     </div>
 
     <div class="stats-grid">
@@ -43,7 +43,7 @@ renderHead('Teacher Dashboard');
         <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected</div><div class="stat-value"><?= $rejectedBills ?></div></div></div>
         <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('all-bills') ?></div><div><div class="stat-label">Total Bills</div><div class="stat-value"><?= $totalBills ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('month') ?></div><div><div class="stat-label">Hrs This Month</div><div class="stat-value"><?= number_format($lecThisMonth,1) ?></div></div></div>
-        <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('fund-requests') ?></div><div><div class="stat-label">Total Earned</div><div class="stat-value sm"><?= formatINR($totalEarned) ?></div></div></div>
+        <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('distributed') ?></div><div><div class="stat-label">Total Earned</div><div class="stat-value sm"><?= formatINR($totalEarned) ?></div></div></div>
     </div>
 
     <div class="d-flex gap-10 flex-wrap mb-2">
@@ -84,7 +84,7 @@ renderHead('Teacher Dashboard');
                     <?php foreach($recentLecs as $l): ?>
                     <tr>
                         <td><?= fmtDate($l['lecture_date'],'d M') ?></td>
-                        <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?'<span class="badge badge-expert" style="font-size:.66rem">'.e($l['subject_code']).'</span>':'' ?></td>
+                        <td><?= e($l['subject_name']??'—') ?> <?= $l['subject_code']?e($l['subject_code']):'—' ?></td>
                         <td><?= number_format($l['theory_hours'],1) ?></td>
                         <td><?= number_format($l['practical_hours'],1) ?></td>
                     </tr>
