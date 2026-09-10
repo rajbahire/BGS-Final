@@ -20,14 +20,20 @@ if (!empty($_SESSION['user_id'])) {
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/functions.php';
 
-$error = '';
+$loginEmail = $_SESSION['login_email'] ?? '';
+$hasError   = !empty($_SESSION['login_has_error']);
+unset($_SESSION['login_email'], $_SESSION['login_has_error']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email']    ?? '');
     $password = trim($_POST['password'] ?? '');
 
     if (!$email || !$password) {
-        $error = 'Please enter both email and password.';
+        setFlash('error', 'Please enter both email and password.');
+        $_SESSION['login_email'] = $email;
+        $_SESSION['login_has_error'] = true;
+        header('Location: index.php');
+        exit;
     } else {
         $stmt = $pdo->prepare(
             "SELECT u.*, d.name AS dept_name
@@ -82,7 +88,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: ' . ($map[$user['role']] ?? 'index.php'));
             exit;
         } else {
-            $error = 'Invalid email or password. Please try again.';
+            setFlash('error', 'Invalid email or password. Please try again.');
+            $_SESSION['login_email'] = $email;
+            $_SESSION['login_has_error'] = true;
+            header('Location: index.php');
+            exit;
         }
     }
 }
@@ -128,14 +138,11 @@ $msg = $_GET['msg'] ?? '';
         <h2>Welcome back</h2>
         <p class="subtitle">Sign in to the Bill Generation System</p>
 
+        <?= getFlash() ?>
+
         <!-- Session expired message -->
         <?php if ($msg === 'login_required'): ?>
-        <div class="alert alert-warning"><?= svgIcon('warning') ?> Your session expired. Please sign in again.</div>
-        <?php endif; ?>
-
-        <!-- Error -->
-        <?php if ($error): ?>
-        <div class="alert alert-error"><?= svgIcon('close') ?> <?= htmlspecialchars($error) ?></div>
+        <div class="alert alert-warning auto-dismiss"><?= svgIcon('warning') ?> Your session expired. Please sign in again.</div>
         <?php endif; ?>
 
         <!-- Login Form -->
@@ -147,8 +154,8 @@ $msg = $_GET['msg'] ?? '';
                     type="email"
                     id="email"
                     name="email"
-                    class="form-control <?= $error ? 'is-invalid' : '' ?>"
-                    value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                    class="form-control <?= $hasError ? 'is-invalid' : '' ?>"
+                    value="<?= htmlspecialchars($loginEmail) ?>"
                     placeholder="Enter your email"
                     required
                     autocomplete="email"
@@ -162,7 +169,7 @@ $msg = $_GET['msg'] ?? '';
                         type="password"
                         id="password"
                         name="password"
-                        class="form-control <?= $error ? 'is-invalid' : '' ?>"
+                        class="form-control <?= $hasError ? 'is-invalid' : '' ?>"
                         placeholder="Enter your password"
                         required
                         autocomplete="current-password"

@@ -42,14 +42,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pm = (int)($_GET['month'] ?? 0);
 $py = (int)($_GET['year']  ?? date('Y'));
-$preview=[]; $totalHrs=0;
+$preview=[]; $totalHrs=0; $existingBill=null;
 
 if ($pm) {
     $from=date('Y-m-01', mktime(0,0,0,$pm,1,$py)); $to=date('Y-m-t', mktime(0,0,0,$pm,1,$py));
     $lq=$pdo->prepare("SELECT * FROM student_work WHERE student_id=? AND work_date BETWEEN ? AND ? ORDER BY work_date");
     $lq->execute([$uid,$from,$to]); $preview=$lq->fetchAll();
     $totalHrs=array_sum(array_column($preview,'hours'));
+
+    $eb = $pdo->prepare("SELECT id, status, bill_number FROM student_bills WHERE student_id=? AND MONTH(period_from)=? AND YEAR(period_from)=? AND status IN ('pending','approved') LIMIT 1");
+    $eb->execute([$uid, $pm, $py]);
+    $existingBill = $eb->fetch();
 }
+
+// Months with unbilled work entries
+$avail = $pdo->prepare(
+    "SELECT MONTH(sw.work_date) AS m,
+            YEAR(sw.work_date)  AS y,
+            SUM(sw.hours)       AS total
+     FROM student_work sw
+     WHERE sw.student_id = ?
+       AND NOT EXISTS (
+           SELECT 1 FROM student_bills sb
+           WHERE sb.student_id = sw.student_id
+             AND MONTH(sb.period_from) = MONTH(sw.work_date)
+             AND YEAR(sb.period_from)  = YEAR(sw.work_date)
+             AND sb.status IN ('pending', 'approved')
+       )
+     GROUP BY YEAR(sw.work_date), MONTH(sw.work_date)
+     HAVING total > 0
+     ORDER BY y DESC, m DESC"
+);
+$avail->execute([$uid]);
+$availMonths = $avail->fetchAll();
 
 renderHead('Generate Bill');
 ?>
@@ -89,6 +114,17 @@ renderHead('Generate Bill');
                     </div>
                     <button type="submit" class="btn btn-primary" style="width:100%">Preview →</button>
                 </form>
+
+                <?php if($availMonths): ?>
+                <hr class="divider">
+                <div class="text-xs text-muted fw-500" style="text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Available Months</div>
+                <?php foreach($availMonths as $am): ?>
+                <a href="?month=<?= $am['m'] ?>&year=<?= $am['y'] ?>" class="btn btn-outline btn-sm <?= ($pm==$am['m'] && $py==$am['y'])?'active':'' ?>" style="display:flex;justify-content:space-between;margin-bottom:5px">
+                    <span><?= date('F Y',mktime(0,0,0,$am['m'],1,$am['y'])) ?></span>
+                    <span class="text-muted"><?= number_format($am['total'],1) ?> hrs</span>
+                </a>
+                <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -130,6 +166,9 @@ renderHead('Generate Bill');
                     </div>
 
                     <hr class="divider">
+                    <?php if($existingBill): ?>
+                    <div class="alert alert-info"><?= svgIcon('info') ?> A bill for <?= e($my) ?> has already been submitted (<strong><?= ucfirst($existingBill['status']) ?></strong> — <?= e($existingBill['bill_number']) ?>). <a href="bill-detail.php?id=<?= $existingBill['id'] ?>" class="btn btn-outline btn-sm" style="margin-left:8px">View Bill →</a></div>
+                    <?php else: ?>
                     <div class="alert alert-warning"><?= svgIcon('warning') ?> Once submitted you cannot edit until HOD reviews it.</div>
                     <form method="POST">
                         <input type="hidden" name="bill_month" value="<?= $pm ?>">
@@ -138,6 +177,7 @@ renderHead('Generate Bill');
                             <?= svgIcon('upload') ?> Submit to HOD — <?= formatINR($total) ?>
                         </button>
                     </form>
+                    <?php endif; ?>
                 </div>
             </div>
             <?php elseif($pm && !$preview): ?>

@@ -32,12 +32,31 @@ $monthPaid = (float)$q("SELECT COALESCE(SUM(b.total_amount),0) FROM bills b JOIN
            + (float)$q("SELECT COALESCE(SUM(sb.total_amount),0) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='approved' AND u.department_id=? AND MONTH(sb.reviewed_at)=MONTH(NOW()) AND YEAR(sb.reviewed_at)=YEAR(NOW())",[$deptId])
            + (float)$q("SELECT COALESCE(SUM(total_amount),0) FROM other_bills WHERE department_id=? AND MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW())",[$deptId]);
 
-$pendingBills = $pdo->prepare(
-    "SELECT b.*, u.name AS tname, u.teacher_type FROM bills b
+$pendingTeacherBills = $pdo->prepare(
+    "SELECT b.id, b.submitted_at, b.month_year, b.total_amount, u.name AS pname,
+            u.teacher_type, 'teacher' AS kind
+     FROM bills b
      JOIN users u ON u.id=b.teacher_id
      WHERE b.status='pending' AND u.department_id=?
-     ORDER BY b.submitted_at ASC LIMIT 6"
-); $pendingBills->execute([$deptId]); $pendingBills = $pendingBills->fetchAll();
+     ORDER BY b.submitted_at DESC LIMIT 6"
+); $pendingTeacherBills->execute([$deptId]); $pendingTeacherBills = $pendingTeacherBills->fetchAll();
+
+$pendingStudentBills = $pdo->prepare(
+    "SELECT sb.id, sb.submitted_at, sb.month_year, sb.total_amount, u.name AS pname,
+            'student' AS teacher_type, 'student' AS kind
+     FROM student_bills sb
+     JOIN users u ON u.id=sb.student_id
+     WHERE sb.status='pending' AND u.department_id=?
+     ORDER BY sb.submitted_at DESC LIMIT 6"
+); $pendingStudentBills->execute([$deptId]); $pendingStudentBills = $pendingStudentBills->fetchAll();
+
+$pendingBills = array_merge($pendingTeacherBills, $pendingStudentBills);
+usort($pendingBills, function($a, $b) {
+    $cmp = strcmp($b['submitted_at'] ?? '', $a['submitted_at'] ?? '');
+    if ($cmp !== 0) return $cmp;
+    return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
+});
+$pendingBills = array_slice($pendingBills, 0, 6);
 
 $recentActivity = $pdo->query(
     "SELECT a.*, u.name FROM activity_log a LEFT JOIN users u ON u.id=a.user_id
@@ -88,15 +107,20 @@ renderHead('HOD Dashboard');
             <?php if($pendingBills): ?>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>Teacher</th><th>Type</th><th>Month</th><th>Amount</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Person</th><th>Type</th><th>Month</th><th>Amount</th><th>Action</th></tr></thead>
                     <tbody>
-                    <?php foreach($pendingBills as $b): ?>
+                    <?php foreach($pendingBills as $b):
+                        $href = $b['kind'] === 'student' ? ('student-bill-detail.php?id=' . $b['id']) : ('request-detail.php?id=' . $b['id']);
+                        $badge = $b['kind'] === 'student'
+                            ? '<span class="badge" style="background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4">Earn & Learn</span>'
+                            : teacherTypeBadge($b['teacher_type'] ?? 'regular');
+                    ?>
                     <tr>
-                        <td class="fw-500"><?= e($b['tname']) ?></td>
-                        <td><?= teacherTypeBadge($b['teacher_type']??'regular') ?></td>
+                        <td class="fw-500"><?= e($b['pname']) ?></td>
+                        <td><?= $badge ?></td>
                         <td><?= e($b['month_year']) ?></td>
                         <td class="fw-600"><?= formatINR($b['total_amount']) ?></td>
-                        <td><a href="request-detail.php?id=<?= $b['id'] ?>" class="btn btn-outline btn-sm">Review</a></td>
+                        <td><a href="<?= $href ?>" class="btn btn-outline btn-sm">Review</a></td>
                     </tr>
                     <?php endforeach; ?>
                     </tbody>

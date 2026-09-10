@@ -13,7 +13,7 @@ $bills = $pdo->prepare(
      JOIN users u ON u.id=b.teacher_id
      LEFT JOIN subjects s ON s.id=u.subject_id
      WHERE b.status='pending' AND u.department_id=?
-     ORDER BY b.submitted_at ASC"
+     ORDER BY b.submitted_at DESC"
 ); $bills->execute([$deptId]); $bills = $bills->fetchAll();
 
 // Pending Earn & Learn (student) bills — scoped to this HOD's department
@@ -23,13 +23,14 @@ $sbills = $pdo->prepare(
      JOIN users u ON u.id=sb.student_id
      LEFT JOIN classes c ON c.id=u.class_id
      WHERE sb.status='pending' AND u.department_id=?
-     ORDER BY sb.submitted_at ASC"
+     ORDER BY sb.submitted_at DESC"
 ); $sbills->execute([$deptId]); $sbills = $sbills->fetchAll();
 
-// ── Merge teacher + student bills into a single review queue (oldest first) ──
+// ── Merge teacher + student bills into a single review queue (latest first) ──
 $queue = [];
 foreach ($bills as $b) {
     $queue[] = [
+        'id'           => (int)$b['id'],
         'kind'         => 'teacher',
         'name'         => $b['tname'],
         'submitted_at' => $b['submitted_at'],
@@ -48,6 +49,7 @@ foreach ($bills as $b) {
 foreach ($sbills as $sb) {
     $sbBillNumber = $sb['bill_number'] ?? generateStudentBillNumber($sb['period_from'], $sb['id']);
     $queue[] = [
+        'id'           => (int)$sb['id'],
         'kind'         => 'student',
         'name'         => $sb['sname'],
         'submitted_at' => $sb['submitted_at'],
@@ -61,7 +63,9 @@ foreach ($sbills as $sb) {
     ];
 }
 usort($queue, function ($a, $b) {
-    return strcmp($a['submitted_at'] ?? '', $b['submitted_at'] ?? '');
+    $cmp = strcmp($b['submitted_at'] ?? '', $a['submitted_at'] ?? '');
+    if ($cmp !== 0) return $cmp;
+    return ($b['id'] ?? 0) <=> ($a['id'] ?? 0);
 });
 
 // Pagination config
@@ -102,7 +106,7 @@ renderHead('Pending Requests');
                 <tbody>
                 <?php foreach ($queue as $i => $row): ?>
                 <tr>
-                    <td class="text-muted"><?= $i + 1 ?></td>
+                    <td class="text-muted"><?= $offset + $i + 1 ?></td>
                     <td>
                         <div class="fw-500"><?= e($row['name']) ?></div>
                         <div class="text-sm" style="margin-top:3px"><?= $row['badge'] ?></div>

@@ -113,11 +113,11 @@ hr.thin{border:0;border-top:1px solid #000;margin:1.7mm 0}
 table{width:100%;border-collapse:collapse;font-size:9.5pt}
 th,td{border:1px solid #000;padding:1.6mm 2mm;vertical-align:middle}
 th{font-weight:bold;text-align:center;background:#e5e5e5}
-.tl{text-align:left}.tr{text-align:right}
+.tl{text-align:left;line-height:1.2}.tr{text-align:right}
 .mt{margin-top:5mm}.mb{margin-bottom:5mm}
 .sign-grid{display:grid;grid-template-columns:1fr 1fr;gap:10mm;margin-top:12mm;font-size:10pt;line-height:2}
 .sign{text-align:center;padding-top:6mm}
-.cert{font-size:10pt;line-height:1.7;text-align:justify;margin:5mm 0}
+.cert{font-size:10pt;line-height:1.7;text-align:justify}
 .box{border:1px solid #000;padding:4mm;margin:4mm 0}
 .stamp-line{display:inline-block;border-bottom:1px solid #000;min-width:55mm;height:5mm}
 .office{min-height:40mm}
@@ -160,11 +160,13 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
                 <th style="width:22mm">To</th>
             </tr>
         </thead>
-        <tbody>
-        <?php foreach ($work as $i => $w): ?>
+        <?php foreach ($work as $i => $w):
+            $rawDesc = $w['description'] ? trim($w['description']) : 'Earn and Learn work';
+            $desc = mb_strlen($rawDesc) > 50 ? (mb_substr($rawDesc, 0, 48) . '…') : $rawDesc;
+        ?>
             <tr>
                 <td class="c" style="font-size:8.5pt"><?= showDate($w['work_date']) ?></td>
-                <td class="tl"><?= h($w['description'] ?: 'Earn and Learn work') ?></td>
+                <td class="tl" style="font-size:8.5pt;max-width:68mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="<?= h($rawDesc) ?>"><?= h($desc) ?></td>
                 <td class="c" style="font-size:8.5pt"><?= showTime($w['start_time'] ?? '') ?></td>
                 <td class="c" style="font-size:8.5pt"><?= showTime($w['end_time'] ?? '') ?></td>
                 <td class="c"><?= money($w['hours']) ?></td>
@@ -211,12 +213,14 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
                 <th style="width:22mm">Working<br>Hours</th>
             </tr>
         </thead>
-        <tbody>
-        <?php foreach ($work as $i => $w): ?>
+        <?php foreach ($work as $i => $w):
+            $rawDesc = $w['description'] ? trim($w['description']) : 'Earn and Learn work';
+            $desc = mb_strlen($rawDesc) > 50 ? (mb_substr($rawDesc, 0, 48) . '…') : $rawDesc;
+        ?>
             <tr>
                 <td class="c"><?= $i + 1 ?></td>
                 <td class="c" style="font-size:8.5pt"><?= showDate($w['work_date']) ?></td>
-                <td class="tl"><?= h($w['description'] ?: 'Earn and Learn work') ?></td>
+                <td class="tl" style="font-size:8.5pt;max-width:78mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="<?= h($rawDesc) ?>"><?= h($desc) ?></td>
                 <td class="c" style="font-size:8.5pt"><?= showTime($w['start_time'] ?? '') ?></td>
                 <td class="c" style="font-size:8.5pt"><?= showTime($w['end_time'] ?? '') ?></td>
                 <td class="c"><?= money($w['hours']) ?></td>
@@ -231,11 +235,11 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 
     <p class="cert">Certified that the above work have actually been done by me & is in accordance with attendance register maintained, & the bill claimed herewith is correct according to the rates as per institute norms.</p>
 
-    <div class="sign-grid" style="margin-top: 25px;">
+    <div class="sign-grid" style="margin-top: 10px;">
         <div>Date: <span class="fl"><?= date('d / m / Y') ?></span></div>
         <div class="r">Signature of Student</div>
     </div>
-    <div class="sign-grid" style="margin-top: 30px;">
+    <div class="sign-grid" style="margin-top: 20px;">
         <div class="sign">Signature of Concern Faculty</div>
         <div class="sign">Signature of Head of Department/Section</div>
     </div>

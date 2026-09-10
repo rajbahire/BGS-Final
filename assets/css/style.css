@@ -968,6 +968,10 @@ tbody tr:hover {
 .form-control.is-invalid {
     border-color: var(--rejected);
 }
+.form-control.is-invalid:focus {
+    border-color: var(--rejected);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
 
 textarea.form-control {
     resize: vertical;
@@ -984,6 +988,9 @@ select.form-control {
 /* =============================================
    ALERTS (inline — for static page warnings)
    ============================================= */
+.alert.auto-dismiss {
+    display: none;
+}
 .alert {
     padding: 10px 14px;
     border-radius: var(--radius-sm);

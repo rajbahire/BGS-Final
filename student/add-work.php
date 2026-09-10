@@ -16,10 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date  = $_POST['work_date'] ?? '';
         $stime = $_POST['start_time'] ?? '';
         $etime = $_POST['end_time'] ?? '';
-        $desc  = trim($_POST['description'] ?? '');
+        $desc  = preg_replace('/\s+/', ' ', trim($_POST['description'] ?? ''));
 
         if (!$date) { setFlash('error','Date is required.'); }
         elseif (!$stime || !$etime) { setFlash('error','Start time and end time are required.'); }
+        elseif (!$desc) { setFlash('error','Description / Particulars of Work is required.'); }
+        elseif (mb_strlen($desc) > 50) { setFlash('error','Description cannot exceed 50 characters to ensure it fits on A4 print.'); }
         else {
             // Compute hours from time difference
             $start = strtotime($stime);
@@ -29,10 +31,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $hours = round(($end - $start) / 3600, 1);
                 if ($hours > 12) { setFlash('error','Work duration cannot exceed 12 hours.'); }
                 else {
-                    $pdo->prepare("INSERT INTO student_work (student_id,work_date,hours,start_time,end_time,description) VALUES (?,?,?,?,?,?)")
-                        ->execute([$uid,$date,$hours,$stime,$etime,$desc]);
-                    logActivity($pdo,$uid,'add_work',"Added $hours hrs on $date ($stime–$etime)");
-                    setFlash('success','Work entry added.');
+                    // Check monthly entry limit (max 20 per month)
+                    $monthCount = $pdo->prepare("SELECT COUNT(*) FROM student_work WHERE student_id=? AND MONTH(work_date)=MONTH(?) AND YEAR(work_date)=YEAR(?)");
+                    $monthCount->execute([$uid, $date, $date]);
+                    if ((int)$monthCount->fetchColumn() >= 20) {
+                        setFlash('error','Maximum 20 work entries allowed per month. You have already reached the limit.');
+                    } else {
+                        $pdo->prepare("INSERT INTO student_work (student_id,work_date,hours,start_time,end_time,description) VALUES (?,?,?,?,?,?)")
+                            ->execute([$uid,$date,$hours,$stime,$etime,$desc]);
+                        logActivity($pdo,$uid,'add_work',"Added $hours hrs on $date ($stime–$etime)");
+                        setFlash('success','Work entry added.');
+                    }
                 }
             }
         }
@@ -43,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $date  = $_POST['work_date'] ?? '';
         $stime = $_POST['start_time'] ?? '';
         $etime = $_POST['end_time'] ?? '';
-        $desc  = trim($_POST['description'] ?? '');
+        $desc  = preg_replace('/\s+/', ' ', trim($_POST['description'] ?? ''));
 
         // Check if editing is allowed
         $w = $pdo->prepare("SELECT work_date FROM student_work WHERE id=? AND student_id=?");
@@ -63,6 +72,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 setFlash('error','Date is required.');
             } elseif (!$stime || !$etime) {
                 setFlash('error','Start time and end time are required.');
+            } elseif (!$desc) {
+                setFlash('error','Description / Particulars of Work is required.');
+            } elseif (mb_strlen($desc) > 50) {
+                setFlash('error','Description cannot exceed 50 characters to ensure it fits on A4 print.');
             } else {
                 $start = strtotime($stime);
                 $end   = strtotime($etime);
@@ -282,7 +295,16 @@ renderHead('Add Work');
                     <div class="form-group"><label>Start Time <span style="color:red">*</span></label><input type="time" name="start_time" class="form-control" required></div>
                     <div class="form-group"><label>End Time <span style="color:red">*</span></label><input type="time" name="end_time" class="form-control" required></div>
                 </div>
-                <div class="form-group"><label>Description / Particulars of Work (optional)</label><textarea name="description" class="form-control" rows="2" placeholder="What work did you do?"></textarea></div>
+                <div class="form-group">
+                    <label>Description / Particulars of Work <span style="color:red">*</span></label>
+                    <input type="text" name="description" id="desc-add-input" class="form-control" maxlength="50"
+                           placeholder="e.g. Library book sorting, Lab maintenance..."
+                           oninput="updateCharCount(this, 'desc-add-count')" required>
+                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:4px">
+                        <span>Max 50 characters (fits on 1 line on A4 printed bill)</span>
+                        <span><span id="desc-add-count">0</span>/50</span>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-work-add')">Cancel</button>
@@ -324,9 +346,15 @@ renderHead('Add Work');
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Description / Particulars of Work (optional)</label>
-                    <textarea name="description" class="form-control" rows="2"
-                              placeholder="What work did you do?"><?= e($w['description'] ?? '') ?></textarea>
+                    <label>Description / Particulars of Work <span style="color:red">*</span></label>
+                    <input type="text" name="description" class="form-control" maxlength="50"
+                           placeholder="e.g. Library book sorting, Lab maintenance..."
+                           value="<?= e($w['description'] ?? '') ?>"
+                           oninput="updateCharCount(this, 'desc-edit-count-<?= $w['id'] ?>')" required>
+                    <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:4px">
+                        <span>Max 50 characters (fits on 1 line on A4 printed bill)</span>
+                        <span><span id="desc-edit-count-<?= $w['id'] ?>"><?= mb_strlen($w['description'] ?? '') ?></span>/50</span>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -337,5 +365,12 @@ renderHead('Add Work');
     </div>
 </div>
 <?php endforeach; ?>
+
+<script>
+function updateCharCount(input, targetId) {
+    var el = document.getElementById(targetId);
+    if (el) el.textContent = input.value.length;
+}
+</script>
 
 <?php renderFooter(); ?>
