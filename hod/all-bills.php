@@ -71,7 +71,7 @@ if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
         $rows[] = [
             'source'    => 'student',
             'name'      => $b['pname'],
-            'sub'       => '<span class="text-sm fw-500" style="color:var(--primary)">' . e($sbBillNum) . '</span> <span class="text-sm text-muted">' . e($b['class_label'] ?: '—') . '</span>',
+            'sub'       => '<span class="text-sm fw-500" style="color:var(--primary)">' . e($sbBillNum) . '</span>',
             'period'    => e($b['month_year']),
             'hours'     => (float)$b['total_hours'],
             'amount'    => (float)$b['total_amount'],
@@ -100,7 +100,7 @@ if ($fTeacher === 0 && in_array($fStatus, ['', 'finalized'], true) && ($fType ==
         $rows[] = [
             'source'    => 'other',
             'name'      => $b['claimant_name'],
-            'sub'       => '<span class="text-sm text-muted">' . e($otype . ' — ' . $b['title']) . '</span>',
+            'sub'       => '<span class="text-sm text-muted">' . e($otype) . '</span>',
             'period'    => fmtDate($b['bill_date'], 'M Y'),
             'hours'     => null,
             'amount'    => (float)$b['total_amount'],

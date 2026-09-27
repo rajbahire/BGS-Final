@@ -1,7 +1,6 @@
 -- ============================================================
 --  College Bill Generation System (BGS) — Full Database Schema
---  Government College of Engineering, Aurangabad
---  Import via phpMyAdmin > Import, or: mysql -u root < database.sql
+--  Government College of Engineering, Chhatrapati Sambhajinagar
 -- ============================================================
 
 CREATE DATABASE IF NOT EXISTS college_bill_system
@@ -246,11 +245,11 @@ CREATE TABLE IF NOT EXISTS student_bills (
 
 -- ============================================================
 -- TABLE 11: other_bills
--- HOD-created bills: practical exam, earn & learn batch, seminar
+-- HOD-created bills: practical exam, seminar
 -- ============================================================
 CREATE TABLE IF NOT EXISTS other_bills (
     id            INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
-    bill_type     ENUM('practical','earn_learn','seminar') NOT NULL,
+    bill_type     ENUM('practical','seminar') NOT NULL,
     created_by    INT UNSIGNED  NOT NULL,
     title         VARCHAR(200)  NOT NULL,
     claimant_name VARCHAR(150)  NOT NULL,

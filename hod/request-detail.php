@@ -14,20 +14,59 @@ $listPage = $from === 'all-bills' ? 'all-bills.php' : 'requests.php';
 $listLbl  = $from === 'all-bills' ? 'All Bills' : 'Pending Requests';
 
 $bill = $pdo->prepare(
-    "SELECT b.*, u.name AS tname, u.email, u.phone, u.teacher_type, u.teacher_mode,
+    "SELECT b.*, u.name AS tname, u.email, u.phone, u.teacher_type, u.teacher_mode, u.role,
             u.rate_theory, u.rate_practical, u.rate_other,
             s.subject_name, s.subject_code, s.mode AS subject_mode,
-            c.label AS class_label, d.name AS dept_name
+            COALESCE(cu.label, cs.label, cs2.label) AS class_label,
+            d.name AS dept_name
      FROM bills b
      JOIN users u ON u.id=b.teacher_id
      LEFT JOIN subjects s ON s.id=u.subject_id
-     LEFT JOIN classes c ON c.id=u.class_id
+     LEFT JOIN subjects s2 ON s2.id=u.subject_id_2
+     LEFT JOIN classes cu ON cu.id=u.class_id
+     LEFT JOIN classes cs ON cs.id=s.class_id
+     LEFT JOIN classes cs2 ON cs2.id=s2.class_id
      LEFT JOIN departments d ON d.id=u.department_id
      WHERE b.id=? AND u.department_id=?"
 );
 $bill->execute([$billId, $deptId]);
 $bill = $bill->fetch();
-if (!$bill) { setFlash('error','Bill not found.'); header('Location: ' . $listPage); exit; }
+
+// If not found in bills, check if this is an Earn & Learn (student) bill and redirect to student-bill-detail
+if (!$bill) {
+    $sb = $pdo->prepare(
+        "SELECT sb.id FROM student_bills sb
+         JOIN users u ON u.id=sb.student_id
+         WHERE sb.id=? AND u.department_id=?"
+    );
+    $sb->execute([$billId, $deptId]);
+    if ($sb->fetch()) {
+        header('Location: student-bill-detail.php?id=' . $billId . ($from ? '&from=' . urlencode($from) : ''));
+        exit;
+    }
+    setFlash('error','Bill not found.');
+    header('Location: ' . $listPage);
+    exit;
+}
+
+// Fallback: If class_label is still empty, derive class from lectures in this bill
+if (empty($bill['class_label'])) {
+    $lecClass = $pdo->prepare(
+        "SELECT c.label
+         FROM bill_lectures bl
+         JOIN lectures l ON l.id=bl.lecture_id
+         LEFT JOIN subjects ls ON ls.id=l.subject_id
+         LEFT JOIN classes c ON c.id=COALESCE(l.class_id, ls.class_id)
+         WHERE bl.bill_id=? AND c.label IS NOT NULL
+         ORDER BY bl.id ASC
+         LIMIT 1"
+    );
+    $lecClass->execute([$billId]);
+    $lc = $lecClass->fetch();
+    if ($lc && !empty($lc['label'])) {
+        $bill['class_label'] = $lc['label'];
+    }
+}
 
 // Lecture entries for this bill
 $lectures = $pdo->prepare(
@@ -68,21 +107,17 @@ renderHead('Review Bill');
 <?php renderTopbar('Review Bill', [
     ['label' => 'Home',   'href' => 'dashboard.php'],
     ['label' => $listLbl,  'href' => $listPage],
-    ['label' => 'Review Bill'],
+    ['label' => 'Bill #' . $billId],
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
 
-    <!-- <div class="breadcrumb">
-        <a href="<?= $listPage ?>"><?= $listLbl ?></a>
-        <span class="sep">›</span>
-        <span>Bill #<?= $billId ?></span>
-    </div> -->
-
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
-            <h1><?= e($bill['month_year']) ?> — <?= e($bill['tname']) ?></h1>
-            <p>Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
+            <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+                <h1 style="margin:0"><?= e($bill['month_year']) ?> — <?= e($bill['tname']) ?></h1>
+            </div>
+            <p style="margin-top:4px">&nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <a href="<?= $listPage ?>" class="btn btn-outline">← Back</a>
     </div>
@@ -95,31 +130,33 @@ renderHead('Review Bill');
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem">
                 <?php
                 $summaries = [
-                    ['Theory Hrs',    number_format($bill['total_theory_hrs'],1),    '#EFF6FF','#1D4ED8'],
-                    ['Practical Hrs', number_format($bill['total_practical_hrs'],1), '#F0FDFA','#0F766E'],
-                    ['Other Hrs',     number_format($bill['total_other_hrs'],1),     '#F5F3FF','#6D28D9'],
-                    ['Total Amount',  formatINR($bill['total_amount']),              '#244B86','#E2C97E'],
+                    ['Theory Hrs',    number_format($bill['total_theory_hrs'],1),    '#EFF6FF', '#BFDBFE', '#1D4ED8'],
+                    ['Practical Hrs', number_format($bill['total_practical_hrs'],1), '#F0FDFA', '#99F6E4', '#0F766E'],
+                    ['Other Hrs',     number_format($bill['total_other_hrs'],1),     '#F5F3FF', '#DDD6FE', '#6D28D9'],
+                    ['Total Amount',  formatINR($bill['total_amount']),              '#ECFDF5', '#A7F3D0', '#059669'],
                 ];
-                foreach($summaries as [$lbl,$val,$bg,$clr]):
+                foreach($summaries as [$lbl,$val,$bg,$bdr,$clr]):
                 ?>
-                <div style="background:<?= $bg ?>;border-radius:var(--radius);padding:1rem;text-align:center">
-                    <div style="font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.8;margin-bottom:4px"><?= $lbl ?></div>
-                    <div style="font-size:1.3rem;font-weight:600;color:<?= $clr ?>"><?= $val ?></div>
+                <div style="background:<?= $bg ?>;border:1px solid <?= $bdr ?>;border-radius:var(--radius);padding:1rem;text-align:center;box-shadow:var(--shadow-sm)">
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.85;margin-bottom:4px"><?= $lbl ?></div>
+                    <div style="font-size:1.3rem;font-weight:700;color:<?= $clr ?>"><?= $val ?></div>
                 </div>
                 <?php endforeach; ?>
             </div>
 
             <!-- Teacher Info -->
             <div class="card" style="margin-bottom:1.5rem">
-                <div class="card-header"><h3><?= svgIcon('teacher') ?> Teacher Info</h3></div>
+                <div class="card-header"><h3><?= svgIcon(($bill['role']??'') === 'student' ? 'student' : 'teacher') ?> <?= ($bill['role']??'') === 'student' ? 'Student' : 'Teacher' ?> Info</h3></div>
                 <div class="card-body">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;font-size:.88rem">
+                        <div><span class="text-muted">Bill Number:</span> <strong style="color:var(--primary)">#<?= $billId ?></strong></div>
                         <div><span class="text-muted">Name:</span> <strong><?= e($bill['tname']) ?></strong></div>
                         <div><span class="text-muted">Email:</span> <?= e($bill['email']) ?></div>
                         <div><span class="text-muted">Type:</span> <?= teacherTypeBadge($bill['teacher_type']??'regular') ?></div>
                         <div><span class="text-muted">Mode:</span> <?= modeBadge($bill['teacher_mode']??'theory') ?></div>
-                        <div><span class="text-muted">Subject:</span> <?= e($bill['subject_name']??'—') ?> (<?= $bill['subject_code'] ? e($bill['subject_code']) : '' ?>)</div>
+                        <div><span class="text-muted">Subject:</span> <?= e($bill['subject_name']??'—') ?><?= !empty($bill['subject_code']) ? ' (' . e($bill['subject_code']) . ')' : '' ?></div>
                         <div><span class="text-muted">Class:</span> <?= e($bill['class_label']??'—') ?></div>
+                        <div><span class="text-muted">Period:</span> <?= fmtDate($bill['period_from'],'d M Y') ?> – <?= fmtDate($bill['period_to'],'d M Y') ?></div>
                         <div><span class="text-muted">Rate/Theory hr:</span> <?= formatINR($bill['rate_theory']) ?></div>
                         <div><span class="text-muted">Rate/Practical hr:</span> <?= formatINR($bill['rate_practical']) ?></div>
                     </div>

@@ -51,7 +51,7 @@ function amountWords(float $number): string {
     return trim(implode(' ',$parts)).' Rupees Only';
 }
 
-$college='GOVERNMENT COLLEGE OF ENGINEERING AURANGABAD';
+$college='GOVERNMENT COLLEGE OF ENGINEERING';
 $city='CHHATRAPATI SAMBHAJINAGAR';
 $typeLabels=['practical'=>'Practical Examination Bill','earn_learn'=>'Earn and Learn Student Bill','seminar'=>'Seminar / Expert Lecture Bill'];
 ?>
@@ -157,7 +157,7 @@ if ($type === 'practical'):
     </div>
     <div class="sign-grid">
         <div class="sign">Department Exam In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+        <div class="sign">Signature of HOD with Stamp</div>
     </div>
     <div class="sign c">Principal</div>
 </div>
@@ -208,7 +208,7 @@ elseif ($type === 'earn_learn'):
     </div>
     <div class="sign-grid">
         <div class="sign">Faculty / Staff In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+        <div class="sign">Signature of HOD with Stamp</div>
     </div>
 </div>
 
@@ -236,7 +236,7 @@ elseif ($type === 'earn_learn'):
 
     <div class="sign-grid">
         <div class="sign">Faculty / Staff In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+        <div class="sign">Signature of HOD with Stamp</div>
     </div>
 </div>
 
@@ -260,7 +260,7 @@ elseif ($type === 'earn_learn'):
     <p class="cert">Certified that the work and attendance stated above have been verified and the amount claimed is correct and submitted for sanction.</p>
     <div class="sign-grid">
         <div class="sign">Faculty / Staff In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+        <div class="sign">Signature of HOD with Stamp</div>
     </div>
 </div>
 
@@ -336,7 +336,7 @@ else:
     </div>
     <div class="sign-grid">
         <div class="sign">Coordinator / Faculty In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+        <div class="sign">Signature of HOD with Stamp</div>
     </div>
     <div class="sign c">Principal</div>
 </div>

@@ -154,7 +154,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
      ====================================================== -->
 <div class="page">
   <div class="hdr">
-    <h1>GOVERNMENT COLLEGE OF ENGINEERING AURANGABAD<br>CHHATRAPATI SAMBHAJINAGAR</h1>
+    <h1>GOVERNMENT COLLEGE OF ENGINEERING<br>CHHATRAPATI SAMBHAJINAGAR</h1>
     <h2>(An Autonomous Institute of Government of Maharashtra)</h2>
   </div>
   <hr class="thick">
@@ -266,7 +266,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I certify that the above bill claimed by me for said duration of academic load which is actually
     engaged by me and is in accordance with attendance register and record of department. The bill claimed
     herewith is correct according to the rates as prescribed in the order received from Govt. College of
-    Engineering Aurangabad, Chhatrapati Sambhajinagar. I know that I will be responsible and accountable for
+    Engineering, Chhatrapati Sambhajinagar. I know that I will be responsible and accountable for
     any wrongful claim. I will return any excess amount disbursed, if found in future.
   </p>
 
@@ -305,14 +305,14 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
   <div class="sgg" style="margin-top:6mm">
     <div></div>
     <div style="text-align: right;">
-      Signature of HoD with Stamp<br>
+      Signature of HOD with Stamp<br>
       Date:&nbsp;<span class="fl" style="min-width:35mm">&nbsp;</span>
     </div>
   </div>
 
   <div class="prin">
     Principal<br>
-    Govt. College of Engineering Aurangabad<br>
+    Government College of Engineering<br>
     Chhatrapati Sambhajinagar
   </div>
 </div>
@@ -391,7 +391,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
     <div class="sr" style="font-size:9.5pt;line-height:2">Signature &amp; Name of Faculty:</div>
   </div>
   <div style="text-align:right;margin-top:10mm;font-size:9.5pt;line-height:2">
-    Signature of HoD with Stamp<br>Date:&nbsp;<span class="fl" style="min-width:35mm">&nbsp;</span>
+    Signature of HOD with Stamp<br>Date:&nbsp;<span class="fl" style="min-width:35mm">&nbsp;</span>
   </div>
 </div>
 
@@ -434,7 +434,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
     <div class="sr" style="font-size:9.5pt;line-height:2">Signature &amp; Name of Faculty:</div>
   </div>
   <div style="text-align:right;margin-top:20mm;font-size:9.5pt;line-height:2">
-    Signature of HoD with Stamp<br>Date:&nbsp;<span class="fl" style="min-width:35mm">&nbsp;</span>
+    Signature of HOD with Stamp<br>Date:&nbsp;<span class="fl" style="min-width:35mm">&nbsp;</span>
   </div>
 </div>
 

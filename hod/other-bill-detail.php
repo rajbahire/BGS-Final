@@ -82,21 +82,17 @@ renderHead('Other Bill Detail');
 <?php renderTopbar('Other Bill Detail', [
     ['label' => 'Home',  'href' => 'dashboard.php'],
     ['label' => $listLbl, 'href' => $listPage],
-    ['label' => 'Bill Detail'],
+    ['label' => 'Bill #' . $billId],
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
 
-    <div class="breadcrumb">
-        <a href="<?= $listPage ?>"><?= $listLbl ?></a>
-        <span class="sep">›</span>
-        <span><?= e($otype) ?> #<?= $billId ?></span>
-    </div>
-
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
-            <h1><?= e($bill['title']) ?></h1>
-            <p>Created <?= fmtDate($bill['created_at'],'d F Y, h:i A') ?></p>
+            <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+                <h1 style="margin:0"><?= e($bill['title']) ?></h1>
+            </div>
+            <p style="margin-top:4px">&nbsp;•&nbsp; Created <?= fmtDate($bill['created_at'],'d F Y, h:i A') ?></p>
         </div>
         <div class="d-flex gap-8">
             <a href="../pdf/other-bill.php?id=<?= $billId ?>" class="btn btn-success" target="_blank"><?= svgIcon('download') ?> Download PDF</a>
@@ -108,16 +104,16 @@ renderHead('Other Bill Detail');
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem">
         <?php
         $summaries = [
-            ['Bill Type',    $otype,                       '#EFF6FF','#1D4ED8'],
-            ['Claimant',     $bill['claimant_name'],        '#F0FDFA','#0F766E'],
-            ['Bill Date',    fmtDate($bill['bill_date']),   '#FFFBEB','#B45309'],
-            ['Total Amount', formatINR($bill['total_amount']), '#244B86','#E2C97E'],
+            ['Bill Type',    $otype,                        '#EFF6FF', '#BFDBFE', '#1D4ED8'],
+            ['Claimant',     $bill['claimant_name'],         '#F0FDFA', '#99F6E4', '#0F766E'],
+            ['Bill Date',    fmtDate($bill['bill_date']),    '#FFFBEB', '#FDE68A', '#B45309'],
+            ['Total Amount', formatINR($bill['total_amount']), '#ECFDF5', '#A7F3D0', '#059669'],
         ];
-        foreach($summaries as [$lbl,$val,$bg,$clr]):
+        foreach($summaries as [$lbl,$val,$bg,$bdr,$clr]):
         ?>
-        <div style="background:<?= $bg ?>;border-radius:var(--radius);padding:1rem;text-align:center">
-            <div style="font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.8;margin-bottom:4px"><?= $lbl ?></div>
-            <div style="font-size:1.15rem;font-weight:600;color:<?= $clr ?>"><?= e($val) ?></div>
+        <div style="background:<?= $bg ?>;border:1px solid <?= $bdr ?>;border-radius:var(--radius);padding:1rem;text-align:center;box-shadow:var(--shadow-sm)">
+            <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.85;margin-bottom:4px"><?= $lbl ?></div>
+            <div style="font-size:1.2rem;font-weight:700;color:<?= $clr ?>"><?= e($val) ?></div>
         </div>
         <?php endforeach; ?>
     </div>

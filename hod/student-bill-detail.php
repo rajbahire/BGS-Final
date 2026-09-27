@@ -63,21 +63,17 @@ renderHead('Review Earn & Learn Bill');
 <?php renderTopbar('Review Earn & Learn Bill', [
     ['label' => 'Home',   'href' => 'dashboard.php'],
     ['label' => $listLbl,  'href' => $listPage],
-    ['label' => 'Review Bill'],
+    ['label' => $billNumber],
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
 
-    <!-- <div class="breadcrumb">
-        <a href="<?= $listPage ?>"><?= $listLbl ?></a>
-        <span class="sep">›</span>
-        <span>Earn & Learn Bill — <?= e($billNumber) ?></span>
-    </div> -->
-
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
-            <h1><?= e($bill['month_year']) ?> — <?= e($bill['sname']) ?></h1>
-            <p>Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
+            <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+                <h1 style="margin:0"><?= e($bill['month_year']) ?> — <?= e($bill['sname']) ?></h1>
+            </div>
+            <p style="margin-top:4px"><span class="text-muted">&nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <a href="<?= $listPage ?>" class="btn btn-outline">← Back</a>
     </div>
@@ -90,16 +86,16 @@ renderHead('Review Earn & Learn Bill');
             <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem">
                 <?php
                 $summaries = [
-                    ['Total Hours',  number_format($bill['total_hours'],1), '#F0FDFA','#0F766E'],
-                    ['Rate / Hour',  formatINR($bill['rate_per_hour']),       '#EFF6FF','#1D4ED8'],
-                    ['Work Days',    count($work),                            '#F5F3FF','#6D28D9'],
-                    ['Total Amount', formatINR($bill['total_amount']),         '#244B86','#E2C97E'],
+                    ['Total Hours',  number_format($bill['total_hours'],1), '#F0FDFA', '#99F6E4', '#0F766E'],
+                    ['Rate / Hour',  formatINR($bill['rate_per_hour']),       '#EFF6FF', '#BFDBFE', '#1D4ED8'],
+                    ['Work Days',    count($work),                            '#F5F3FF', '#DDD6FE', '#6D28D9'],
+                    ['Total Amount', formatINR($bill['total_amount']),         '#ECFDF5', '#A7F3D0', '#059669'],
                 ];
-                foreach($summaries as [$lbl,$val,$bg,$clr]):
+                foreach($summaries as [$lbl,$val,$bg,$bdr,$clr]):
                 ?>
-                <div style="background:<?= $bg ?>;border-radius:var(--radius);padding:1rem;text-align:center">
-                    <div style="font-size:.7rem;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.8;margin-bottom:4px"><?= $lbl ?></div>
-                    <div style="font-size:1.3rem;font-weight:600;color:<?= $clr ?>"><?= $val ?></div>
+                <div style="background:<?= $bg ?>;border:1px solid <?= $bdr ?>;border-radius:var(--radius);padding:1rem;text-align:center;box-shadow:var(--shadow-sm)">
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.85;margin-bottom:4px"><?= $lbl ?></div>
+                    <div style="font-size:1.3rem;font-weight:700;color:<?= $clr ?>"><?= $val ?></div>
                 </div>
                 <?php endforeach; ?>
             </div>
@@ -109,8 +105,10 @@ renderHead('Review Earn & Learn Bill');
                 <div class="card-header"><h3><?= svgIcon('student') ?> Student Info</h3></div>
                 <div class="card-body">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;font-size:.88rem">
+                        <div><span class="text-muted">Bill Number:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong></div>
                         <div><span class="text-muted">Name:</span> <strong><?= e($bill['sname']) ?></strong></div>
                         <div><span class="text-muted">Email:</span> <?= e($bill['email'] ?: '—') ?></div>
+                        <div><span class="text-muted">Phone:</span> <?= e($bill['phone'] ?: '—') ?></div>
                         <div><span class="text-muted">Class:</span> <?= e($bill['class_label'] ?? '—') ?></div>
                         <div><span class="text-muted">Department:</span> <?= e($bill['dept_name'] ?? '—') ?></div>
                         <div><span class="text-muted">Rate / Hour:</span> <?= formatINR($bill['rate_per_hour']) ?></div>

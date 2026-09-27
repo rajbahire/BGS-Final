@@ -80,7 +80,7 @@ function amountWords(float $number): string {
     return trim(implode(' ',$parts)).' Rupees Only';
 }
 
-$college='GOVERNMENT COLLEGE OF ENGINEERING AURANGABAD';
+$college='GOVERNMENT COLLEGE OF ENGINEERING';
 $city='CHHATRAPATI SAMBHAJINAGAR';
 ?>
 <!DOCTYPE html>
@@ -352,7 +352,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
     <p class="cert">Certified that the work and attendance stated above have been verified and the amount claimed is correct and submitted for sanction.</p>
     <div class="sign-grid">
         <div class="sign">Faculty / Staff In-charge</div>
-        <div class="sign">Signature of HoD with Stamp</div>
+        <div class="sign">Signature of HOD with Stamp</div>
     </div>
 </div> -->
 
