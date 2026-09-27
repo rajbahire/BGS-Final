@@ -350,9 +350,10 @@ renderHead('Manage Users');
                 <div class="form-group"><label>Teacher Type <span style="color:red">*</span></label>
                     <select name="teacher_type" class="form-control" required>
                         <option value="">— Select Type —</option>
+                        <!-- Regular option — temporarily disabled
                         <option value="regular">Regular</option>
-                        <option value="expert">Expert</option>
-                        <option value="sectional_expert">Sectional Expert</option>
+                        -->
+                        <option value="expert">Expert / Sectional Expert</option>
                         <option value="adjunct">Adjunct</option>
                     </select>
                 </div>
@@ -403,7 +404,7 @@ renderHead('Manage Users');
                 <div class="form-group"><label>Teacher Type <span style="color:red">*</span></label>
                     <select name="teacher_type" class="form-control" required>
                         <option value="">— Select Type —</option>
-                        <?php foreach(['regular'=>'Regular','expert'=>'Expert','sectional_expert'=>'Sectional Expert','adjunct'=>'Adjunct'] as $v=>$l): ?>
+                        <?php foreach(['regular'=>'Regular','expert'=>'Expert / Sectional Expert','adjunct'=>'Adjunct'] as $v=>$l): ?>
                         <option value="<?= $v ?>" <?= ($t['teacher_type']??'')===$v?'selected':'' ?>><?= $l ?></option>
                         <?php endforeach; ?>
                     </select>

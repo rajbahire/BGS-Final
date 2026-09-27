@@ -3,8 +3,7 @@
 //  pdf/generate.php — Official GCEA Bill (4 pages)
 //  Sections fill based on teacher_type:
 //    regular           -> Section 1 (Full-time PoP / Adjunct)
-//    expert            -> Section 2 (Hourly Visiting/Expert)
-//    sectional_expert  -> Section 2 (Hourly, practical-based)
+//    expert            -> Section 2 (Hourly Expert / Sectional Expert)
 //    adjunct           -> Section 3 (Adjunct Credit Based)
 //  Inactive sections are crossed with a diagonal X.
 // ============================================================
@@ -46,6 +45,7 @@ if ($user['role'] === 'teacher') {
 }
 $bill = $q->fetch();
 if (!$bill) { die('<p style="font-family:sans-serif;padding:2rem">Bill not found or not yet approved.</p>'); }
+$billNumber = $bill['bill_number'] ?? generateTeacherBillNumber($bill['period_from'], $bill['id']);
 
 // Lecture entries for Annexure I
 $lq = $pdo->prepare(
@@ -102,7 +102,7 @@ function cross(){
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Bill <?= h($month) ?> — <?= h($bill['tname']) ?></title>
+<title>Teacher Bill <?= h($billNumber) ?> — <?= h($bill['tname']) ?></title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:9.5pt}
@@ -121,6 +121,7 @@ body{font-family:'Times New Roman',Times,serif;color:#000;background:#ccc}
 hr.thick{border:none;border-top:2.5px solid #000;margin:2.5mm 0}
 hr.thin{border:none;border-top:1.2px solid #000;margin:1.5mm 0}
 .fl{display:inline-block;border-bottom:1px solid #000;min-width:40mm;padding:0 1mm;vertical-align:bottom}
+.bill-id{font-size:8pt;color:#555;text-align:right;margin-bottom:2mm}
 .binfo{font-size:9.5pt;line-height:2.1;margin:3mm 0}
 .sec{position:relative;margin-bottom:4mm;overflow:hidden}
 table{width:100%;border-collapse:collapse;font-size:9pt}
@@ -144,7 +145,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
 <body>
 
 <div class="pbar">
-    <span>Bill #<?= str_pad($billId,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; <?= h($month) ?> &nbsp;|&nbsp; <?= h($bill['tname']) ?></span>
+    <span><?= h($billNumber) ?> &nbsp;|&nbsp; <?= h($month) ?> &nbsp;|&nbsp; <?= h($bill['tname']) ?></span>
     <a></a>
     <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
 </div>
@@ -153,6 +154,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
      PAGE 1 — MAIN BILL
      ====================================================== -->
 <div class="page">
+  <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
   <div class="hdr">
     <h1>GOVERNMENT COLLEGE OF ENGINEERING<br>CHHATRAPATI SAMBHAJINAGAR</h1>
     <h2>(An Autonomous Institute of Government of Maharashtra)</h2>
@@ -322,6 +324,7 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
      PAGE 3 — ANNEXURE I (Lecture Details)
      ====================================================== -->
 <div class="page">
+  <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
   <p class="c b u" style="font-size:11pt;margin-bottom:1mm">ANNEXURE I</p>
   <p class="c b" style="font-size:10pt;margin-bottom:3mm">(For Visiting Faculty/ Expert faculty / Sessional Instructor)</p>
 

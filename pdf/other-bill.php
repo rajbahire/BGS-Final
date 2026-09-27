@@ -24,6 +24,7 @@ if ($user['role'] === 'hod') {
 $bill = $row->fetch();
 if (!$bill) { die('<p style="font-family:sans-serif;padding:2rem">Bill not found.</p>'); }
 
+$billNumber = $bill['bill_number'] ?? generateOtherBillNumber($bill['bill_date'], $bill['id']);
 $type = $bill['bill_type'];
 $data = json_decode($bill['bill_data'], true) ?? [];
 
@@ -59,7 +60,7 @@ $typeLabels=['practical'=>'Practical Examination Bill','earn_learn'=>'Earn and L
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Bill #<?= $id ?> — <?= h($bill['title']) ?></title>
+<title><?= h($billNumber) ?> — <?= h($bill['title']) ?></title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-size:10pt}
@@ -100,7 +101,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 
 <div class="pbar">
     <span><?= h($bill['title']) ?></span>
-    <span class="bill-ref">Bill #<?= str_pad($id,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; <?= h($bill['claimant_name']) ?></span>
+    <span class="bill-ref"><?= h($billNumber) ?> &nbsp;|&nbsp; <?= h($bill['claimant_name']) ?></span>
     <a></a>
     <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
 </div>
@@ -116,7 +117,7 @@ if ($type === 'practical'):
     $amount=($students*$rate)+$other;
 ?>
 <div class="page">
-    <div class="bill-id">Bill #<?= str_pad($id,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
+    <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1><h2>(An Autonomous Institute of Government of Maharashtra)</h2></div>
     <hr class="thick">
     <div class="title">PRACTICAL EXAMINATION REMUNERATION BILL</div>
@@ -179,7 +180,7 @@ elseif ($type === 'earn_learn'):
 ?>
 <!-- Page 1: Bill -->
 <div class="page">
-    <div class="bill-id">Bill #<?= str_pad($id,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
+    <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1><h2>(An Autonomous Institute of Government of Maharashtra)</h2></div>
     <hr class="thick">
     <div class="title">EARN AND LEARN STUDENT BILL</div>
@@ -296,7 +297,7 @@ else:
     $amount=$honorarium+$taDa+$other;
 ?>
 <div class="page">
-    <div class="bill-id">Bill #<?= str_pad($id,5,'0',STR_PAD_LEFT) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
+    <div class="bill-id"><?= h($billNumber) ?> &nbsp;|&nbsp; Generated: <?= date('d/m/Y H:i') ?></div>
     <div class="hdr c"><h1><?= $college ?><br><?= $city ?></h1><h2>(An Autonomous Institute of Government of Maharashtra)</h2></div>
     <hr class="thick">
     <div class="title">SEMINAR / EXPERT LECTURE BILL</div>

@@ -29,6 +29,7 @@ $sbills = $pdo->prepare(
 // ── Merge teacher + student bills into a single review queue (latest first) ──
 $queue = [];
 foreach ($bills as $b) {
+    $tbBillNumber = $b['bill_number'] ?? generateTeacherBillNumber($b['period_from'], $b['id']);
     $queue[] = [
         'id'           => (int)$b['id'],
         'kind'         => 'teacher',
@@ -39,11 +40,8 @@ foreach ($bills as $b) {
         'month_year'   => $b['month_year'],
         'hours'        => number_format((float)$b['total_theory_hrs'] + (float)$b['total_practical_hrs'] + (float)$b['total_other_hrs'], 1),
         'amount'       => (float)$b['total_amount'],
-        'badge'        => '<span style="display:inline-flex;gap:4px;flex-wrap:wrap">'
-                       . teacherTypeBadge($b['teacher_type'] ?? 'regular')
-                       . modeBadge($b['teacher_mode'] ?? 'theory')
-                       . '</span>',
-        'href'         => 'request-detail.php?id=' . (int)$b['id'],
+        'sub'          => '<span class="text-sm text-muted">' . e($tbBillNumber) . ' · ' . teacherTypeLabel($b['teacher_type'] ?? 'regular') . '</span>',
+        'href'         => 'teacher-bill-detail.php?id=' . (int)$b['id'],
     ];
 }
 foreach ($sbills as $sb) {
@@ -54,11 +52,11 @@ foreach ($sbills as $sb) {
         'name'         => $sb['sname'],
         'submitted_at' => $sb['submitted_at'],
         'detail'       => $sb['class_label'] ?? '',
-        'detail_code'  => $sbBillNumber,
+        'detail_code'  => '',   // students have no subject code; bill # shows under Person
         'month_year'   => $sb['month_year'],
         'hours'        => number_format((float)$sb['total_hours'], 1),
         'amount'       => (float)$sb['total_amount'],
-        'badge'        => '<span class="badge" style="background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4">Earn & Learn</span>',
+        'sub'          => '<span class="text-sm text-muted">' . e($sbBillNumber) . '</span>',
         'href'         => 'student-bill-detail.php?id=' . (int)$sb['id'],
     ];
 }
@@ -92,7 +90,7 @@ renderHead('Pending Requests');
     <?= getFlash() ?>
     <div class="page-header">
         <h1>Pending Requests</h1>
-        <p><?= count($queue) ?> bill<?= count($queue) != 1 ? 's' : '' ?> awaiting review — <?= count($bills) ?> teacher · <?= count($sbills) ?> Earn & Learn</p>
+        <p><?= $totalRecords ?> bill<?= $totalRecords != 1 ? 's' : '' ?> awaiting review — <?= count($bills) ?> teacher · <?= count($sbills) ?> Earn & Learn</p>
     </div>
 
     <?php if ($queue): ?>
@@ -101,24 +99,25 @@ renderHead('Pending Requests');
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr><th>#</th><th>Person</th><th>Subject Code</th><th>Subject</th><th>Month</th><th>Hours</th><th>Amount</th><th>Submitted</th><th>Action</th></tr>
+                    <tr><th>#</th><th>Type</th><th>Person</th><th>Subject Code</th><th>Subject / Class</th><th>Month</th><th>Hours</th><th>Amount</th><th>Submitted</th><th>Action</th></tr>
                 </thead>
                 <tbody>
                 <?php foreach ($queue as $i => $row): ?>
                 <tr>
                     <td class="text-muted"><?= $offset + $i + 1 ?></td>
+                    <td><?= billTypeBadge($row['kind']) ?></td>
                     <td>
                         <div class="fw-500"><?= e($row['name']) ?></div>
-                        <div class="text-sm" style="margin-top:3px"><?= $row['badge'] ?></div>
+                        <div><?= $row['sub'] ?></div>
                     </td>
                     <td class="fw-500">
                         <?php if ($row['detail_code']): ?>
                         <?= e($row['detail_code']) ?>
                         <?php else: ?>—<?php endif; ?>
                     </td>
-                    <td class="fw-500"><?= e($row['detail'] ?: '—') ?></td>        
+                    <td class="fw-500"><?= e($row['detail'] ?: '—') ?></td>
                     <td class="fw-500"><?= e($row['month_year']) ?></td>
-                    <td><?= $row['hours'] ?> hrs</td>
+                    <td><?= $row['hours'] ?></td>
                     <td class="fw-600"><?= formatINR($row['amount']) ?></td>
                     <td class="text-sm text-muted"><?= fmtDate($row['submitted_at'], 'd M Y') ?></td>
                     <td><a href="<?= e($row['href']) ?>" class="btn btn-primary btn-sm">Review →</a></td>

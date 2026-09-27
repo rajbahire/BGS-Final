@@ -10,6 +10,7 @@ $billId = (int)($_GET['id'] ?? 0);
 $bill   = $pdo->prepare("SELECT b.*,u.name AS tname,u.email,u.department_id,u.teacher_type,u.teacher_mode,s.subject_name,s.subject_code,c.label AS class_label FROM bills b JOIN users u ON u.id=b.teacher_id LEFT JOIN subjects s ON s.id=u.subject_id LEFT JOIN classes c ON c.id=s.class_id WHERE b.id=? AND b.teacher_id=?");
 $bill->execute([$billId,$uid]); $bill=$bill->fetch();
 if (!$bill) { setFlash('error','Bill not found.'); header('Location: my-bills.php'); exit; }
+$billNumber = $bill['bill_number'] ?? generateTeacherBillNumber($bill['period_from'], $bill['id']);
 
 $lectures = $pdo->prepare("SELECT l.*,s.subject_name,s.subject_code FROM lectures l JOIN bill_lectures bl ON bl.lecture_id=l.id LEFT JOIN subjects s ON s.id=l.subject_id WHERE bl.bill_id=? ORDER BY l.lecture_date");
 $lectures->execute([$billId]); $lectures=$lectures->fetchAll();
@@ -22,19 +23,22 @@ renderHead('Bill Detail');
 <?php renderTopbar('Bill Detail', [
     ['label' => 'Home',  'href' => 'dashboard.php'],
     ['label' => 'My Bills', 'href' => 'my-bills.php'],
-    ['label' => 'Bill Detail'],
+    ['label' => $billNumber],
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
 
     <div class="breadcrumb">
-        <a href="my-bills.php">My Bills</a><span class="sep">›</span><span>Bill #<?= $billId ?></span>
+        <a href="my-bills.php">My Bills</a><span class="sep">›</span><span><?= e($billNumber) ?></span>
     </div>
 
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
-            <h1><?= e($bill['month_year']) ?> Bill</h1>
-            <p>Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
+            <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
+                <h1 style="margin:0"><?= e($bill['month_year']) ?> Bill</h1>
+                <span class="badge" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;font-size:.85rem;font-weight:600"><?= e($billNumber) ?></span>
+            </div>
+            <p style="margin-top:4px"><span class="text-muted">Bill No:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong> &nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <div class="d-flex gap-8">
             <?php if($bill['status']==='approved'): ?>
@@ -57,7 +61,7 @@ renderHead('Bill Detail');
             <div class="card-header"><h3><?= svgIcon('list') ?> Bill Summary</h3></div>
             <div class="card-body">
                 <table style="font-size:.88rem;width:100%">
-                    <tr><td class="text-muted" style="padding:5px 0;width:160px">Bill ID</td><td><strong>#<?= $billId ?></strong></td></tr>
+                    <tr><td class="text-muted" style="padding:5px 0;width:160px">Bill ID</td><td><strong><?= e($billNumber) ?></strong></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Month</td><td><?= e($bill['month_year']) ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Period</td><td><?= fmtDate($bill['period_from']) ?> – <?= fmtDate($bill['period_to']) ?></td></tr>
                     <tr><td class="text-muted" style="padding:5px 0">Theory Hrs</td><td><?= number_format($bill['total_theory_hrs'],1) ?> @ <?= formatINR($bill['rate_theory']) ?>/hr = <strong><?= formatINR($bill['theory_amount']) ?></strong></td></tr>

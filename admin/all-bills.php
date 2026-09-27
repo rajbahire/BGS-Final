@@ -21,7 +21,7 @@ $rows = [];
 
 // 1) Teacher bills (bills)
 if ($fType === '' || $fType === 'teacher') {
-    $sql = "SELECT b.id, b.month_year, b.period_from,
+    $sql = "SELECT b.id, b.bill_number, b.month_year, b.period_from,
                    b.total_theory_hrs, b.total_practical_hrs, b.total_other_hrs,
                    b.total_amount, b.status, b.submitted_at, b.created_at,
                    u.name AS pname, u.teacher_type, d.name AS dept_name,
@@ -37,11 +37,12 @@ if ($fType === '' || $fType === 'teacher') {
     if ($fYear)   { $sql .= " AND YEAR(b.period_from)=?";  $params[] = $fYear;   }
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     foreach ($stmt->fetchAll() as $b) {
+        $tbBillNum = $b['bill_number'] ?? generateTeacherBillNumber($b['period_from'], $b['id']);
         $rows[] = [
             'source'    => 'teacher',
             'dept'      => $b['dept_name'] ?? '—',
             'name'      => $b['pname'],
-            'sub'       => teacherTypeBadge($b['teacher_type'] ?? 'regular'),
+            'sub'       => '<span class="text-sm text-muted">' . e($tbBillNum) . ' · ' . teacherTypeLabel($b['teacher_type'] ?? 'regular') . '</span>',
             'period'    => e($b['month_year']),
             'hours'     => (float)$b['total_theory_hrs'] + (float)$b['total_practical_hrs'] + (float)$b['total_other_hrs'],
             'amount'    => (float)$b['total_amount'],
@@ -77,7 +78,7 @@ if ($fType === '' || $fType === 'student') {
             'source'    => 'student',
             'dept'      => $b['dept_name'] ?? '—',
             'name'      => $b['pname'],
-            'sub'       => '<span class="text-sm fw-500" style="color:var(--primary)">' . e($sbBillNum) . '</span> <span class="text-sm text-muted">' . e($b['class_label'] ?: '—') . '</span>',
+            'sub'       => '<span class="text-sm text-muted">' . e($sbBillNum) . ($b['class_label'] ? ' · ' . e($b['class_label']) : '') . '</span>',
             'period'    => e($b['month_year']),
             'hours'     => (float)$b['total_hours'],
             'amount'    => (float)$b['total_amount'],
@@ -90,9 +91,9 @@ if ($fType === '' || $fType === 'student') {
     }
 }
 
-// 3) HOD-created other bills (other_bills) — no approval workflow, always finalized
-if ($fType === '' || $fType === 'other') {
-    $sql = "SELECT ob.id, ob.bill_type, ob.title, ob.claimant_name, ob.bill_date,
+// 3) HOD-generated other bills (other_bills) — generated directly by HOD
+if (($fStatus === '' || in_array($fStatus, ['generated', 'finalized'], true)) && ($fType === '' || $fType === 'other')) {
+    $sql = "SELECT ob.id, ob.bill_number, ob.bill_type, ob.title, ob.claimant_name, ob.bill_date,
                    ob.total_amount, ob.created_at, d.name AS dept_name
             FROM other_bills ob
             LEFT JOIN departments d ON d.id=ob.department_id
@@ -104,15 +105,16 @@ if ($fType === '' || $fType === 'other') {
     $stmt = $pdo->prepare($sql); $stmt->execute($params);
     foreach ($stmt->fetchAll() as $b) {
         $otype = $typeLabels[$b['bill_type']] ?? ucfirst($b['bill_type']);
+        $obBillNum = $b['bill_number'] ?? generateOtherBillNumber($b['bill_date'], $b['id']);
         $rows[] = [
             'source'    => 'other',
             'dept'      => $b['dept_name'] ?? '—',
             'name'      => $b['claimant_name'],
-            'sub'       => '<span class="text-sm text-muted">' . e($otype . ' — ' . $b['title']) . '</span>',
-            'period'    => fmtDate($b['bill_date'], 'M Y'),
+            'sub'       => '<span class="text-sm text-muted">' . e($obBillNum) . ' · ' . e($otype) . '</span>',
+            'period'    => fmtDate($b['bill_date'], 'F Y'),
             'hours'     => null,
             'amount'    => (float)$b['total_amount'],
-            'status'    => 'finalized',
+            'status'    => 'generated',
             'date'      => $b['created_at'],
             'sort_date' => $b['created_at'],
             'pdf'       => '../pdf/other-bill.php?id=' . $b['id'],
@@ -169,11 +171,10 @@ renderHead('All Bills');
                     <label>Status</label>
                     <select name="status" class="form-control" style="width:180px">
                         <option value="">All</option>
-                        <option value="draft"    <?= $fStatus==='draft'   ?'selected':'' ?>>Draft</option>
-                        <option value="pending"  <?= $fStatus==='pending' ?'selected':'' ?>>Pending</option>
-                        <option value="approved" <?= $fStatus==='approved'?'selected':'' ?>>Approved</option>
-                        <option value="rejected" <?= $fStatus==='rejected'?'selected':'' ?>>Rejected</option>
-                        <option value="finalized" <?= $fStatus==='finalized'?'selected':'' ?>>Finalized</option>
+                        <option value="pending"   <?= $fStatus==='pending'  ?'selected':'' ?>>Pending</option>
+                        <option value="approved"  <?= $fStatus==='approved' ?'selected':'' ?>>Approved</option>
+                        <option value="rejected"  <?= $fStatus==='rejected' ?'selected':'' ?>>Rejected</option>
+                        <option value="generated" <?= in_array($fStatus,['generated','finalized'],true)?'selected':'' ?>>Generated</option>
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">

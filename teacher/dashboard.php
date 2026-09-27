@@ -58,10 +58,11 @@ renderHead('Teacher Dashboard');
             <?php if($recentBills): ?>
             <div class="table-wrap">
                 <table>
-                    <thead><tr><th>Month</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+                    <thead><tr><th>Bill ID</th><th>Month</th><th>Amount</th><th>Status</th><th></th></tr></thead>
                     <tbody>
                     <?php foreach($recentBills as $b): ?>
                     <tr>
+                        <td class="fw-500" style="white-space:nowrap;font-size:.82rem"><?= e($b['bill_number'] ?? generateTeacherBillNumber($b['period_from'], $b['id'])) ?></td>
                         <td class="fw-500"><?= e($b['month_year']) ?></td>
                         <td><?= formatINR($b['total_amount']) ?></td>
                         <td><?= statusBadge($b['status']) ?></td>

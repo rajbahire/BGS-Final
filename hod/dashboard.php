@@ -33,7 +33,7 @@ $monthPaid = (float)$q("SELECT COALESCE(SUM(b.total_amount),0) FROM bills b JOIN
            + (float)$q("SELECT COALESCE(SUM(total_amount),0) FROM other_bills WHERE department_id=? AND MONTH(created_at)=MONTH(NOW()) AND YEAR(created_at)=YEAR(NOW())",[$deptId]);
 
 $pendingTeacherBills = $pdo->prepare(
-    "SELECT b.id, b.submitted_at, b.month_year, b.total_amount, u.name AS pname,
+    "SELECT b.id, b.bill_number, b.period_from, b.submitted_at, b.month_year, b.total_amount, u.name AS pname,
             u.teacher_type, 'teacher' AS kind
      FROM bills b
      JOIN users u ON u.id=b.teacher_id
@@ -42,7 +42,7 @@ $pendingTeacherBills = $pdo->prepare(
 ); $pendingTeacherBills->execute([$deptId]); $pendingTeacherBills = $pendingTeacherBills->fetchAll();
 
 $pendingStudentBills = $pdo->prepare(
-    "SELECT sb.id, sb.submitted_at, sb.month_year, sb.total_amount, u.name AS pname,
+    "SELECT sb.id, sb.bill_number, sb.period_from, sb.submitted_at, sb.month_year, sb.total_amount, u.name AS pname,
             'student' AS teacher_type, 'student' AS kind
      FROM student_bills sb
      JOIN users u ON u.id=sb.student_id
@@ -110,13 +110,19 @@ renderHead('HOD Dashboard');
                     <thead><tr><th>Person</th><th>Type</th><th>Month</th><th>Amount</th><th>Action</th></tr></thead>
                     <tbody>
                     <?php foreach($pendingBills as $b):
-                        $href = $b['kind'] === 'student' ? ('student-bill-detail.php?id=' . $b['id']) : ('request-detail.php?id=' . $b['id']);
+                        $href = $b['kind'] === 'student' ? ('student-bill-detail.php?id=' . $b['id']) : ('teacher-bill-detail.php?id=' . $b['id']);
                         $badge = $b['kind'] === 'student'
                             ? '<span class="badge" style="background:#F0FDFA;color:#0F766E;border:1px solid #99F6E4">Earn & Learn</span>'
                             : teacherTypeBadge($b['teacher_type'] ?? 'regular');
+                        $billNum = $b['kind'] === 'student'
+                            ? ($b['bill_number'] ?? generateStudentBillNumber($b['period_from'], $b['id']))
+                            : ($b['bill_number'] ?? generateTeacherBillNumber($b['period_from'], $b['id']));
                     ?>
                     <tr>
-                        <td class="fw-500"><?= e($b['pname']) ?></td>
+                        <td class="fw-500">
+                            <div><?= e($b['pname']) ?></div>
+                            <div class="text-xs fw-600" style="color:var(--primary);margin-top:2px"><?= e($billNum) ?></div>
+                        </td>
                         <td><?= $badge ?></td>
                         <td><?= e($b['month_year']) ?></td>
                         <td class="fw-600"><?= formatINR($b['total_amount']) ?></td>

@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS users (
     department_id         INT UNSIGNED   DEFAULT NULL,
 
     -- Teacher-specific fields
-    teacher_type          ENUM('regular','expert','sectional_expert','adjunct') DEFAULT NULL,
+    teacher_type          ENUM('regular','expert','adjunct') DEFAULT NULL,
     teacher_mode          ENUM('theory','practical','theory & practical') DEFAULT NULL,
     subject_id            INT UNSIGNED   DEFAULT NULL,  -- assigned theory subject
     subject_id_2          INT UNSIGNED   DEFAULT NULL,  -- assigned practical subject (for Theory & Practical mode)
@@ -154,6 +154,7 @@ CREATE TABLE IF NOT EXISTS lectures (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS bills (
     id                  INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
+    bill_number         VARCHAR(20)   DEFAULT NULL,  -- e.g. TB-2026-08-00012
     teacher_id          INT UNSIGNED  NOT NULL,
     generated_by        INT UNSIGNED  DEFAULT NULL,  -- NULL = teacher self; HOD id = manual
     month_year          VARCHAR(20)   NOT NULL,      -- e.g. "March 2026"
@@ -186,6 +187,7 @@ CREATE TABLE IF NOT EXISTS bills (
 
     created_at          TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
+    UNIQUE KEY idx_teacher_bill_number (bill_number),
     FOREIGN KEY (teacher_id)   REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (generated_by) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (reviewed_by)  REFERENCES users(id) ON DELETE SET NULL
@@ -249,6 +251,7 @@ CREATE TABLE IF NOT EXISTS student_bills (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS other_bills (
     id            INT UNSIGNED  AUTO_INCREMENT PRIMARY KEY,
+    bill_number   VARCHAR(20)   DEFAULT NULL,
     bill_type     ENUM('practical','seminar') NOT NULL,
     created_by    INT UNSIGNED  NOT NULL,
     title         VARCHAR(200)  NOT NULL,
@@ -258,6 +261,7 @@ CREATE TABLE IF NOT EXISTS other_bills (
     total_amount  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     bill_data     JSON          NOT NULL,             -- all form fields
     created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY idx_other_bill_number (bill_number),
     FOREIGN KEY (created_by)    REFERENCES users(id)       ON DELETE CASCADE,
     FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -358,7 +362,7 @@ INSERT INTO departments (name, short_name) VALUES
 --     'Prof. Ravi Kumar', 'ravi@gcea.edu',
 --     '$2y$10$b5yE8qe.hEphrxbw/X0y4ORhUT.Lm9ZXbjkXFDm.soG35a0olPw.C',  -- teacher@1234
 --     'teacher', 5,
---     'sectional_expert', 'practical', 2,
+--     'expert', 'practical', 2,
 --     0.00, 450.00, 0.00,
 --     'GCEA/APP/2024/002', '9123456780'
 -- );

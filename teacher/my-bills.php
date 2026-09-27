@@ -61,12 +61,13 @@ renderHead('My Bills');
         <div class="table-wrap">
             <table>
                 <thead>
-                    <tr><th>#</th><th>Month</th><th>Theory Hrs</th><th>Practical Hrs</th><th>Other Hrs</th><th>Amount</th><th>Status</th><th>Submitted</th><th>Action</th></tr>
+                    <tr><th>#</th><th>Bill ID</th><th>Month</th><th>Theory Hrs</th><th>Practical Hrs</th><th>Other Hrs</th><th>Amount</th><th>Status</th><th>Submitted</th><th>Action</th></tr>
                 </thead>
                 <tbody>
                 <?php foreach($bills as  $i => $b): ?>
                 <tr>
-                    <td class="text-muted"><?= $i + 1 ?></td>
+                    <td class="text-muted"><?= $offset + $i + 1 ?></td>
+                    <td class="fw-500" style="white-space:nowrap"><?= e($b['bill_number'] ?? generateTeacherBillNumber($b['period_from'], $b['id'])) ?></td>
                     <td class="fw-500"><?= e($b['month_year']) ?></td>
                     <td><?= number_format($b['total_theory_hrs'],1) ?></td>
                     <td><?= number_format($b['total_practical_hrs'],1) ?></td>

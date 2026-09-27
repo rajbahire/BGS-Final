@@ -18,6 +18,7 @@ $bill->execute([$billId, $deptId]);
 $bill = $bill->fetch();
 if (!$bill) { setFlash('error','Bill not found.'); header('Location: ' . $listPage); exit; }
 
+$billNumber = $bill['bill_number'] ?? generateOtherBillNumber($bill['bill_date'], $bill['id']);
 $typeLabels = ['practical'=>'Practical Exam','earn_learn'=>'Earn & Learn','seminar'=>'Seminar'];
 $otype      = $typeLabels[$bill['bill_type']] ?? ucfirst($bill['bill_type']);
 $d          = json_decode($bill['bill_data'], true) ?? [];
@@ -82,7 +83,7 @@ renderHead('Other Bill Detail');
 <?php renderTopbar('Other Bill Detail', [
     ['label' => 'Home',  'href' => 'dashboard.php'],
     ['label' => $listLbl, 'href' => $listPage],
-    ['label' => 'Bill #' . $billId],
+    ['label' => $billNumber],
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
@@ -90,9 +91,9 @@ renderHead('Other Bill Detail');
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
             <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
-                <h1 style="margin:0"><?= e($bill['title']) ?></h1>
+                <h1 style="margin:0"><?= e(fmtDate($bill['bill_date'], 'F Y')) ?> — <?= e($bill['claimant_name']) ?></h1>
             </div>
-            <p style="margin-top:4px">&nbsp;•&nbsp; Created <?= fmtDate($bill['created_at'],'d F Y, h:i A') ?></p>
+            <p style="margin-top:4px"><span class="text-muted">Bill No:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong> &nbsp;•&nbsp; Generated <?= fmtDate($bill['created_at'],'d F Y, h:i A') ?></p>
         </div>
         <div class="d-flex gap-8">
             <a href="../pdf/other-bill.php?id=<?= $billId ?>" class="btn btn-success" target="_blank"><?= svgIcon('download') ?> Download PDF</a>
@@ -100,39 +101,46 @@ renderHead('Other Bill Detail');
         </div>
     </div>
 
-    <!-- Summary boxes -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem">
-        <?php
-        $summaries = [
-            ['Bill Type',    $otype,                        '#EFF6FF', '#BFDBFE', '#1D4ED8'],
-            ['Claimant',     $bill['claimant_name'],         '#F0FDFA', '#99F6E4', '#0F766E'],
-            ['Bill Date',    fmtDate($bill['bill_date']),    '#FFFBEB', '#FDE68A', '#B45309'],
-            ['Total Amount', formatINR($bill['total_amount']), '#ECFDF5', '#A7F3D0', '#059669'],
-        ];
-        foreach($summaries as [$lbl,$val,$bg,$bdr,$clr]):
-        ?>
-        <div style="background:<?= $bg ?>;border:1px solid <?= $bdr ?>;border-radius:var(--radius);padding:1rem;text-align:center;box-shadow:var(--shadow-sm)">
-            <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.85;margin-bottom:4px"><?= $lbl ?></div>
-            <div style="font-size:1.2rem;font-weight:700;color:<?= $clr ?>"><?= e($val) ?></div>
-        </div>
-        <?php endforeach; ?>
-    </div>
+    <div style="display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start">
 
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
-        <!-- Bill Details -->
-        <div class="card">
-            <div class="card-header"><h3><?= svgIcon('document') ?> Bill Details</h3></div>
-            <div class="card-body">
-                <table style="font-size:.88rem;width:100%">
-                    <?= fld('Claimant', $bill['claimant_name']) ?>
-                    <?= fld('Bill Date', fmtDate($bill['bill_date'])) ?>
-                    <?php foreach($fields as [$label,$value]): ?>
-                    <?= fld($label, $value) ?>
-                    <?php endforeach; ?>
-                </table>
+        <!-- Left: Bill Details -->
+        <div>
+            <!-- Summary boxes -->
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem">
+                <?php
+                $summaries = [
+                    ['Bill Type',    $otype,                        '#EFF6FF', '#BFDBFE', '#1D4ED8'],
+                    ['Claimant',     $bill['claimant_name'],         '#F0FDFA', '#99F6E4', '#0F766E'],
+                    ['Bill Date',    fmtDate($bill['bill_date']),    '#FFFBEB', '#FDE68A', '#B45309'],
+                    ['Total Amount', formatINR($bill['total_amount']), '#ECFDF5', '#A7F3D0', '#059669'],
+                ];
+                foreach($summaries as [$lbl,$val,$bg,$bdr,$clr]):
+                ?>
+                <div style="background:<?= $bg ?>;border:1px solid <?= $bdr ?>;border-radius:var(--radius);padding:1rem;text-align:center;box-shadow:var(--shadow-sm)">
+                    <div style="font-size:.7rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:<?= $clr ?>;opacity:.85;margin-bottom:4px"><?= $lbl ?></div>
+                    <div style="font-size:1.3rem;font-weight:700;color:<?= $clr ?>"><?= e($val) ?></div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Bill Details -->
+            <div class="card">
+                <div class="card-header"><h3><?= svgIcon('document') ?> Bill Details</h3></div>
+                <div class="card-body">
+                    <table style="font-size:.88rem;width:100%">
+                        <?= fld('Bill Number', $billNumber) ?>
+                        <?= fld('Title', $bill['title']) ?>
+                        <?= fld('Claimant', $bill['claimant_name']) ?>
+                        <?= fld('Bill Date', fmtDate($bill['bill_date'])) ?>
+                        <?php foreach($fields as [$label,$value]): ?>
+                        <?= fld($label, $value) ?>
+                        <?php endforeach; ?>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- Right: Amount + Payment — no review panel; other bills are generated, not approved -->
         <div>
             <!-- Amount breakdown -->
             <div class="card" style="margin-bottom:1.5rem">
@@ -140,7 +148,7 @@ renderHead('Other Bill Detail');
                 <div class="card-body">
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
                         <span class="text-muted">Status</span>
-                        <?= statusBadge('finalized') ?>
+                        <?= statusBadge('generated') ?>
                     </div>
                     <div style="border-top:1px solid var(--border);margin-top:.5rem;padding-top:.6rem;display:flex;justify-content:space-between;align-items:center">
                         <strong>Total Amount</strong>

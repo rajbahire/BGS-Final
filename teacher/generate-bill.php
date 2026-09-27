@@ -40,11 +40,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ins->execute([$uid,$my,$from,$to,$tHrs,$pHrs,$oHrs,$teacher['rate_theory'],$teacher['rate_practical'],$teacher['rate_other'],$tAmt,$pAmt,$oAmt,$total]);
     $billId=$pdo->lastInsertId();
 
+    // Generate unique bill number (TB-YYYY-MM-NNNNN)
+    $billNumber = generateTeacherBillNumber($from, $billId);
+    $pdo->prepare("UPDATE bills SET bill_number=? WHERE id=?")->execute([$billNumber, $billId]);
+
     $link=$pdo->prepare("INSERT INTO bill_lectures (bill_id,lecture_id) VALUES (?,?)");
     foreach($lectures as $l) $link->execute([$billId,$l['id']]);
 
-    logActivity($pdo,$uid,'submit_bill',"Submitted bill #$billId for $my — ".formatINR($total));
-    setFlash('success',"Bill for $my submitted to HOD. Total: ".formatINR($total));
+    logActivity($pdo,$uid,'submit_bill',"Submitted bill $billNumber for $my — ".formatINR($total));
+    setFlash('success',"Bill $billNumber for $my submitted to HOD. Total: ".formatINR($total));
     header("Location: my-bills.php"); exit;
 }
 
@@ -53,7 +57,12 @@ $pm = (int)($_GET['month'] ?? 0);
 $py = (int)($_GET['year']  ?? date('Y'));
 $preview=[]; $pTotals=['t'=>0,'p'=>0,'o'=>0];
 
+$existingBill = null;
 if ($pm) {
+    $ebQ = $pdo->prepare("SELECT id, status, bill_number, period_from FROM bills WHERE teacher_id=? AND MONTH(period_from)=? AND YEAR(period_from)=? LIMIT 1");
+    $ebQ->execute([$uid, $pm, $py]);
+    $existingBill = $ebQ->fetch();
+
     $lq=$pdo->prepare("SELECT l.*,s.subject_name,s.subject_code FROM lectures l LEFT JOIN subjects s ON s.id=l.subject_id WHERE l.teacher_id=? AND MONTH(l.lecture_date)=? AND YEAR(l.lecture_date)=? AND l.id NOT IN (SELECT lecture_id FROM bill_lectures) ORDER BY l.lecture_date");
     $lq->execute([$uid,$pm,$py]); $preview=$lq->fetchAll();
     $pTotals=['t'=>array_sum(array_column($preview,'theory_hours')),'p'=>array_sum(array_column($preview,'practical_hours')),'o'=>array_sum(array_column($preview,'other_hours'))];
@@ -191,6 +200,11 @@ renderHead('Generate Bill');
                 </form>
             </div>
         </div>
+
+        <?php elseif($pm && !$preview && !empty($existingBill)):
+            $exBillNum = $existingBill['bill_number'] ?? generateTeacherBillNumber($existingBill['period_from'], $existingBill['id']);
+        ?>
+        <div class="card"><div class="empty-state"><div class="icon"><?= svgIcon('document') ?></div><h3>Bill Already Generated</h3><p>A bill for <?= date('F Y',mktime(0,0,0,$pm,1,$py)) ?> has already been submitted (<strong><?= e($exBillNum) ?></strong> — <?= statusBadge($existingBill['status']) ?>).</p><a href="bill-detail.php?id=<?= $existingBill['id'] ?>" class="btn btn-primary" style="margin-top:1rem">View Bill →</a></div></div>
 
         <?php elseif($pm && !$preview): ?>
         <div class="card"><div class="empty-state"><div class="icon"><?= svgIcon('document') ?></div><h3>No unbilled lectures</h3><p>No entries for <?= date('F Y',mktime(0,0,0,$pm,1,$py)) ?> or all already billed.</p><a href="lectures.php" class="btn btn-primary" style="margin-top:1rem">Add Lectures</a></div></div>

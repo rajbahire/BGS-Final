@@ -37,9 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $pdo->prepare("INSERT INTO other_bills (bill_type,created_by,title,claimant_name,department_id,bill_date,total_amount,bill_data) VALUES (?,?,?,?,?,?,?,?)")
         ->execute([$type,$user['id'],$title,$claimant,$deptId,$billDate,$amount,json_encode($data,JSON_UNESCAPED_UNICODE)]);
-    $newId = $pdo->lastInsertId();
+    $newId = (int)$pdo->lastInsertId();
+    $billNumber = generateOtherBillNumber($billDate, $newId);
+    $pdo->prepare("UPDATE other_bills SET bill_number=? WHERE id=?")->execute([$billNumber, $newId]);
 
-    logActivity($pdo,$user['id'],'create_other_bill',"Created $type bill #$newId for $claimant — ".formatINR($amount));
+    logActivity($pdo,$user['id'],'create_other_bill',"Created $type bill $billNumber for $claimant — ".formatINR($amount));
     header("Location: ../pdf/other-bill.php?id=$newId"); exit;
 }
 
@@ -76,11 +78,14 @@ renderHead('Other Bills');
         <?php if($existing): ?>
         <div class="table-wrap">
             <table>
-                <thead><tr><th>#</th><th>Type</th><th>Title</th><th>Claimant</th><th>Amount</th><th>Date</th><th>Action</th></tr></thead>
+                <thead><tr><th>#</th><th>Bill ID</th><th>Type</th><th>Title</th><th>Claimant</th><th>Amount</th><th>Date</th><th>Action</th></tr></thead>
                 <tbody>
-                <?php foreach($existing as $i => $b): $typeClasses=['practical'=>'badge-expert','earn_learn'=>'badge-approved','seminar'=>'badge-adjunct']; ?>
+                <?php foreach($existing as $i => $b):
+                    $obBillNum = $b['bill_number'] ?? generateOtherBillNumber($b['bill_date'], $b['id']);
+                ?>
                 <tr>
                     <td class="text-muted"><?= $i + 1 ?></td>
+                    <td class="fw-500" style="white-space:nowrap;color:var(--primary)"><?= e($obBillNum) ?></td>
                     <td class="fw-600"><?= $typeLabels[$b['bill_type']]??$b['bill_type'] ?></td>
                     <td class="fw-500"><?= e($b['title']) ?></td>
                     <td><?= e($b['claimant_name']) ?></td>

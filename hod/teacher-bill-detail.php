@@ -49,6 +49,8 @@ if (!$bill) {
     exit;
 }
 
+$billNumber = $bill['bill_number'] ?? generateTeacherBillNumber($bill['period_from'], $bill['id']);
+
 // Fallback: If class_label is still empty, derive class from lectures in this bill
 if (empty($bill['class_label'])) {
     $lecClass = $pdo->prepare(
@@ -84,17 +86,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'approve') {
         $pdo->prepare("UPDATE bills SET status='approved',reviewed_at=NOW(),reviewed_by=? WHERE id=?")
             ->execute([$user['id'], $billId]);
-        logActivity($pdo,$user['id'],'approve_bill',"Approved bill #$billId for {$bill['tname']}");
-        setFlash('success',"Bill #$billId approved successfully.");
+        logActivity($pdo,$user['id'],'approve_bill',"Approved bill $billNumber for {$bill['tname']}");
+        setFlash('success',"Bill $billNumber approved successfully.");
         header('Location: ' . $listPage); exit;
     }
     if ($action === 'reject') {
         $reason = trim($_POST['reason'] ?? '');
-        if (!$reason) { setFlash('error','Please provide a rejection reason.'); header("Location: request-detail.php?id=$billId&from=$from"); exit; }
+        if (!$reason) { setFlash('error','Please provide a rejection reason.'); header("Location: teacher-bill-detail.php?id=$billId&from=$from"); exit; }
         $pdo->prepare("UPDATE bills SET status='rejected',rejection_reason=?,reviewed_at=NOW(),reviewed_by=? WHERE id=?")
             ->execute([$reason, $user['id'], $billId]);
-        logActivity($pdo,$user['id'],'reject_bill',"Rejected bill #$billId: $reason");
-        setFlash('success',"Bill #$billId rejected.");
+        logActivity($pdo,$user['id'],'reject_bill',"Rejected bill $billNumber: $reason");
+        setFlash('success',"Bill $billNumber rejected.");
         header('Location: ' . $listPage); exit;
     }
 }
@@ -107,7 +109,7 @@ renderHead('Review Bill');
 <?php renderTopbar('Review Bill', [
     ['label' => 'Home',   'href' => 'dashboard.php'],
     ['label' => $listLbl,  'href' => $listPage],
-    ['label' => 'Bill #' . $billId],
+    ['label' => $billNumber],
 ]); ?>
 <div class="page-body">
     <?= getFlash() ?>
@@ -117,7 +119,7 @@ renderHead('Review Bill');
             <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
                 <h1 style="margin:0"><?= e($bill['month_year']) ?> — <?= e($bill['tname']) ?></h1>
             </div>
-            <p style="margin-top:4px">&nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
+            <p style="margin-top:4px"><span class="text-muted">Bill No:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong> &nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <a href="<?= $listPage ?>" class="btn btn-outline">← Back</a>
     </div>
@@ -149,7 +151,7 @@ renderHead('Review Bill');
                 <div class="card-header"><h3><?= svgIcon(($bill['role']??'') === 'student' ? 'student' : 'teacher') ?> <?= ($bill['role']??'') === 'student' ? 'Student' : 'Teacher' ?> Info</h3></div>
                 <div class="card-body">
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;font-size:.88rem">
-                        <div><span class="text-muted">Bill Number:</span> <strong style="color:var(--primary)">#<?= $billId ?></strong></div>
+                        <div><span class="text-muted">Bill Number:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong></div>
                         <div><span class="text-muted">Name:</span> <strong><?= e($bill['tname']) ?></strong></div>
                         <div><span class="text-muted">Email:</span> <?= e($bill['email']) ?></div>
                         <div><span class="text-muted">Type:</span> <?= teacherTypeBadge($bill['teacher_type']??'regular') ?></div>

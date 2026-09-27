@@ -123,7 +123,7 @@ renderHead('My Profile');
                     <div class="form-group"><label>Email</label><input type="email" class="form-control" value="<?= e($row['email']) ?>" disabled></div>
                     <div class="form-group"><label>Phone <span style="color:red">*</span></label><input type="text" name="phone" class="form-control" required value="<?= e($row['phone']??'') ?>"></div>
                     <div class="form-group"><label>Department</label><input type="text" class="form-control" value="<?= e($row['dept_name']??'—') ?>" disabled></div>
-                    <div class="form-group"><label>Teacher Type</label><input type="text" class="form-control" value="<?= ucfirst(str_replace('_',' ',$row['teacher_type']??'—')) ?>" disabled></div>
+                    <div class="form-group"><label>Teacher Type</label><input type="text" class="form-control" value="<?= teacherTypeLabel($row['teacher_type'] ?? '—') ?>" disabled></div>
                     <div class="form-group"><label>Mode</label><input type="text" class="form-control" value="<?= ucfirst($row['teacher_mode']??'—') ?>" disabled></div>
                     <div class="form-group"><label>Assigned Subject</label><input type="text" class="form-control" value="<?= e(($row['subject_name']??'—').($row['subject_code']?' ('.$row['subject_code'].')':'')) ?>" disabled></div>
                     <div class="form-group"><label>Appointment Order No. <span style="color:red">*</span></label><input type="text" name="appointment_order_no" class="form-control" value="<?= e($row['appointment_order_no']??'') ?>" placeholder="Enter appointment order number" required></div>

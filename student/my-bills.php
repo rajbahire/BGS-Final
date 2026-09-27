@@ -67,7 +67,7 @@ renderHead('My Bills');
                 ?>
                 <tr>
                     <td class="text-muted"><?= $recordNum ?></td>
-                    <td class="fw-500" style="white-space:nowrap"><?= e($b['bill_number'] ?? 'EL-'.date('Y-m',strtotime($b['period_from'])).'-'.str_pad($b['id'],5,'0',STR_PAD_LEFT)) ?></td>
+                    <td class="fw-500" style="white-space:nowrap"><?= e($b['bill_number'] ?? generateStudentBillNumber($b['period_from'], $b['id'])) ?></td>
                     <td class="fw-500"><?= e($b['month_year']) ?></td>
                     <td class="text-sm text-muted"><?= fmtDate($b['period_from'],'d M') ?> – <?= fmtDate($b['period_to'],'d M') ?></td>
                     <td><?= number_format($b['total_hours'],1) ?></td>

@@ -72,7 +72,8 @@ function statusBadge(string $status): string {
         'pending'   => ['badge-pending',   '● Pending'],
         'approved'  => ['badge-approved',  '● Approved'],
         'rejected'  => ['badge-rejected',  '● Rejected'],
-        'finalized' => ['badge-finalized', '● Finalized'],
+        'finalized' => ['badge-approved',  '● Generated'],
+        'generated' => ['badge-approved',  '● Generated'],
     ];
     [$cls, $label] = $map[$status] ?? ['badge-pending', ucfirst($status)];
     return '<span class="badge ' . $cls . '">' . $label . '</span>';
@@ -80,13 +81,24 @@ function statusBadge(string $status): string {
 
 function teacherTypeBadge(string $type): string {
     $map = [
-        'regular'          => ['badge-regular',   'Regular'],
-        'expert'           => ['badge-expert',    'Expert'],
-        'sectional_expert' => ['badge-sectional', 'Sectional Expert'],
-        'adjunct'          => ['badge-adjunct',   'Adjunct'],
+        'regular'          => ['badge-regular', 'Regular'],
+        'expert'           => ['badge-expert',  'Expert / Sectional Expert'],
+        'sectional_expert' => ['badge-expert',  'Expert / Sectional Expert'], // legacy value — same type as expert
+        'adjunct'          => ['badge-adjunct', 'Adjunct'],
     ];
     [$cls, $label] = $map[$type] ?? ['badge-regular', ucfirst($type)];
     return '<span class="badge ' . $cls . '">' . $label . '</span>';
+}
+
+// Plain-text label for table cells where a badge chip would be too busy
+function teacherTypeLabel(string $type): string {
+    $map = [
+        'regular'          => 'Regular',
+        'expert'           => 'Expert / Sectional Expert',
+        'sectional_expert' => 'Expert / Sectional Expert', // legacy value — same type as expert
+        'adjunct'          => 'Adjunct',
+    ];
+    return $map[$type] ?? ucfirst($type);
 }
 
 function modeBadge(string $mode): string {
@@ -346,12 +358,28 @@ function subjectLabel(PDO $pdo, int $id): string {
     return $cache[$id];
 }
 
+// ── Teacher Bill Number Generator ────────────────────────────
+// Format: TB-YYYY-MM-NNNNN  (e.g. TB-2026-08-00012)
+function generateTeacherBillNumber(string $periodFrom, int $billId): string {
+    $ts = strtotime($periodFrom);
+    $ym = $ts ? date('Y-m', $ts) : date('Y-m');
+    return 'TB-' . $ym . '-' . str_pad($billId, 5, '0', STR_PAD_LEFT);
+}
+
 // ── Student Bill Number Generator ────────────────────────────
 // Format: EL-YYYY-MM-NNNNN  (e.g. EL-2026-08-00012)
 function generateStudentBillNumber(string $periodFrom, int $billId): string {
     $ts = strtotime($periodFrom);
     $ym = $ts ? date('Y-m', $ts) : date('Y-m');
     return 'EL-' . $ym . '-' . str_pad($billId, 5, '0', STR_PAD_LEFT);
+}
+
+// ── Other Bill Number Generator ──────────────────────────────
+// Format: OB-YYYY-MM-NNNNN  (e.g. OB-2026-08-00012)
+function generateOtherBillNumber(string $billDate, int $billId): string {
+    $ts = strtotime($billDate);
+    $ym = $ts ? date('Y-m', $ts) : date('Y-m');
+    return 'OB-' . $ym . '-' . str_pad($billId, 5, '0', STR_PAD_LEFT);
 }
 
 // ── Pagination helpers ───────────────────────────────────────

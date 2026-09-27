@@ -34,17 +34,17 @@ $totalBilled  = (float)$pdo->query("SELECT COALESCE(SUM(total_amount),0) FROM bi
 
 // Recent bills (latest 6 across all bill types)
 $recentBills = $pdo->query(
-    "(SELECT 'teacher' AS source, b.total_amount, b.month_year,
+    "(SELECT 'teacher' AS source, b.id, b.bill_number, b.period_from, b.total_amount, b.month_year,
              u.name AS pname, u.teacher_type, COALESCE(b.submitted_at, b.created_at) AS sort_date
       FROM bills b JOIN users u ON u.id=b.teacher_id WHERE b.status='approved'
       ORDER BY sort_date DESC LIMIT 6)
      UNION ALL
-     (SELECT 'student' AS source, sb.total_amount, sb.month_year,
+     (SELECT 'student' AS source, sb.id, sb.bill_number, sb.period_from, sb.total_amount, sb.month_year,
              u.name AS pname, NULL AS teacher_type, sb.submitted_at AS sort_date
       FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='approved'
       ORDER BY sort_date DESC LIMIT 6)
      UNION ALL
-     (SELECT 'other' AS source, ob.total_amount, DATE_FORMAT(ob.bill_date,'%M %Y') AS month_year,
+     (SELECT 'other' AS source, ob.id, ob.bill_number, ob.bill_date AS period_from, ob.total_amount, DATE_FORMAT(ob.bill_date,'%M %Y') AS month_year,
              ob.claimant_name AS pname, ob.bill_type AS teacher_type, ob.created_at AS sort_date
       FROM other_bills ob ORDER BY ob.created_at DESC LIMIT 6)
      ORDER BY sort_date DESC LIMIT 6"
@@ -144,7 +144,22 @@ renderHead('Admin Dashboard');
                         }
                     ?>
                     <tr>
-                        <td class="fw-500"><?= e($rb['pname']) ?></td>
+                        <td class="fw-500">
+                            <div><?= e($rb['pname']) ?></div>
+                            <?php
+                            $billNum = null;
+                            if ($rb['source'] === 'teacher') {
+                                $billNum = $rb['bill_number'] ?? generateTeacherBillNumber($rb['period_from'], $rb['id']);
+                            } elseif ($rb['source'] === 'student') {
+                                $billNum = $rb['bill_number'] ?? generateStudentBillNumber($rb['period_from'], $rb['id']);
+                            } elseif ($rb['source'] === 'other') {
+                                $billNum = $rb['bill_number'] ?? generateOtherBillNumber($rb['period_from'], $rb['id']);
+                            }
+                            ?>
+                            <?php if ($billNum): ?>
+                            <div class="text-xs fw-600" style="color:var(--primary);margin-top:2px"><?= e($billNum) ?></div>
+                            <?php endif; ?>
+                        </td>
                         <td><?= $badge ?></td>
                         <td><?= e($rb['month_year']) ?></td>
                         <td class="fw-600"><?= formatINR($rb['total_amount']) ?></td>

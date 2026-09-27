@@ -38,12 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ins->execute([$teacherId,$user['id'],$my,$from,$to,$tHrs,$pHrs,$oHrs,$t['rate_theory'],$t['rate_practical'],$t['rate_other'],$tAmt,$pAmt,$oAmt,$total]);
     $billId=$pdo->lastInsertId();
 
+    // Generate unique bill number (TB-YYYY-MM-NNNNN)
+    $billNumber = generateTeacherBillNumber($from, $billId);
+    $pdo->prepare("UPDATE bills SET bill_number=? WHERE id=?")->execute([$billNumber, $billId]);
+
     $link=$pdo->prepare("INSERT INTO bill_lectures (bill_id,lecture_id) VALUES (?,?)");
     foreach($lectures as $l) $link->execute([$billId,$l['id']]);
 
-    logActivity($pdo,$user['id'],'manual_bill',"Created bill #$billId for {$t['name']} — $my");
-    setFlash('success',"Bill #$billId created for {$t['name']} ($my). Total: ".formatINR($total));
-    header("Location: request-detail.php?id=$billId"); exit;
+    logActivity($pdo,$user['id'],'manual_bill',"Created bill $billNumber for {$t['name']} — $my");
+    setFlash('success',"Bill $billNumber created for {$t['name']} ($my). Total: ".formatINR($total));
+    header("Location: teacher-bill-detail.php?id=$billId"); exit;
 }
 
 $selTeacher=(int)($_GET['teacher']??0);

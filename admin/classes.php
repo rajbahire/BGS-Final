@@ -83,8 +83,7 @@ $totalRecords = (int)$stmtCount->fetchColumn();
 $totalPages = totalPages($totalRecords, $perPage);
 
 // Main query with pagination
-$sql    = "SELECT c.*, d.name AS dept_name, d.short_name AS dept_short,
-            (SELECT COUNT(*) FROM subjects s WHERE s.class_id=c.id) AS subject_count
+$sql    = "SELECT c.*, d.name AS dept_name, d.short_name AS dept_short
            FROM classes c JOIN departments d ON d.id=c.department_id WHERE 1=1";
 $params = [];
 if ($filterDept) { $sql .= " AND c.department_id=?"; $params[] = $filterDept; }
@@ -147,7 +146,7 @@ renderHead('Classes');
                 <?php if ($classes): ?>
                 <div class="table-wrap">
                     <table>
-                        <thead><tr><th>#</th><th>Classes</th><th>Department</th><th>Year</th><th>Sem</th><th>Subjects</th><th>Status</th><th>Action</th></tr></thead>
+                        <thead><tr><th>#</th><th>Classes</th><th>Department</th><th>Year</th><th>Sem</th><th>Status</th><th>Action</th></tr></thead>
                         <tbody>
                         <?php foreach ($classes as $i => $c): ?>
                         <tr>
@@ -156,7 +155,6 @@ renderHead('Classes');
                             <td class="text-sm"><?= e($c['dept_name']) ?></td>
                             <td><?= (int)$c['year'] ?></td>
                             <td><?= (int)$c['semester'] ?></td>
-                            <td><?= (int)$c['subject_count'] ?></td>
                             <td><?= $c['is_active'] ? '<span class="badge badge-approved">Active</span>' : '<span class="badge badge-rejected">Inactive</span>' ?></td>
                         <td>
                             <div class="d-flex gap-8" style="flex-wrap:wrap">

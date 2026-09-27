@@ -73,7 +73,7 @@ renderHead('Review Earn & Learn Bill');
             <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
                 <h1 style="margin:0"><?= e($bill['month_year']) ?> — <?= e($bill['sname']) ?></h1>
             </div>
-            <p style="margin-top:4px"><span class="text-muted">&nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
+            <p style="margin-top:4px"><span class="text-muted">Bill No:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong> &nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <a href="<?= $listPage ?>" class="btn btn-outline">← Back</a>
     </div>
