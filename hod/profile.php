@@ -49,7 +49,7 @@ $_SESSION['profile_completed'] = isProfileComplete($row) ? 1 : 0;
 
 $deptName = $row['department_id'] ? deptName($pdo,(int)$row['department_id']) : '—';
 
-renderHead('HOD Profile');
+renderHead('My Profile');
 ?>
 <div class="app-layout">
 <?php renderSidebar('profile','hod',$user); ?>

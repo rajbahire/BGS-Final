@@ -111,7 +111,7 @@ $takenPairs = array_map(
     $classes
 );
 
-renderHead('HOD — Classes');
+renderHead('Classes');
 ?>
 <div class="app-layout">
 <?php renderSidebar('classes','hod',$user); ?>

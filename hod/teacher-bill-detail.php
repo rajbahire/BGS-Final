@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-renderHead('Review Bill');
+renderHead('Review Teacher Bill');
 ?>
 <div class="app-layout">
 <?php renderSidebar('requests','hod',$user); ?>
@@ -244,7 +244,7 @@ renderHead('Review Bill');
                 <div class="alert alert-error" style="text-align:left;margin-top:1rem"><?= e($bill['rejection_reason']) ?></div>
                 <?php endif; ?>
                 <?php if($bill['status']==='approved'): ?>
-                <a href="../pdf/generate.php?id=<?= $billId ?>" class="btn btn-success" style="margin-top:1rem" target="_blank"><?= svgIcon('download') ?> Download PDF</a>
+                <a href="../pdf/teacher-bill.php?id=<?= $billId ?>" class="btn btn-success" style="margin-top:1rem" target="_blank"><?= svgIcon('download') ?> Download PDF</a>
                 <?php endif; ?>
             </div>
         </div>

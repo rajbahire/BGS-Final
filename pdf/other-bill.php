@@ -60,7 +60,7 @@ $typeLabels=['practical'=>'Practical Examination Bill','earn_learn'=>'Earn and L
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title><?= h($billNumber) ?> — <?= h($bill['title']) ?></title>
+<title>Other Bill <?= h($billNumber) ?> — <?= h($bill['title']) ?></title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html{font-size:10pt}
@@ -100,7 +100,7 @@ th{font-weight:bold;text-align:center;background:#e5e5e5}
 <body>
 
 <div class="pbar">
-    <span><?= h($bill['title']) ?></span>
+    <span>Other Bill — <?= h($bill['title']) ?></span>
     <span class="bill-ref"><?= h($billNumber) ?> &nbsp;|&nbsp; <?= h($bill['claimant_name']) ?></span>
     <a></a>
     <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>

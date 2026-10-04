@@ -131,7 +131,7 @@ $subjects   = array_slice($subjects, $offset, $perPage);
 
 $deptName = $user['dept_name'] ?: 'Your Department';
 
-renderHead('HOD — Subjects');
+renderHead('Subjects');
 ?>
 <div class="app-layout">
 <?php renderSidebar('subjects','hod',$user); ?>

@@ -162,7 +162,7 @@ function canEditWork($pdo, $studentId, $workDate) {
     return !$billStatus || $billStatus === 'rejected';
 }
 
-renderHead('Add Work');
+renderHead('Work Log');
 ?>
 <div class="app-layout">
 <?php renderSidebar('add-work','student',$user); ?>

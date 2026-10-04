@@ -55,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-renderHead('Review Earn & Learn Bill');
+renderHead('Review Student Bill');
 ?>
 <div class="app-layout">
 <?php renderSidebar('requests','hod',$user); ?>

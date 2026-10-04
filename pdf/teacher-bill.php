@@ -1,6 +1,6 @@
 <?php
 // ============================================================
-//  pdf/generate.php — Official GCEA Bill (4 pages)
+//  pdf/teacher-bill.php — Official GCEA Teacher Bill (4 pages)
 //  Sections fill based on teacher_type:
 //    regular           -> Section 1 (Full-time PoP / Adjunct)
 //    expert            -> Section 2 (Hourly Expert / Sectional Expert)
@@ -110,6 +110,7 @@ body{font-family:'Times New Roman',Times,serif;color:#000;background:#ccc}
 .pbar{position:fixed;top:0;left:0;right:0;z-index:999;background:#1a3a6e;color:#fff;display:flex;align-items:center;gap:12px;padding:9px 18px;font-family:Arial,sans-serif;font-size:12px}
 .pbar button{background:#fff;color:#1a3a6e;border:none;border-radius:4px;padding:6px 16px;font-weight:700;font-size:12px;cursor:pointer}
 .pbar button svg{width:16px;height:16px;display:inline-block;vertical-align:middle;flex-shrink:0;margin-right:4px}
+.pbar .bill-ref{font-size:11px;opacity:.8}
 .pbar a{color:rgba(255,255,255,.7);text-decoration:none;margin-left:auto}
 .page{width:210mm;min-height:297mm;padding:13mm 14mm 12mm;margin:0 auto 14px;background:#fff;page-break-after:always;position:relative}
 @media screen{body{padding-top:50px}.page{box-shadow:0 2px 10px rgba(0,0,0,.3)}}
@@ -145,7 +146,8 @@ th,td{border:1px solid #000;padding:1.5mm 2mm;vertical-align:top}
 <body>
 
 <div class="pbar">
-    <span><?= h($billNumber) ?> &nbsp;|&nbsp; <?= h($month) ?> &nbsp;|&nbsp; <?= h($bill['tname']) ?></span>
+    <span>Teacher Bill — <?= h($bill['tname']) ?></span>
+    <span class="bill-ref"><?= h($billNumber) ?> &nbsp;|&nbsp; <?= h($month) ?></span>
     <a></a>
     <button onclick="window.print()"><?= svgIcon('printer') ?> Print / Save as PDF</button>
 </div>

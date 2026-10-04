@@ -49,7 +49,7 @@ if ($fType === '' || $fType === 'teacher') {
             'status'    => $b['status'],
             'date'      => $b['submitted_at'],
             'sort_date' => $b['sort_date'],
-            'pdf'       => '../pdf/generate.php?id=' . $b['id'],
+            'pdf'       => '../pdf/teacher-bill.php?id=' . $b['id'],
             'pdf_show'  => $b['status'] === 'approved',
         ];
     }

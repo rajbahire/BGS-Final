@@ -28,21 +28,16 @@ renderHead('Bill Detail');
 <div class="page-body">
     <?= getFlash() ?>
 
-    <div class="breadcrumb">
-        <a href="my-bills.php">My Bills</a><span class="sep">›</span><span><?= e($billNumber) ?></span>
-    </div>
-
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
             <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">
                 <h1 style="margin:0"><?= e($bill['month_year']) ?> Bill</h1>
-                <span class="badge" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;font-size:.85rem;font-weight:600"><?= e($billNumber) ?></span>
             </div>
             <p style="margin-top:4px"><span class="text-muted">Bill No:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong> &nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <div class="d-flex gap-8">
             <?php if($bill['status']==='approved'): ?>
-            <a href="../pdf/generate.php?id=<?= $billId ?>" class="btn btn-success" target="_blank"><?= svgIcon('download') ?> Download PDF</a>
+            <a href="../pdf/teacher-bill.php?id=<?= $billId ?>" class="btn btn-success" target="_blank"><?= svgIcon('download') ?> Download PDF</a>
             <?php endif; ?>
             <?php if($bill['status']==='rejected'): ?>
             <a href="generate-bill.php" class="btn btn-primary"><?= svgIcon('refresh') ?> Generate New Bill</a>

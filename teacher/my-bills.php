@@ -79,7 +79,7 @@ renderHead('My Bills');
                         <div class="d-flex gap-8">
                             <a href="bill-detail.php?id=<?= $b['id'] ?>" class="btn btn-outline btn-sm">View</a>
                             <?php if($b['status']==='approved'): ?>
-                            <a href="../pdf/generate.php?id=<?= $b['id'] ?>" class="btn btn-success btn-sm" target="_blank">PDF</a>
+                            <a href="../pdf/teacher-bill.php?id=<?= $b['id'] ?>" class="btn btn-success btn-sm" target="_blank">PDF</a>
                             <?php endif; ?>
                         </div>
                     </td>

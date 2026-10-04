@@ -44,7 +44,7 @@ renderHead('Bill Detail');
     <div class="d-flex justify-between align-center flex-wrap gap-10 mb-2">
         <div class="page-header" style="margin:0">
             <h1><?= e($bill['month_year']) ?> Bill</h1>
-            <p>Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
+            <p style="margin-top:4px"><span class="text-muted">Bill No:</span> <strong style="color:var(--primary)"><?= e($billNumber) ?></strong> &nbsp;•&nbsp; Submitted <?= fmtDate($bill['submitted_at'],'d F Y, h:i A') ?></p>
         </div>
         <div class="d-flex gap-8">
             <?php if($bill['status']==='approved'): ?>

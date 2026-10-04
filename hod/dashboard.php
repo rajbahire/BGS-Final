@@ -19,6 +19,12 @@ $rejected   = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teach
            + (int)$q("SELECT COUNT(*) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE sb.status='rejected' AND u.department_id=?",[$deptId]);
 $otherBills = (int)$q("SELECT COUNT(*) FROM other_bills WHERE department_id=?",[$deptId]);
 
+// All bills = every bill in the department regardless of status:
+// all teacher bills + all student bills + all other bills (already finalized on creation).
+$teacherBillsCount = (int)$q("SELECT COUNT(*) FROM bills b JOIN users u ON u.id=b.teacher_id WHERE u.department_id=?",[$deptId]);
+$studentBillsCount = (int)$q("SELECT COUNT(*) FROM student_bills sb JOIN users u ON u.id=sb.student_id WHERE u.department_id=?",[$deptId]);
+$allBills = $teacherBillsCount + $studentBillsCount + $otherBills;
+
 $teachers = (int)$q("SELECT COUNT(*) FROM users WHERE role='teacher' AND department_id=? AND is_active=1",[$deptId]);
 $students = (int)$q("SELECT COUNT(*) FROM users WHERE role='student' AND department_id=? AND is_active=1",[$deptId]);
 
@@ -84,7 +90,7 @@ renderHead('HOD Dashboard');
         <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending Requests</div><div class="stat-value"><?= $pending ?></div></div></div>
         <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $approved ?></div></div></div>
         <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected Bills</div><div class="stat-value"><?= $rejected ?></div></div></div>
-        <div class="stat-card stat-card--teal"><div class="stat-icon teal"><?= svgIcon('other-bills') ?></div><div><div class="stat-label">Other Bills</div><div class="stat-value"><?= $otherBills ?></div></div></div>
+        <div class="stat-card stat-card--teal"><div class="stat-icon teal"><?= svgIcon('all-bills') ?></div><div><div class="stat-label">All Bills</div><div class="stat-value"><?= $allBills ?></div></div></div>
         <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('teacher') ?></div><div><div class="stat-label">Teachers</div><div class="stat-value"><?= $teachers ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('student') ?></div><div><div class="stat-label">E&amp;L Students</div><div class="stat-value"><?= $students ?></div></div></div>
         <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('distributed') ?></div><div><div class="stat-label">This Month Paid</div><div class="stat-value sm"><?= formatINR($monthPaid) ?></div></div></div>

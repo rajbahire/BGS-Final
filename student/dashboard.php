@@ -11,6 +11,7 @@ $q = function($sql,$p=[]) use($pdo){ $s=$pdo->prepare($sql); $s->execute($p); re
 $totalBills    = (int)$q("SELECT COUNT(*) FROM student_bills WHERE student_id=?",[$uid]);
 $pendingBills  = (int)$q("SELECT COUNT(*) FROM student_bills WHERE student_id=? AND status='pending'",[$uid]);
 $approvedBills = (int)$q("SELECT COUNT(*) FROM student_bills WHERE student_id=? AND status='approved'",[$uid]);
+$rejectedBills= (int)$q("SELECT COUNT(*) FROM student_bills WHERE student_id=? AND status='rejected'",[$uid]);
 $totalEarned   = (float)$q("SELECT COALESCE(SUM(total_amount),0) FROM student_bills WHERE student_id=? AND status='approved'",[$uid]);
 $hrsThisMonth  = (float)$q("SELECT COALESCE(SUM(hours),0) FROM student_work WHERE student_id=? AND MONTH(work_date)=MONTH(NOW()) AND YEAR(work_date)=YEAR(NOW())",[$uid]);
 
@@ -37,8 +38,9 @@ renderHead('Student Dashboard');
 
     <div class="stats-grid">
         <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('all-bills') ?></div><div><div class="stat-label">Total Bills</div><div class="stat-value"><?= $totalBills ?></div></div></div>
-        <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending</div><div class="stat-value"><?= $pendingBills ?></div></div></div>
-        <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved</div><div class="stat-value"><?= $approvedBills ?></div></div></div>
+        <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending Bills</div><div class="stat-value"><?= $pendingBills ?></div></div></div>
+        <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $approvedBills ?></div></div></div>
+        <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected Bills</div><div class="stat-value"><?= $rejectedBills ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('month') ?></div><div><div class="stat-label">Hrs This Month</div><div class="stat-value"><?= number_format($hrsThisMonth,1) ?></div></div></div>
         <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('distributed') ?></div><div><div class="stat-label">Total Earned</div><div class="stat-value sm"><?= formatINR($totalEarned) ?></div></div></div>
     </div>

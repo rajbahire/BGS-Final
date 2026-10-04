@@ -4,10 +4,12 @@
 //  College Bill Generation System — GCEA
 // ============================================================
 
-define('DB_HOST',    'localhost');
-define('DB_NAME',    'college_bill_system');
-define('DB_USER',    'root');
-define('DB_PASS',    '');          // XAMPP default: empty
+// Environment overrides (read by tests/seed.php + Playwright's test server, see
+// README-TESTING.md). Unset locally → identical XAMPP defaults as before.
+define('DB_HOST',    getenv('BGS_DB_HOST') ?: 'localhost');
+define('DB_NAME',    getenv('BGS_DB_NAME') ?: 'college_bill_system');
+define('DB_USER',    getenv('BGS_DB_USER') ?: 'root');
+define('DB_PASS',    (string)getenv('BGS_DB_PASS'));   // XAMPP default: empty
 define('DB_CHARSET', 'utf8mb4');
 
 $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', DB_HOST, DB_NAME, DB_CHARSET);

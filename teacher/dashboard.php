@@ -38,10 +38,10 @@ renderHead('Teacher Dashboard');
     </div>
 
     <div class="stats-grid">
-        <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending</div><div class="stat-value"><?= $pendingBills ?></div></div></div>
-        <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved</div><div class="stat-value"><?= $approvedBills ?></div></div></div>
-        <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected</div><div class="stat-value"><?= $rejectedBills ?></div></div></div>
-        <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('all-bills') ?></div><div><div class="stat-label">Total Bills</div><div class="stat-value"><?= $totalBills ?></div></div></div>
+        <div class="stat-card stat-card--blue"><div class="stat-icon blue"><?= svgIcon('all-bills') ?></div><div><div class="stat-label">All Bills</div><div class="stat-value"><?= $totalBills ?></div></div></div>
+        <div class="stat-card stat-card--amber"><div class="stat-icon amber"><?= svgIcon('pending') ?></div><div><div class="stat-label">Pending Bills</div><div class="stat-value"><?= $pendingBills ?></div></div></div>
+        <div class="stat-card stat-card--green"><div class="stat-icon green"><?= svgIcon('approved') ?></div><div><div class="stat-label">Approved Bills</div><div class="stat-value"><?= $approvedBills ?></div></div></div>
+        <div class="stat-card stat-card--red"><div class="stat-icon red"><?= svgIcon('rejected') ?></div><div><div class="stat-label">Rejected Bills</div><div class="stat-value"><?= $rejectedBills ?></div></div></div>
         <div class="stat-card stat-card--purple"><div class="stat-icon purple"><?= svgIcon('month') ?></div><div><div class="stat-label">Hrs This Month</div><div class="stat-value"><?= number_format($lecThisMonth,1) ?></div></div></div>
         <div class="stat-card stat-card--orange"><div class="stat-icon orange"><?= svgIcon('distributed') ?></div><div><div class="stat-label">Total Earned</div><div class="stat-value sm"><?= formatINR($totalEarned) ?></div></div></div>
     </div>

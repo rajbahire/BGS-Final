@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     header('Location: profile.php'); exit;
 }
-renderHead('Profile');
+renderHead('My Profile');
 ?>
 <div class="app-layout">
 <?php renderSidebar('profile','admin',$user); ?>
