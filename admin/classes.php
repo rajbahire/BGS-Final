@@ -124,8 +124,8 @@ renderHead('Classes');
                 <div class="card-body" style="padding:.9rem">
                     <form method="GET" style="display:flex;gap:10px;align-items:flex-end">
                         <div class="form-group" style="margin:0;flex:1">
-                            <label>Filter by Department</label>
-                            <select name="dept" class="form-control" onchange="this.form.submit()">
+                            <label for="admin_filter_dept">Filter by Department</label>
+                            <select id="admin_filter_dept" name="dept" class="form-control" onchange="this.form.submit()">
                                 <option value="">All Departments</option>
                                 <?php foreach ($depts as $d): ?>
                                 <option value="<?= $d['id'] ?>" <?= $filterDept==$d['id']?'selected':'' ?>>
@@ -211,7 +211,7 @@ renderHead('Classes');
             <input type="hidden" name="dept_filter" value="<?= $filterDept ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Department <span style="color:red">*</span></label>
+                    <label for="sel-dept">Department <span style="color:red">*</span></label>
                     <select name="department_id" id="sel-dept" class="form-control" required
                             onchange="filterYears(); filterSemesters(); autoLabel();">
                         <option value="">— Select —</option>
@@ -228,7 +228,7 @@ renderHead('Classes');
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Year <span style="color:red">*</span></label>
+                    <label for="sel-year">Year <span style="color:red">*</span></label>
                     <select name="year" id="sel-year" class="form-control" required
                             onchange="filterSemesters(); autoLabel();">
                         <option value="">— Select —</option>
@@ -239,14 +239,14 @@ renderHead('Classes');
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Semester <span style="color:red">*</span></label>
+                    <label for="sel-sem">Semester <span style="color:red">*</span></label>
                     <select name="semester" id="sel-sem" class="form-control" required
                             onchange="autoLabel()">
                         <option value="">— Select Dept & Year first —</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Label <span style="color:red">*</span></label>
+                    <label for="label-input">Label <span style="color:red">*</span></label>
                     <input type="text" name="label" id="label-input" class="form-control" required
                            placeholder="e.g. Year-Department-Semester">
                 </div>
@@ -276,12 +276,12 @@ renderHead('Classes');
             <input type="hidden" name="id" value="<?= $c['id'] ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="text-muted">Department</label>
-                    <input type="text" class="form-control" disabled
+                    <label class="text-muted" for="edit_c_dept_<?= $c['id'] ?>">Department</label>
+                    <input type="text" id="edit_c_dept_<?= $c['id'] ?>" class="form-control" disabled
                            value="<?= e($c['dept_name'] . ' (' . $c['dept_short'] . ')') ?>">
                 </div>
                 <div class="form-group">
-                    <label>Year <span style="color:red">*</span></label>
+                    <label for="sel-year-edit-<?= $c['id'] ?>">Year <span style="color:red">*</span></label>
                     <select name="year" id="sel-year-edit-<?= $c['id'] ?>" class="form-control" required
                             onchange="autoLabel()">
                         <option value="1" <?= $c['year']==1?'selected':'' ?>>1st Year (FY)</option>
@@ -295,7 +295,7 @@ renderHead('Classes');
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Semester <span style="color:red">*</span></label>
+                    <label for="sel-sem-edit-<?= $c['id'] ?>">Semester <span style="color:red">*</span></label>
                     <select name="semester" id="sel-sem-edit-<?= $c['id'] ?>" class="form-control" required
                             onchange="autoLabel()">
                         <?php for ($s = 1; $s <= $rowMaxSem; $s++): ?>
@@ -304,13 +304,13 @@ renderHead('Classes');
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Label <span style="color:red">*</span></label>
+                    <label for="label-input-<?= $c['id'] ?>">Label <span style="color:red">*</span></label>
                     <input type="text" name="label" id="label-input-<?= $c['id'] ?>" class="form-control" required
                            value="<?= e($c['label']) ?>" placeholder="e.g. Year-Department-Semester">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="is_active" class="form-control">
+                    <label for="edit_c_status_<?= $c['id'] ?>">Status</label>
+                    <select id="edit_c_status_<?= $c['id'] ?>" name="is_active" class="form-control">
                         <option value="1" <?= $c['is_active']?'selected':'' ?>>Active</option>
                         <option value="0" <?= !$c['is_active']?'selected':'' ?>>Inactive</option>
                     </select>

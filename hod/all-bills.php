@@ -72,7 +72,7 @@ if ($fTeacher === 0 && ($fType === '' || $fType === 'student')) {
         $rows[] = [
             'source'    => 'student',
             'name'      => $b['pname'],
-            'sub'       => '<span class="text-sm text-muted">' . e($sbBillNum) . '</span>',
+            'sub'       => '<span class="text-sm text-muted">' . e($sbBillNum) .  ($b['class_label'] ? ' · ' . e($b['class_label']) : '') . '</span>',
             'period'    => e($b['month_year']),
             'hours'     => (float)$b['total_hours'],
             'amount'    => (float)$b['total_amount'],
@@ -156,8 +156,8 @@ renderHead('All Bills');
         <div class="card-body" style="padding:.9rem">
             <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
                 <div class="form-group" style="margin:0">
-                    <label>Type</label>
-                    <select name="type" class="form-control" style="width:200px">
+                    <label for="all_type">Type</label>
+                    <select id="all_type" name="type" class="form-control" style="width:200px">
                         <option value="">All Bills</option>
                         <option value="teacher" <?= $fType==='teacher'?'selected':'' ?>>Teacher Bills</option>
                         <option value="student" <?= $fType==='student'?'selected':'' ?>>Earn & Learn (Students)</option>
@@ -165,8 +165,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Status</label>
-                    <select name="status" class="form-control" style="width:180px">
+                    <label for="all_status">Status</label>
+                    <select id="all_status" name="status" class="form-control" style="width:180px">
                         <option value="">All</option>
                         <option value="pending"   <?= $fStatus==='pending'  ?'selected':'' ?>>Pending</option>
                         <option value="approved"  <?= $fStatus==='approved' ?'selected':'' ?>>Approved</option>
@@ -175,8 +175,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Teacher</label>
-                    <select name="teacher" class="form-control" style="width:200px">
+                    <label for="all_teacher">Teacher</label>
+                    <select id="all_teacher" name="teacher" class="form-control" style="width:200px">
                         <option value="">All Teachers</option>
                         <?php foreach($teachers as $t): ?>
                         <option value="<?= $t['id'] ?>" <?= $fTeacher==$t['id']?'selected':'' ?>><?= e($t['name']) ?></option>
@@ -184,8 +184,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Month</label>
-                    <select name="month" class="form-control" style="width:180px">
+                    <label for="all_month">Month</label>
+                    <select id="all_month" name="month" class="form-control" style="width:180px">
                         <option value="">All Months</option>
                         <?php for($m=1;$m<=12;$m++): ?>
                         <option value="<?= $m ?>" <?= $fMonth==$m?'selected':'' ?>><?= date('F',mktime(0,0,0,$m,1)) ?></option>
@@ -193,8 +193,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Year</label>
-                    <select name="year" class="form-control" style="width:180px">
+                    <label for="all_year">Year</label>
+                    <select id="all_year" name="year" class="form-control" style="width:180px">
                         <option value="">All</option>
                         <?php for($y=date('Y');$y>=date('Y')-4;$y--): ?>
                         <option value="<?= $y ?>" <?= $fYear==$y?'selected':'' ?>><?= $y ?></option>

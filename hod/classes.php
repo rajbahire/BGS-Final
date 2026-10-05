@@ -217,13 +217,13 @@ renderHead('Classes');
             <div class="modal-body">
                 <!-- Department (read-only display) -->
                 <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" class="form-control" value="<?= e($deptName) ?>" disabled
+                    <label for="add_class_dept">Department</label>
+                    <input type="text" id="add_class_dept" name="class_dept_display" class="form-control" value="<?= e($deptName) ?>" disabled
                            style="background:var(--bg);color:var(--light)">
                 </div>
 
                 <div class="form-group">
-                    <label>Year <span style="color:red">*</span></label>
+                    <label for="sel-year">Year <span style="color:red">*</span></label>
                     <select name="year" id="sel-year" class="form-control" required
                             onchange="filterSemesters(); autoLabel();">
                         <option value="">— Select Year —</option>
@@ -239,7 +239,7 @@ renderHead('Classes');
                 </div>
 
                 <div class="form-group">
-                    <label>Semester <span style="color:red">*</span></label>
+                    <label for="sel-sem">Semester <span style="color:red">*</span></label>
                     <select name="semester" id="sel-sem" class="form-control" required
                             onchange="autoLabel()">
                         <option value="">— Select Year first —</option>
@@ -247,7 +247,7 @@ renderHead('Classes');
                 </div>
 
                 <div class="form-group">
-                    <label>Class Label <span style="color:red">*</span></label>
+                    <label for="lbl-input">Class Label <span style="color:red">*</span></label>
                     <input type="text" name="label" id="lbl-input" class="form-control" required
                            placeholder="e.g. FY <?= e($deptShort ?: 'DEPT') ?> Sem 1">
                 </div>
@@ -274,14 +274,14 @@ renderHead('Classes');
             <div class="modal-body">
                 <!-- Department (read-only display) -->
                 <div class="form-group">
-                    <label>Department</label>
-                    <input type="text" class="form-control" value="<?= e($deptName) ?>" disabled
+                    <label for="edit_dept_<?= $c['id'] ?>">Department</label>
+                    <input type="text" id="edit_dept_<?= $c['id'] ?>" name="class_dept_display_<?= $c['id'] ?>" class="form-control" value="<?= e($deptName) ?>" disabled
                            style="background:var(--bg);color:var(--light)">
                 </div>
 
                 <div class="form-group">
-                    <label>Year <span style="color:red">*</span></label>
-                    <select name="year" class="form-control" required
+                    <label for="edit_year_<?= $c['id'] ?>">Year <span style="color:red">*</span></label>
+                    <select id="edit_year_<?= $c['id'] ?>" name="year" class="form-control" required
                             onchange="autoLabel()">
                         <option value="1" <?= $c['year']==1?'selected':'' ?>>1st Year (FY)</option>
                         <option value="2" <?= $c['year']==2?'selected':'' ?>>2nd Year (SY)</option>
@@ -295,8 +295,8 @@ renderHead('Classes');
                 </div>
 
                 <div class="form-group">
-                    <label>Semester <span style="color:red">*</span></label>
-                    <select name="semester" class="form-control" required
+                    <label for="edit_sem_<?= $c['id'] ?>">Semester <span style="color:red">*</span></label>
+                    <select id="edit_sem_<?= $c['id'] ?>" name="semester" class="form-control" required
                             onchange="autoLabel()">
                         <?php for ($s = 1; $s <= $maxSem; $s++): ?>
                         <option value="<?= $s ?>" <?= $c['semester']==$s?'selected':'' ?>>Semester <?= $s ?></option>
@@ -305,15 +305,15 @@ renderHead('Classes');
                 </div>
 
                 <div class="form-group">
-                    <label>Class Label <span style="color:red">*</span></label>
-                    <input type="text" name="label" class="form-control" required
+                    <label for="edit_label_<?= $c['id'] ?>">Class Label <span style="color:red">*</span></label>
+                    <input type="text" id="edit_label_<?= $c['id'] ?>" name="label" class="form-control" required
                            value="<?= e($c['label']) ?>"
                            placeholder="e.g. FY <?= e($deptShort ?: 'DEPT') ?> Sem 1">
                 </div>
 
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="is_active" class="form-control">
+                    <label for="edit_status_<?= $c['id'] ?>">Status</label>
+                    <select id="edit_status_<?= $c['id'] ?>" name="is_active" class="form-control">
                         <option value="1" <?= $c['is_active']?'selected':'' ?>>Active</option>
                         <option value="0" <?= !$c['is_active']?'selected':'' ?>>Inactive</option>
                     </select>

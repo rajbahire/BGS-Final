@@ -340,15 +340,15 @@ renderHead('Manage Users');
             <input type="hidden" name="action" value="add_teacher">
             <input type="hidden" name="tab" value="teachers">
             <div class="modal-body">
-                <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" required></div>
-                <div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" class="form-control" required placeholder="teacher@gcea.edu"></div>
+                <div class="form-group"><label for="add_t_name">Full Name <span style="color:red">*</span></label><input type="text" id="add_t_name" name="name" class="form-control" required autocomplete="name"></div>
+                <div class="form-group"><label for="add_t_email">Email <span style="color:red">*</span></label><input type="email" id="add_t_email" name="email" class="form-control" required placeholder="teacher@gcea.edu" autocomplete="email"></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <div class="form-group"><label>Password</label><input type="text" name="password" class="form-control" value="teacher@1234"></div>
-                    <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control"></div>
+                    <div class="form-group"><label for="add_t_password">Password</label><input type="text" id="add_t_password" name="password" class="form-control" value="teacher@1234" autocomplete="new-password"></div>
+                    <div class="form-group"><label for="add_t_phone">Phone</label><input type="text" id="add_t_phone" name="phone" class="form-control" autocomplete="tel"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                <div class="form-group"><label>Teacher Type <span style="color:red">*</span></label>
-                    <select name="teacher_type" class="form-control" required>
+                <div class="form-group"><label for="add_t_type">Teacher Type <span style="color:red">*</span></label>
+                    <select id="add_t_type" name="teacher_type" class="form-control" required>
                         <option value="">— Select Type —</option>
                         <!-- Regular option — temporarily disabled
                         <option value="regular">Regular</option>
@@ -357,8 +357,8 @@ renderHead('Manage Users');
                         <option value="adjunct">Adjunct</option>
                     </select>
                 </div>
-                <div class="form-group"><label>Mode <span style="color:red">*</span></label>
-                    <select name="teacher_mode" class="form-control sel-mode" required onchange="updateSubjectFields(this)">
+                <div class="form-group"><label for="add_t_mode">Mode <span style="color:red">*</span></label>
+                    <select id="add_t_mode" name="teacher_mode" class="form-control sel-mode" required onchange="updateSubjectFields(this)">
                         <option value="">— Select Mode —</option>
                         <option value="theory">Theory</option>
                         <option value="practical">Practical</option>
@@ -367,11 +367,11 @@ renderHead('Manage Users');
                 </div>
                 </div>
                 <div class="subject-fields"></div>
-                <div class="form-group"><label>Appointment Order No.</label><input type="text" name="appointment_order_no" class="form-control"></div>
+                <div class="form-group"><label for="add_t_order">Appointment Order No.</label><input type="text" id="add_t_order" name="appointment_order_no" class="form-control"></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                    <div class="form-group"><label>Rate Theory (₹) <span style="color:red">*</span></label><input type="number" name="rate_theory" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Rate Practical (₹) <span style="color:red">*</span></label><input type="number" name="rate_practical" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Rate Other (₹) <span style="color:red">*</span></label><input type="number" name="rate_other" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="add_t_rate_theory">Rate Theory (₹) <span style="color:red">*</span></label><input type="number" id="add_t_rate_theory" name="rate_theory" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="add_t_rate_practical">Rate Practical (₹) <span style="color:red">*</span></label><input type="number" id="add_t_rate_practical" name="rate_practical" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="add_t_rate_other">Rate Other (₹) <span style="color:red">*</span></label><input type="number" id="add_t_rate_other" name="rate_other" class="form-control" step="0.01" min="0" value="0"></div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -395,22 +395,22 @@ renderHead('Manage Users');
             <input type="hidden" name="tab" value="teachers">
             <input type="hidden" name="id" value="<?= $t['id'] ?>">
             <div class="modal-body">
-                <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" required value="<?= e($t['name']) ?>"></div>
+                <div class="form-group"><label for="edit_t_name_<?= $t['id'] ?>">Full Name <span style="color:red">*</span></label><input type="text" id="edit_t_name_<?= $t['id'] ?>" name="name" class="form-control" required value="<?= e($t['name']) ?>" autocomplete="name"></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                    <div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" class="form-control" required placeholder="teacher@gcea.edu" value="<?= e($t['email']) ?>"></div>
-                    <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control" value="<?= e($t['phone']??'') ?>"></div>
+                    <div class="form-group"><label for="edit_t_email_<?= $t['id'] ?>">Email <span style="color:red">*</span></label><input type="email" id="edit_t_email_<?= $t['id'] ?>" name="email" class="form-control" required placeholder="teacher@gcea.edu" value="<?= e($t['email']) ?>" autocomplete="email"></div>
+                    <div class="form-group"><label for="edit_t_phone_<?= $t['id'] ?>">Phone</label><input type="text" id="edit_t_phone_<?= $t['id'] ?>" name="phone" class="form-control" value="<?= e($t['phone']??'') ?>" autocomplete="tel"></div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                <div class="form-group"><label>Teacher Type <span style="color:red">*</span></label>
-                    <select name="teacher_type" class="form-control" required>
+                <div class="form-group"><label for="edit_t_type_<?= $t['id'] ?>">Teacher Type <span style="color:red">*</span></label>
+                    <select id="edit_t_type_<?= $t['id'] ?>" name="teacher_type" class="form-control" required>
                         <option value="">— Select Type —</option>
                         <?php foreach(['regular'=>'Regular','expert'=>'Expert / Sectional Expert','adjunct'=>'Adjunct'] as $v=>$l): ?>
                         <option value="<?= $v ?>" <?= ($t['teacher_type']??'')===$v?'selected':'' ?>><?= $l ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="form-group"><label>Mode <span style="color:red">*</span></label>
-                    <select name="teacher_mode" class="form-control sel-mode" required onchange="updateSubjectFields(this)">
+                <div class="form-group"><label for="edit_t_mode_<?= $t['id'] ?>">Mode <span style="color:red">*</span></label>
+                    <select id="edit_t_mode_<?= $t['id'] ?>" name="teacher_mode" class="form-control sel-mode" required onchange="updateSubjectFields(this)">
                         <option value="">— Select Mode —</option>
                         <option value="theory"    <?= ($t['teacher_mode']??'')==='theory'    ?'selected':'' ?>>Theory</option>
                         <option value="practical" <?= ($t['teacher_mode']??'')==='practical' ?'selected':'' ?>>Practical</option>
@@ -419,13 +419,13 @@ renderHead('Manage Users');
                 </div>
                 </div>
                 <div class="subject-fields"></div>
-                <div class="form-group"><label>Appointment Order No.</label><input type="text" name="appointment_order_no" class="form-control" value="<?= e($t['appointment_order_no']??'') ?>"></div>
+                <div class="form-group"><label for="edit_t_order_<?= $t['id'] ?>">Appointment Order No.</label><input type="text" id="edit_t_order_<?= $t['id'] ?>" name="appointment_order_no" class="form-control" value="<?= e($t['appointment_order_no']??'') ?>"></div>
                 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-                    <div class="form-group"><label>Rate Theory (₹) <span style="color:red">*</span></label><input type="number" name="rate_theory" class="form-control" step="0.01" min="0" value="<?= $t['rate_theory']??0 ?>"></div>
-                    <div class="form-group"><label>Rate Practical (₹) <span style="color:red">*</span></label><input type="number" name="rate_practical" class="form-control" step="0.01" min="0" value="<?= $t['rate_practical']??0 ?>"></div>
-                    <div class="form-group"><label>Rate Other (₹) <span style="color:red">*</span></label><input type="number" name="rate_other" class="form-control" step="0.01" min="0" value="<?= $t['rate_other']??0 ?>"></div>
+                    <div class="form-group"><label for="edit_t_rate_theory_<?= $t['id'] ?>">Rate Theory (₹) <span style="color:red">*</span></label><input type="number" id="edit_t_rate_theory_<?= $t['id'] ?>" name="rate_theory" class="form-control" step="0.01" min="0" value="<?= $t['rate_theory']??0 ?>"></div>
+                    <div class="form-group"><label for="edit_t_rate_practical_<?= $t['id'] ?>">Rate Practical (₹) <span style="color:red">*</span></label><input type="number" id="edit_t_rate_practical_<?= $t['id'] ?>" name="rate_practical" class="form-control" step="0.01" min="0" value="<?= $t['rate_practical']??0 ?>"></div>
+                    <div class="form-group"><label for="edit_t_rate_other_<?= $t['id'] ?>">Rate Other (₹) <span style="color:red">*</span></label><input type="number" id="edit_t_rate_other_<?= $t['id'] ?>" name="rate_other" class="form-control" step="0.01" min="0" value="<?= $t['rate_other']??0 ?>"></div>
                 </div>
-                <div class="form-group"><label>Status</label><select name="is_active" class="form-control"><option value="1" <?= $t['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$t['is_active']?'selected':'' ?>>Inactive</option></select></div>
+                <div class="form-group"><label for="edit_t_status_<?= $t['id'] ?>">Status</label><select id="edit_t_status_<?= $t['id'] ?>" name="is_active" class="form-control"><option value="1" <?= $t['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$t['is_active']?'selected':'' ?>>Inactive</option></select></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-teacher-<?= $t['id'] ?>-edit')">Cancel</button>
@@ -447,20 +447,20 @@ renderHead('Manage Users');
             <input type="hidden" name="action" value="add_student">
             <input type="hidden" name="tab" value="students">
             <div class="modal-body">
-                <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" placeholder="Enter Full Name" required></div>
-                <div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" class="form-control" required placeholder="student@gcea.edu"></div>
-                <div class="form-group"><label>Enrollment Number</label><input type="text" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001"></div>
-                <div class="form-group"><label>Password</label><input type="text" name="password" class="form-control" value="student@1234"></div>
-                <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control" placeholder="Phone Number"></div>
-                <div class="form-group"><label>Class <span style="color:red">*</span></label>
-                    <select name="class_id" class="form-control" required>
+                <div class="form-group"><label for="add_s_name">Full Name <span style="color:red">*</span></label><input type="text" id="add_s_name" name="name" class="form-control" placeholder="Enter Full Name" required autocomplete="name"></div>
+                <div class="form-group"><label for="add_s_email">Email <span style="color:red">*</span></label><input type="email" id="add_s_email" name="email" class="form-control" required placeholder="student@gcea.edu" autocomplete="email"></div>
+                <div class="form-group"><label for="add_s_enrollment">Enrollment Number</label><input type="text" id="add_s_enrollment" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001"></div>
+                <div class="form-group"><label for="add_s_password">Password</label><input type="text" id="add_s_password" name="password" class="form-control" value="student@1234" autocomplete="new-password"></div>
+                <div class="form-group"><label for="add_s_phone">Phone</label><input type="text" id="add_s_phone" name="phone" class="form-control" placeholder="Phone Number" autocomplete="tel"></div>
+                <div class="form-group"><label for="add_s_class">Class <span style="color:red">*</span></label>
+                    <select id="add_s_class" name="class_id" class="form-control" required>
                         <option value="">— Select Class —</option>
                         <?php foreach($classes as $c): ?>
                         <option value="<?= $c['id'] ?>"><?= e($c['label']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="form-group"><label>Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" name="rate_per_hour" class="form-control" step="0.01" min="0" value="50" required></div>
+                <div class="form-group"><label for="add_s_rate">Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" id="add_s_rate" name="rate_per_hour" class="form-control" step="0.01" min="0" value="50" required></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-student-add')">Cancel</button>
@@ -483,20 +483,20 @@ renderHead('Manage Users');
             <input type="hidden" name="tab" value="students">
             <input type="hidden" name="id" value="<?= $s['id'] ?>">
             <div class="modal-body">
-                <div class="form-group"><label>Full Name <span style="color:red">*</span></label><input type="text" name="name" class="form-control" required value="<?= e($s['name']) ?>"></div>
-                <div class="form-group"><label>Email <span style="color:red">*</span></label><input type="email" name="email" class="form-control" required placeholder="student@gcea.edu" value="<?= e($s['email']) ?>"></div>
-                <div class="form-group"><label>Enrollment Number</label><input type="text" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001" value="<?= e($s['enrollment_number']??'') ?>"></div>
-                <div class="form-group"><label>Phone</label><input type="text" name="phone" class="form-control" value="<?= e($s['phone']??'') ?>"></div>
-                <div class="form-group"><label>Class <span style="color:red">*</span></label>
-                    <select name="class_id" class="form-control" required>
+                <div class="form-group"><label for="edit_s_name_<?= $s['id'] ?>">Full Name <span style="color:red">*</span></label><input type="text" id="edit_s_name_<?= $s['id'] ?>" name="name" class="form-control" required value="<?= e($s['name']) ?>" autocomplete="name"></div>
+                <div class="form-group"><label for="edit_s_email_<?= $s['id'] ?>">Email <span style="color:red">*</span></label><input type="email" id="edit_s_email_<?= $s['id'] ?>" name="email" class="form-control" required placeholder="student@gcea.edu" value="<?= e($s['email']) ?>" autocomplete="email"></div>
+                <div class="form-group"><label for="edit_s_enrollment_<?= $s['id'] ?>">Enrollment Number</label><input type="text" id="edit_s_enrollment_<?= $s['id'] ?>" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001" value="<?= e($s['enrollment_number']??'') ?>"></div>
+                <div class="form-group"><label for="edit_s_phone_<?= $s['id'] ?>">Phone</label><input type="text" id="edit_s_phone_<?= $s['id'] ?>" name="phone" class="form-control" value="<?= e($s['phone']??'') ?>" autocomplete="tel"></div>
+                <div class="form-group"><label for="edit_s_class_<?= $s['id'] ?>">Class <span style="color:red">*</span></label>
+                    <select id="edit_s_class_<?= $s['id'] ?>" name="class_id" class="form-control" required>
                         <option value="">— Select Class —</option>
                         <?php foreach($classes as $c): ?>
                         <option value="<?= $c['id'] ?>" <?= (($s['class_id']??0)==$c['id'])?'selected':'' ?>><?= e($c['label']) ?></option>
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="form-group"><label>Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" name="rate_per_hour" class="form-control" step="0.01" min="0" value="<?= $s['rate_per_hour'] ?>" required></div>
-                <div class="form-group"><label>Status</label><select name="is_active" class="form-control"><option value="1" <?= $s['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$s['is_active']?'selected':'' ?>>Inactive</option></select></div>
+                <div class="form-group"><label for="edit_s_rate_<?= $s['id'] ?>">Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" id="edit_s_rate_<?= $s['id'] ?>" name="rate_per_hour" class="form-control" step="0.01" min="0" value="<?= $s['rate_per_hour'] ?>" required></div>
+                <div class="form-group"><label for="edit_s_status_<?= $s['id'] ?>">Status</label><select id="edit_s_status_<?= $s['id'] ?>" name="is_active" class="form-control"><option value="1" <?= $s['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$s['is_active']?'selected':'' ?>>Inactive</option></select></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-student-<?= $s['id'] ?>-edit')">Cancel</button>
@@ -527,12 +527,18 @@ function availableSubjects(ownerId) {
     });
 }
 
-function buildSelect(name, filterFn, selectedId, labelText, pool) {
+function buildSelect(name, filterFn, selectedId, labelText, pool, fieldId) {
     const wrap = document.createElement('div');
     wrap.className = 'form-group';
     const lbl = document.createElement('label');
+    if (fieldId) {
+        lbl.htmlFor = fieldId;
+    }
     lbl.innerHTML = labelText + ' <span style="color:red">*</span>';
     const sel = document.createElement('select');
+    if (fieldId) {
+        sel.id = fieldId;
+    }
     sel.name = name;
     sel.className = 'form-control';
     sel.required = true;
@@ -569,14 +575,15 @@ function updateSubjectFields(modeSelect) {
 
     const theoryFilter    = s => s.mode === 'theory' || s.mode === 'theory & practical';
     const practicalFilter = s => s.mode === 'practical' || s.mode === 'theory & practical';
+    const fieldPrefix = 'subj_' + ownerId + '_';
 
     if (mode === 'theory') {
-        container.appendChild(buildSelect('subject_id',   theoryFilter,    subj1, 'Theory Subject',    pool));
+        container.appendChild(buildSelect('subject_id',   theoryFilter,    subj1, 'Theory Subject',    pool, fieldPrefix + 'theory'));
     } else if (mode === 'practical') {
-        container.appendChild(buildSelect('subject_id',   practicalFilter, subj1, 'Practical Subject', pool));
+        container.appendChild(buildSelect('subject_id',   practicalFilter, subj1, 'Practical Subject', pool, fieldPrefix + 'practical'));
     } else if (mode === 'theory & practical') {
-        container.appendChild(buildSelect('subject_id',   theoryFilter,    subj1, 'Theory Subject',    pool));
-        container.appendChild(buildSelect('subject_id_2', practicalFilter, subj2, 'Practical Subject', pool));
+        container.appendChild(buildSelect('subject_id',   theoryFilter,    subj1, 'Theory Subject',    pool, fieldPrefix + 'theory'));
+        container.appendChild(buildSelect('subject_id_2', practicalFilter, subj2, 'Practical Subject', pool, fieldPrefix + 'practical'));
     }
 }
 

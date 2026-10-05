@@ -49,7 +49,7 @@ function isProfileComplete(array $u): bool {
     $required = match($u['role'] ?? '') {
         'admin', 'hod' => ['phone'],
         'teacher'       => ['phone', 'appointment_order_no', 'bank_name', 'account_no', 'ifsc', 'pan'],
-        'student'       => ['enrollment_number', 'phone', 'bank_name', 'account_no', 'ifsc', 'pan'],
+        'student'       => ['enrollment_number', 'phone'], // bank details not required for now
         default         => [],
     };
     foreach ($required as $f) {
@@ -156,7 +156,7 @@ function renderHead(string $title, int $depth = 1): void {
     <title><?= e($title) ?> — BGS | GCEA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=4">
+    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=6">
 </head>
 <body>
 <!-- TOP NAVBAR -->

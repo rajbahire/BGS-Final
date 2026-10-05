@@ -86,8 +86,8 @@ renderHead('Manual Bill');
             <div class="card-body">
                 <form method="GET">
                     <div class="form-group">
-                        <label>Teacher</label>
-                        <select name="teacher" class="form-control" required>
+                        <label for="manual_teacher">Teacher</label>
+                        <select id="manual_teacher" name="teacher" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php foreach($teachers as $t): ?>
                             <option value="<?= $t['id'] ?>" <?= $selTeacher==$t['id']?'selected':'' ?>><?= e($t['name']) ?> (<?= e($t['subject_code']??'—') ?>)</option>
@@ -95,8 +95,8 @@ renderHead('Manual Bill');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Month</label>
-                        <select name="month" class="form-control" required>
+                        <label for="manual_month">Month</label>
+                        <select id="manual_month" name="month" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php for($m=1;$m<=12;$m++): ?>
                             <option value="<?= $m ?>" <?= $selMonth==$m?'selected':'' ?>><?= date('F',mktime(0,0,0,$m,1)) ?></option>
@@ -104,8 +104,8 @@ renderHead('Manual Bill');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Year</label>
-                        <select name="year" class="form-control">
+                        <label for="manual_year">Year</label>
+                        <select id="manual_year" name="year" class="form-control">
                             <?php for($y=date('Y');$y>=date('Y')-3;$y--): ?>
                             <option value="<?= $y ?>" <?= $selYear==$y?'selected':'' ?>><?= $y ?></option>
                             <?php endfor; ?>

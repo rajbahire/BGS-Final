@@ -4,6 +4,9 @@
 //  College Bill Generation System — GCEA
 // ============================================================
 
+// Set timezone to Indian Standard Time (IST = UTC+5:30)
+date_default_timezone_set('Asia/Kolkata');
+
 // Environment overrides (read by tests/seed.php + Playwright's test server, see
 // README-TESTING.md). Unset locally → identical XAMPP defaults as before.
 define('DB_HOST',    getenv('BGS_DB_HOST') ?: 'localhost');

@@ -198,20 +198,20 @@ renderHead('Manage HODs');
             <input type="hidden" name="action" value="add">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Full Name <span style="color:red">*</span></label>
-                    <input type="text" name="name" class="form-control" required placeholder="Dr. Full Name">
+                    <label for="add_hod_name">Full Name <span style="color:red">*</span></label>
+                    <input type="text" id="add_hod_name" name="name" class="form-control" required placeholder="Dr. Full Name" autocomplete="name">
                 </div>
                 <div class="form-group">
-                    <label>Email <span style="color:red">*</span></label>
-                    <input type="email" name="email" class="form-control" required placeholder="hod@gcea.edu">
+                    <label for="add_hod_email">Email <span style="color:red">*</span></label>
+                    <input type="email" id="add_hod_email" name="email" class="form-control" required placeholder="hod@gcea.edu" autocomplete="email">
                 </div>
                 <div class="form-group">
-                    <label>Password</label>
-                    <input type="text" name="password" class="form-control" value="hod@1234">
+                    <label for="add_hod_password">Password</label>
+                    <input type="text" id="add_hod_password" name="password" class="form-control" value="hod@1234" autocomplete="new-password">
                 </div>
                 <div class="form-group">
-                    <label>Department <span style="color:red">*</span></label>
-                    <select name="department_id" class="form-control" required>
+                    <label for="add_hod_dept">Department <span style="color:red">*</span></label>
+                    <select id="add_hod_dept" name="department_id" class="form-control" required>
                         <option value="">— Select —</option>
                         <?php foreach ($depts as $d):
                             if (in_array((int)$d['id'], $assignedDeptIds, true)) continue;
@@ -221,8 +221,8 @@ renderHead('Manage HODs');
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" name="phone" class="form-control" placeholder="10-digit number">
+                    <label for="add_hod_phone">Phone</label>
+                    <input type="text" id="add_hod_phone" name="phone" class="form-control" placeholder="10-digit number" autocomplete="tel">
                 </div>
             </div>
             <div class="modal-footer">
@@ -246,18 +246,18 @@ renderHead('Manage HODs');
             <input type="hidden" name="id" value="<?= $h['id'] ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Full Name <span style="color:red">*</span></label>
-                    <input type="text" name="name" class="form-control" required
-                           value="<?= e($h['name']) ?>" placeholder="Dr. Full Name">
+                    <label for="edit_hod_name_<?= $h['id'] ?>">Full Name <span style="color:red">*</span></label>
+                    <input type="text" id="edit_hod_name_<?= $h['id'] ?>" name="name" class="form-control" required
+                           value="<?= e($h['name']) ?>" placeholder="Dr. Full Name" autocomplete="name">
                 </div>
                 <div class="form-group">
-                    <label>Email <span style="color:red">*</span></label>
-                    <input type="email" name="email" class="form-control" required
-                           value="<?= e($h['email']) ?>">
+                    <label for="edit_hod_email_<?= $h['id'] ?>">Email <span style="color:red">*</span></label>
+                    <input type="email" id="edit_hod_email_<?= $h['id'] ?>" name="email" class="form-control" required
+                           value="<?= e($h['email']) ?>" autocomplete="email">
                 </div>
                 <div class="form-group">
-                    <label>Department <span style="color:red">*</span></label>
-                    <select name="department_id" class="form-control" required>
+                    <label for="edit_hod_dept_<?= $h['id'] ?>">Department <span style="color:red">*</span></label>
+                    <select id="edit_hod_dept_<?= $h['id'] ?>" name="department_id" class="form-control" required>
                         <option value="">— Select —</option>
                         <?php foreach ($depts as $d):
                             // Skip departments already assigned to another active HOD
@@ -274,13 +274,13 @@ renderHead('Manage HODs');
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Phone</label>
-                    <input type="text" name="phone" class="form-control"
-                           value="<?= e($h['phone'] ?? '') ?>" placeholder="10-digit number">
+                    <label for="edit_hod_phone_<?= $h['id'] ?>">Phone</label>
+                    <input type="text" id="edit_hod_phone_<?= $h['id'] ?>" name="phone" class="form-control"
+                           value="<?= e($h['phone'] ?? '') ?>" placeholder="10-digit number" autocomplete="tel">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="is_active" class="form-control">
+                    <label for="edit_hod_status_<?= $h['id'] ?>">Status</label>
+                    <select id="edit_hod_status_<?= $h['id'] ?>" name="is_active" class="form-control">
                         <option value="1" <?= $h['is_active']?'selected':'' ?>>Active</option>
                         <option value="0" <?= !$h['is_active']?'selected':'' ?>>Inactive</option>
                     </select>

@@ -157,8 +157,8 @@ renderHead('My Lectures');
                 <div class="card-body" style="padding:.8rem">
                     <form method="GET" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
                         <div class="form-group" style="margin:0">
-                            <label>Month</label>
-                            <select name="month" class="form-control" style="width:130px">
+                            <label for="lec_filter_month">Month</label>
+                            <select id="lec_filter_month" name="month" class="form-control" style="width:130px">
                                 <option value="">All Months</option>
                                 <?php for($m=1;$m<=12;$m++): ?>
                                 <option value="<?= $m ?>" <?= $fm==$m?'selected':'' ?>><?= date('F',mktime(0,0,0,$m,1)) ?></option>
@@ -166,8 +166,8 @@ renderHead('My Lectures');
                             </select>
                         </div>
                         <div class="form-group" style="margin:0">
-                            <label>Year</label>
-                            <select name="year" class="form-control" style="width:100px">
+                            <label for="lec_filter_year">Year</label>
+                            <select id="lec_filter_year" name="year" class="form-control" style="width:100px">
                                 <?php for($y=date('Y');$y>=date('Y')-3;$y--): ?>
                                 <option value="<?= $y ?>" <?= $fy==$y?'selected':'' ?>><?= $y ?></option>
                                 <?php endfor; ?>
@@ -258,13 +258,13 @@ renderHead('My Lectures');
                 <div class="alert alert-warning"><?= svgIcon('warning') ?> No subject assigned. Please ask your HOD to assign a subject.</div>
                 <?php else: ?>
                 <div class="form-group">
-                    <label>Date <span style="color:red">*</span></label>
-                    <input type="date" name="lecture_date" class="form-control" data-today required max="<?= date('Y-m-d') ?>">
+                    <label for="lecture_date_add">Date <span style="color:red">*</span></label>
+                    <input type="date" id="lecture_date_add" name="lecture_date" class="form-control" data-today required max="<?= date('Y-m-d') ?>">
                 </div>
 
                 <div class="form-group">
-                    <label>Subject <span style="color:red">*</span></label>
-                    <select name="subject_id" class="form-control" required>
+                    <label for="lecture_subject_id">Subject <span style="color:red">*</span></label>
+                    <select id="lecture_subject_id" name="subject_id" class="form-control" required>
                         <option value="">— Select Subject —</option>
                         <?php foreach($assignedSubjects as $as): ?>
                         <option value="<?= $as['id'] ?>"><?= e($as['label']) ?></option>
@@ -274,8 +274,8 @@ renderHead('My Lectures');
 
                 <?php if($showTheory): ?>
                 <div class="form-group">
-                    <label>Theory Hours</label>
-                    <input type="number" name="theory_hours" class="form-control" step="0.5" min="0" value="1">
+                    <label for="theory_hours">Theory Hours</label>
+                    <input type="number" id="theory_hours" name="theory_hours" class="form-control" step="0.5" min="0" value="1">
                 </div>
                 <?php else: ?>
                 <input type="hidden" name="theory_hours" value="0">
@@ -283,21 +283,21 @@ renderHead('My Lectures');
 
                 <?php if($showPractical): ?>
                 <div class="form-group">
-                    <label>Practical Hours</label>
-                    <input type="number" name="practical_hours" class="form-control" step="0.5" min="0" value="1">
+                    <label for="practical_hours">Practical Hours</label>
+                    <input type="number" id="practical_hours" name="practical_hours" class="form-control" step="0.5" min="0" value="1">
                 </div>
                 <?php else: ?>
                 <input type="hidden" name="practical_hours" value="0">
                 <?php endif; ?>
 
                 <div class="form-group">
-                    <label>Other Hours</label>
-                    <input type="number" name="other_hours" class="form-control" step="0.5" min="0" value="0">
+                    <label for="other_hours">Other Hours</label>
+                    <input type="number" id="other_hours" name="other_hours" class="form-control" step="0.5" min="0" value="0">
                 </div>
 
                 <div class="form-group">
-                    <label>Notes (optional)</label>
-                    <textarea name="notes" class="form-control" rows="2" placeholder="Any remarks…"></textarea>
+                    <label for="lecture_notes">Notes (optional)</label>
+                    <textarea id="lecture_notes" name="notes" class="form-control" rows="2" placeholder="Any remarks…"></textarea>
                 </div>
                 <?php endif; ?>
             </div>

@@ -171,8 +171,8 @@ renderHead('Review Student Bill');
                     <form method="POST">
                         <input type="hidden" name="action" value="reject_student">
                         <div class="form-group">
-                            <label>Reason for rejection <span style="color:red">*</span></label>
-                            <textarea name="reason" class="form-control" rows="4" required
+                            <label for="reject_reason_student">Reason for rejection <span style="color:red">*</span></label>
+                            <textarea id="reject_reason_student" name="reason" class="form-control" rows="4" required
                                       placeholder="Explain reason clearly…"></textarea>
                         </div>
                         <button type="submit" class="btn btn-danger" style="width:100%"

@@ -116,43 +116,43 @@ renderHead('Other Bills');
 
                 <?php if($billType==='practical'): ?>
                 <div class="form-grid">
-                    <div class="form-group"><label>Examiner / Faculty Name <span style="color:red">*</span></label><input type="text" name="faculty_name" class="form-control" required></div>
-                    <div class="form-group"><label>Subject</label><input type="text" name="subject" class="form-control" placeholder="e.g. Data Structures Lab"></div>
-                    <div class="form-group"><label>Programme / Class</label><input type="text" name="program" class="form-control" placeholder="e.g. SE CSE"></div>
-                    <div class="form-group"><label>Examination</label><input type="text" name="exam_name" class="form-control" placeholder="Winter Exam 2025-26"></div>
-                    <div class="form-group"><label>Exam Date</label><input type="date" name="exam_date" class="form-control" data-today></div>
-                    <div class="form-group"><label>No. of Students</label><input type="number" name="students" class="form-control" min="0" value="0"></div>
-                    <div class="form-group"><label>Rate per Student (₹)</label><input type="number" name="rate" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Other Amount (₹)</label><input type="number" name="other_amount" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Academic Year</label><input type="text" name="academic_year" class="form-control" value="<?= date('Y').'-'.(date('y')+1) ?>"></div>
-                    <div class="form-group"><label>Bill Date</label><input type="date" name="bill_date" class="form-control" data-today></div>
+                    <div class="form-group"><label for="prac_faculty_name">Examiner / Faculty Name <span style="color:red">*</span></label><input type="text" id="prac_faculty_name" name="faculty_name" class="form-control" required></div>
+                    <div class="form-group"><label for="prac_subject">Subject</label><input type="text" id="prac_subject" name="subject" class="form-control" placeholder="e.g. Data Structures Lab"></div>
+                    <div class="form-group"><label for="prac_program">Programme / Class</label><input type="text" id="prac_program" name="program" class="form-control" placeholder="e.g. SE CSE"></div>
+                    <div class="form-group"><label for="prac_exam_name">Examination</label><input type="text" id="prac_exam_name" name="exam_name" class="form-control" placeholder="Winter Exam 2025-26"></div>
+                    <div class="form-group"><label for="prac_exam_date">Exam Date</label><input type="date" id="prac_exam_date" name="exam_date" class="form-control" data-today></div>
+                    <div class="form-group"><label for="prac_students">No. of Students</label><input type="number" id="prac_students" name="students" class="form-control" min="0" value="0"></div>
+                    <div class="form-group"><label for="prac_rate">Rate per Student (₹)</label><input type="number" id="prac_rate" name="rate" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="prac_other_amount">Other Amount (₹)</label><input type="number" id="prac_other_amount" name="other_amount" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="prac_academic_year">Academic Year</label><input type="text" id="prac_academic_year" name="academic_year" class="form-control" value="<?= date('Y').'-'.(date('y')+1) ?>"></div>
+                    <div class="form-group"><label for="prac_bill_date">Bill Date</label><input type="date" id="prac_bill_date" name="bill_date" class="form-control" data-today></div>
                 </div>
                 <hr class="divider">
                 <div class="form-grid">
-                    <div class="form-group"><label>Bank Name</label><input type="text" name="bank_name" class="form-control"></div>
-                    <div class="form-group"><label>Account No.</label><input type="text" name="account_no" class="form-control"></div>
-                    <div class="form-group"><label>IFSC</label><input type="text" name="ifsc" class="form-control"></div>
-                    <div class="form-group"><label>PAN</label><input type="text" name="pan" class="form-control"></div>
+                    <div class="form-group"><label for="prac_bank_name">Bank Name</label><input type="text" id="prac_bank_name" name="bank_name" class="form-control"></div>
+                    <div class="form-group"><label for="prac_account_no">Account No.</label><input type="text" id="prac_account_no" name="account_no" class="form-control"></div>
+                    <div class="form-group"><label for="prac_ifsc">IFSC</label><input type="text" id="prac_ifsc" name="ifsc" class="form-control"></div>
+                    <div class="form-group"><label for="prac_pan">PAN</label><input type="text" id="prac_pan" name="pan" class="form-control"></div>
                 </div>
 
                 <?php elseif($billType==='seminar'): ?>
                 <div class="form-grid">
-                    <div class="form-group"><label>Speaker / Faculty Name <span style="color:red">*</span></label><input type="text" placeholder="Name of a speaker" name="speaker_name" class="form-control" required></div>
-                    <div class="form-group"><label>Seminar Title <span style="color:red">*</span></label><input type="text" placeholder="Title of the seminar" name="seminar_title" class="form-control" required></div>
-                    <div class="form-group"><label>Topic <span style="color:red">*</span></label><input type="text" placeholder="Topic of the seminar" name="topic" class="form-control" required></div>
-                    <div class="form-group"><label>Date <span style="color:red">*</span></label><input type="date" name="seminar_date" class="form-control" data-today></div>
-                    <div class="form-group"><label>Duration <span style="color:red">*</span></label><input type="text" name="duration" class="form-control" placeholder="e.g. 2 hours" required></div>
-                    <div class="form-group"><label>Honorarium (₹)</label><input type="number" name="honorarium" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>TA / DA (₹)</label><input type="number" name="ta_da" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Other Amount (₹)</label><input type="number" name="other_amount" class="form-control" step="0.01" min="0" value="0"></div>
-                    <div class="form-group"><label>Bill Date</label><input type="date" name="bill_date" class="form-control" data-today></div>
+                    <div class="form-group"><label for="sem_speaker_name">Speaker / Faculty Name <span style="color:red">*</span></label><input type="text" id="sem_speaker_name" placeholder="Name of a speaker" name="speaker_name" class="form-control" required></div>
+                    <div class="form-group"><label for="sem_seminar_title">Seminar Title <span style="color:red">*</span></label><input type="text" id="sem_seminar_title" placeholder="Title of the seminar" name="seminar_title" class="form-control" required></div>
+                    <div class="form-group"><label for="sem_topic">Topic <span style="color:red">*</span></label><input type="text" id="sem_topic" placeholder="Topic of the seminar" name="topic" class="form-control" required></div>
+                    <div class="form-group"><label for="sem_seminar_date">Date <span style="color:red">*</span></label><input type="date" id="sem_seminar_date" name="seminar_date" class="form-control" data-today></div>
+                    <div class="form-group"><label for="sem_duration">Duration <span style="color:red">*</span></label><input type="text" id="sem_duration" name="duration" class="form-control" placeholder="e.g. 2 hours" required></div>
+                    <div class="form-group"><label for="sem_honorarium">Honorarium (₹)</label><input type="number" id="sem_honorarium" name="honorarium" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="sem_ta_da">TA / DA (₹)</label><input type="number" id="sem_ta_da" name="ta_da" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="sem_other_amount">Other Amount (₹)</label><input type="number" id="sem_other_amount" name="other_amount" class="form-control" step="0.01" min="0" value="0"></div>
+                    <div class="form-group"><label for="sem_bill_date">Bill Date</label><input type="date" id="sem_bill_date" name="bill_date" class="form-control" data-today></div>
                 </div>
                 <hr class="divider">
                 <div class="form-grid">
-                    <div class="form-group"><label>Bank Name</label><input type="text" name="bank_name" class="form-control"></div>
-                    <div class="form-group"><label>Account No.</label><input type="text" name="account_no" class="form-control"></div>
-                    <div class="form-group"><label>IFSC</label><input type="text" name="ifsc" class="form-control"></div>
-                    <div class="form-group"><label>PAN</label><input type="text" name="pan" class="form-control"></div>
+                    <div class="form-group"><label for="sem_bank_name">Bank Name</label><input type="text" id="sem_bank_name" name="bank_name" class="form-control"></div>
+                    <div class="form-group"><label for="sem_account_no">Account No.</label><input type="text" id="sem_account_no" name="account_no" class="form-control"></div>
+                    <div class="form-group"><label for="sem_ifsc">IFSC</label><input type="text" id="sem_ifsc" name="ifsc" class="form-control"></div>
+                    <div class="form-group"><label for="sem_pan">PAN</label><input type="text" id="sem_pan" name="pan" class="form-control"></div>
                 </div>
                 <?php else: ?>
                 <div class="alert alert-warning"><?= svgIcon('warning') ?> Unknown bill type. Please select from the tabs above.</div>

@@ -63,8 +63,8 @@ renderHead('Timetable');
         <div class="card-body" style="padding:.9rem">
             <form method="GET" style="display:flex;gap:10px;align-items:flex-end">
                 <div class="form-group" style="margin:0;flex:1">
-                    <label>Select Class to View / Edit Timetable</label>
-                    <select name="class" class="form-control" onchange="this.form.submit()">
+                    <label for="class_filter">Select Class to View / Edit Timetable</label>
+                    <select id="class_filter" name="class" class="form-control" onchange="this.form.submit()">
                         <option value="">— Select Class —</option>
                         <?php foreach($classes as $c): ?>
                         <option value="<?= $c['id'] ?>" <?= $filterClass==$c['id']?'selected':'' ?>><?= e($c['label']) ?></option>
@@ -122,8 +122,8 @@ renderHead('Timetable');
                     <input type="hidden" name="filter_class" value="<?= $filterClass ?>">
 
                     <div class="form-group">
-                        <label>Subject <span style="color:red">*</span></label>
-                        <select name="subject_id" class="form-control" required>
+                        <label for="tt_subject_id">Subject <span style="color:red">*</span></label>
+                        <select id="tt_subject_id" name="subject_id" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php foreach($subjects as $s): ?>
                             <option value="<?= $s['id'] ?>"><?= e($s['subject_name'].' ('.$s['subject_code'].')') ?></option>
@@ -131,8 +131,8 @@ renderHead('Timetable');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Teacher <span style="color:red">*</span></label>
-                        <select name="teacher_id" class="form-control" required>
+                        <label for="tt_teacher_id">Teacher <span style="color:red">*</span></label>
+                        <select id="tt_teacher_id" name="teacher_id" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php foreach($teachers as $t): ?>
                             <option value="<?= $t['id'] ?>"><?= e($t['name']) ?></option>
@@ -140,8 +140,8 @@ renderHead('Timetable');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Day <span style="color:red">*</span></label>
-                        <select name="day_of_week" class="form-control" required>
+                        <label for="tt_day_of_week">Day <span style="color:red">*</span></label>
+                        <select id="tt_day_of_week" name="day_of_week" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php for($d=1;$d<=6;$d++): ?>
                             <option value="<?= $d ?>"><?= $days[$d] ?></option>
@@ -149,8 +149,8 @@ renderHead('Timetable');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Time Slot <span style="color:red">*</span></label>
-                        <select name="time_slot" class="form-control" required>
+                        <label for="tt_time_slot">Time Slot <span style="color:red">*</span></label>
+                        <select id="tt_time_slot" name="time_slot" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php foreach($slots as $s): ?>
                             <option value="<?= $s ?>"><?= $s ?></option>
@@ -158,15 +158,15 @@ renderHead('Timetable');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Mode</label>
-                        <select name="mode" class="form-control">
+                        <label for="tt_mode">Mode</label>
+                        <select id="tt_mode" name="mode" class="form-control">
                             <option value="theory">Theory</option>
                             <option value="practical">Practical</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Academic Year</label>
-                        <input type="text" name="academic_year" class="form-control" value="<?= date('Y').'-'.(date('y')+1) ?>">
+                        <label for="tt_academic_year">Academic Year</label>
+                        <input type="text" id="tt_academic_year" name="academic_year" class="form-control" value="<?= date('Y').'-'.(date('y')+1) ?>">
                     </div>
                     <button type="submit" class="btn btn-primary" style="width:100%"><?= svgIcon('add') ?> Add Entry</button>
                 </form>

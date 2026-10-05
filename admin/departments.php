@@ -85,8 +85,8 @@ renderHead('Departments');
             <div class="card-header">
                 <h3>All Departments (<?= count($depts) ?>)</h3>
                 <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-                    <input type="text" class="form-control" style="width:200px"
-                           placeholder="Search…" data-search-table="dept-table">
+                    <input type="text" id="dept_search" name="dept_search" class="form-control" style="width:200px"
+                           placeholder="Search…" data-search-table="dept-table" aria-label="Search departments" autocomplete="off">
                 </div>
             </div>
             <?php if ($depts): ?>
@@ -170,14 +170,14 @@ renderHead('Departments');
             <input type="hidden" name="action" value="add">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Department Name <span style="color:red">*</span></label>
-                    <input type="text" name="name" class="form-control" required
-                           placeholder="e.g. Computer Science & Engineering">
+                    <label for="add_dept_name">Department Name <span style="color:red">*</span></label>
+                    <input type="text" id="add_dept_name" name="name" class="form-control" required
+                           placeholder="e.g. Computer Science & Engineering" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label>Short Name <span style="color:red">*</span></label>
-                    <input type="text" name="short_name" class="form-control" required
-                           maxlength="20" placeholder="e.g. CSE">
+                    <label for="add_dept_short">Short Name <span style="color:red">*</span></label>
+                    <input type="text" id="add_dept_short" name="short_name" class="form-control" required
+                           maxlength="20" placeholder="e.g. CSE" autocomplete="off">
                 </div>
             </div>
             <div class="modal-footer">
@@ -201,20 +201,20 @@ renderHead('Departments');
             <input type="hidden" name="id" value="<?= $d['id'] ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Department Name <span style="color:red">*</span></label>
-                    <input type="text" name="name" class="form-control" required
+                    <label for="edit_dept_name_<?= $d['id'] ?>">Department Name <span style="color:red">*</span></label>
+                    <input type="text" id="edit_dept_name_<?= $d['id'] ?>" name="name" class="form-control" required
                            value="<?= e($d['name']) ?>"
-                           placeholder="e.g. Computer Science & Engineering">
+                           placeholder="e.g. Computer Science & Engineering" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label>Short Name <span style="color:red">*</span></label>
-                    <input type="text" name="short_name" class="form-control" required
+                    <label for="edit_dept_short_<?= $d['id'] ?>">Short Name <span style="color:red">*</span></label>
+                    <input type="text" id="edit_dept_short_<?= $d['id'] ?>" name="short_name" class="form-control" required
                            maxlength="20" value="<?= e($d['short_name']) ?>"
-                           placeholder="e.g. CSE">
+                           placeholder="e.g. CSE" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="is_active" class="form-control">
+                    <label for="edit_dept_status_<?= $d['id'] ?>">Status</label>
+                    <select id="edit_dept_status_<?= $d['id'] ?>" name="is_active" class="form-control">
                         <option value="1" <?= $d['is_active']?'selected':'' ?>>Active</option>
                         <option value="0" <?= !$d['is_active']?'selected':'' ?>>Inactive</option>
                     </select>

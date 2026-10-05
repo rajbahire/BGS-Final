@@ -159,8 +159,8 @@ renderHead('All Bills');
         <div class="card-body" style="padding:.9rem">
             <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
                 <div class="form-group" style="margin:0">
-                    <label>Type</label>
-                    <select name="type" class="form-control" style="width:200px">
+                    <label for="admin_bill_type">Type</label>
+                    <select id="admin_bill_type" name="type" class="form-control" style="width:200px">
                         <option value="">All Bills</option>
                         <option value="teacher" <?= $fType==='teacher'?'selected':'' ?>>Teacher Bills</option>
                         <option value="student" <?= $fType==='student'?'selected':'' ?>>Earn & Learn (Students)</option>
@@ -168,8 +168,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Status</label>
-                    <select name="status" class="form-control" style="width:180px">
+                    <label for="admin_bill_status">Status</label>
+                    <select id="admin_bill_status" name="status" class="form-control" style="width:180px">
                         <option value="">All</option>
                         <option value="pending"   <?= $fStatus==='pending'  ?'selected':'' ?>>Pending</option>
                         <option value="approved"  <?= $fStatus==='approved' ?'selected':'' ?>>Approved</option>
@@ -178,8 +178,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Department</label>
-                    <select name="dept" class="form-control" style="width:200px">
+                    <label for="admin_bill_dept">Department</label>
+                    <select id="admin_bill_dept" name="dept" class="form-control" style="width:200px">
                         <option value="">All Departments</option>
                         <?php foreach($departments as $dept): ?>
                         <option value="<?= $dept['id'] ?>" <?= $fDept==$dept['id']?'selected':'' ?>><?= e($dept['name']) ?></option>
@@ -187,8 +187,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Month</label>
-                    <select name="month" class="form-control" style="width:180px">
+                    <label for="admin_bill_month">Month</label>
+                    <select id="admin_bill_month" name="month" class="form-control" style="width:180px">
                         <option value="">All Months</option>
                         <?php for($m=1;$m<=12;$m++): ?>
                         <option value="<?= $m ?>" <?= $fMonth==$m?'selected':'' ?>><?= date('F',mktime(0,0,0,$m,1)) ?></option>
@@ -196,8 +196,8 @@ renderHead('All Bills');
                     </select>
                 </div>
                 <div class="form-group" style="margin:0">
-                    <label>Year</label>
-                    <select name="year" class="form-control" style="width:180px">
+                    <label for="admin_bill_year">Year</label>
+                    <select id="admin_bill_year" name="year" class="form-control" style="width:180px">
                         <option value="">All</option>
                         <?php for($y=date('Y');$y>=date('Y')-4;$y--): ?>
                         <option value="<?= $y ?>" <?= $fYear==$y?'selected':'' ?>><?= $y ?></option>

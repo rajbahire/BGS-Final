@@ -111,8 +111,8 @@ renderHead('Subjects');
                 <div class="card-body" style="padding:.9rem">
                     <form method="GET" style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
                         <div class="form-group" style="margin:0">
-                            <label>Department</label>
-                            <select name="dept" class="form-control" style="width:200px" onchange="this.form.submit()">
+                            <label for="filter_admin_dept">Department</label>
+                            <select id="filter_admin_dept" name="dept" class="form-control" style="width:200px" onchange="this.form.submit()">
                                 <option value="">All</option>
                                 <?php foreach ($depts as $d): ?>
                                 <option value="<?= $d['id'] ?>" <?= $filterDept==$d['id']?'selected':'' ?>><?= e($d['name']) ?></option>
@@ -121,8 +121,8 @@ renderHead('Subjects');
                         </div>
                         <?php if ($classes): ?>
                         <div class="form-group" style="margin:0">
-                            <label>Class</label>
-                            <select name="class" class="form-control" style="width:180px" onchange="this.form.submit()">
+                            <label for="filter_admin_class">Class</label>
+                            <select id="filter_admin_class" name="class" class="form-control" style="width:180px" onchange="this.form.submit()">
                                 <option value="">All Classes</option>
                                 <?php foreach ($classes as $c): ?>
                                 <option value="<?= $c['id'] ?>" <?= $filterClass==$c['id']?'selected':'' ?>><?= e($c['label']) ?></option>
@@ -206,8 +206,8 @@ renderHead('Subjects');
             <input type="hidden" name="filter_dept" value="<?= $filterDept ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Class <span style="color:red">*</span></label>
-                    <select name="class_id" class="form-control" required>
+                    <label for="add_as_class">Class <span style="color:red">*</span></label>
+                    <select id="add_as_class" name="class_id" class="form-control" required>
                         <option value="">— Select Class —</option>
                         <?php
                         $currentDept = '';
@@ -224,20 +224,20 @@ renderHead('Subjects');
                 </div>
 
                 <div class="form-group">
-                    <label>Subject Name <span style="color:red">*</span></label>
-                    <input type="text" name="subject_name" class="form-control" required
+                    <label for="add_as_name">Subject Name <span style="color:red">*</span></label>
+                    <input type="text" id="add_as_name" name="subject_name" class="form-control" required
                            placeholder="e.g. Data Structures">
                 </div>
 
                 <div class="form-group">
-                    <label>Subject Code <span style="color:red">*</span></label>
-                    <input type="text" name="subject_code" class="form-control" required
+                    <label for="add_as_code">Subject Code <span style="color:red">*</span></label>
+                    <input type="text" id="add_as_code" name="subject_code" class="form-control" required
                            style="text-transform:uppercase" placeholder="e.g. CS301">
                 </div>
 
                 <div class="form-group">
-                    <label>Mode <span style="color:red">*</span></label>
-                    <select name="mode" class="form-control" required>
+                    <label for="add_as_mode">Mode <span style="color:red">*</span></label>
+                    <select id="add_as_mode" name="mode" class="form-control" required>
                         <option value="">— Select Mode —</option>
                         <option value="theory">Theory</option>
                         <option value="practical">Practical</option>
@@ -267,27 +267,27 @@ renderHead('Subjects');
             <input type="hidden" name="id" value="<?= $s['id'] ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label class="text-muted">Class</label>
-                    <input type="text" class="form-control" disabled
+                    <label class="text-muted" for="edit_as_class_<?= $s['id'] ?>">Class</label>
+                    <input type="text" id="edit_as_class_<?= $s['id'] ?>" class="form-control" disabled
                            value="<?= e($s['class_label'] . ' — ' . $s['dept_name']) ?>">
                 </div>
 
                 <div class="form-group">
-                    <label>Subject Name <span style="color:red">*</span></label>
-                    <input type="text" name="subject_name" class="form-control" required
+                    <label for="edit_as_name_<?= $s['id'] ?>">Subject Name <span style="color:red">*</span></label>
+                    <input type="text" id="edit_as_name_<?= $s['id'] ?>" name="subject_name" class="form-control" required
                            value="<?= e($s['subject_name']) ?>" placeholder="e.g. Data Structures">
                 </div>
 
                 <div class="form-group">
-                    <label>Subject Code <span style="color:red">*</span></label>
-                    <input type="text" name="subject_code" class="form-control" required
+                    <label for="edit_as_code_<?= $s['id'] ?>">Subject Code <span style="color:red">*</span></label>
+                    <input type="text" id="edit_as_code_<?= $s['id'] ?>" name="subject_code" class="form-control" required
                            style="text-transform:uppercase"
                            value="<?= e($s['subject_code']) ?>" placeholder="e.g. CS301">
                 </div>
 
                 <div class="form-group">
-                    <label>Mode <span style="color:red">*</span></label>
-                    <select name="mode" class="form-control" required>
+                    <label for="edit_as_mode_<?= $s['id'] ?>">Mode <span style="color:red">*</span></label>
+                    <select id="edit_as_mode_<?= $s['id'] ?>" name="mode" class="form-control" required>
                         <option value="theory"    <?= $s['mode']==='theory'   ?'selected':'' ?>>Theory</option>
                         <option value="practical" <?= $s['mode']==='practical'      ?'selected':'' ?>>Practical</option>
                         <option value="theory & practical" <?= $s['mode']==='theory & practical' ?'selected':'' ?>>Theory & Practical</option>
@@ -295,8 +295,8 @@ renderHead('Subjects');
                 </div>
 
                 <div class="form-group">
-                    <label>Status</label>
-                    <select name="is_active" class="form-control">
+                    <label for="edit_as_status_<?= $s['id'] ?>">Status</label>
+                    <select id="edit_as_status_<?= $s['id'] ?>" name="is_active" class="form-control">
                         <option value="1" <?= $s['is_active']?'selected':'' ?>>Active</option>
                         <option value="0" <?= !$s['is_active']?'selected':'' ?>>Inactive</option>
                     </select>

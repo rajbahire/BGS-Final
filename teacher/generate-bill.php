@@ -93,8 +93,8 @@ renderHead('Generate Bill');
             <div class="card-body">
                 <form method="GET">
                     <div class="form-group">
-                        <label>Month</label>
-                        <select name="month" class="form-control" required>
+                        <label for="bill_month">Month</label>
+                        <select id="bill_month" name="month" class="form-control" required>
                             <option value="">— Select —</option>
                             <?php for($m=1;$m<=12;$m++): ?>
                             <option value="<?= $m ?>" <?= $pm==$m?'selected':'' ?>><?= date('F',mktime(0,0,0,$m,1)) ?></option>
@@ -102,8 +102,8 @@ renderHead('Generate Bill');
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Year</label>
-                        <select name="year" class="form-control">
+                        <label for="bill_year">Year</label>
+                        <select id="bill_year" name="year" class="form-control">
                             <?php for($y=date('Y');$y>=date('Y')-3;$y--): ?>
                             <option value="<?= $y ?>" <?= $py==$y?'selected':'' ?>><?= $y ?></option>
                             <?php endfor; ?>

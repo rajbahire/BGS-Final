@@ -16,6 +16,141 @@ function formatINR(amount) {
     });
 }
 
+// ── Copy to clipboard utility ──────────────────────────────────
+function copyToClipboard(text, successMsg) {
+    navigator.clipboard.writeText(text).then(function() {
+        showToast(successMsg || 'Copied to clipboard!', 'success');
+    }).catch(function(err) {
+        console.error('Copy failed:', err);
+    });
+}
+
+// ── Show toast notification ───────────────────────────────────
+function showToast(message, type = 'info', duration = 4000) {
+    const container = document.querySelector('.toast-container');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.innerHTML = `
+        ${getToastIcon(type)}
+        ${message}
+        <button class="toast-close" aria-label="Close">&times;</button>
+        <div class="toast-progress"></div>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto-dismiss with hover-pause
+    let remaining = duration;
+    let startTime = Date.now();
+    let timer = setTimeout(() => dismissToast(toast), remaining);
+
+    toast.addEventListener('mouseenter', () => {
+        clearTimeout(timer);
+        remaining -= Date.now() - startTime;
+        toast.classList.add('toast-paused');
+    });
+    toast.addEventListener('mouseleave', () => {
+        toast.classList.remove('toast-paused');
+        startTime = Date.now();
+        timer = setTimeout(() => dismissToast(toast), remaining);
+    });
+
+    // Close button
+    toast.querySelector('.toast-close').addEventListener('click', () => dismissToast(toast));
+}
+
+function getToastIcon(type) {
+    const icons = {
+        success: '<span class="check-icon">✓</span>',
+        error: '<span class="error-icon">✗</span>',
+        warning: '<span class="warning-icon">⚠</span>',
+        info: '<span class="info-icon">ℹ</span>'
+    };
+    return icons[type] || icons.info;
+}
+
+function dismissToast(toast) {
+    toast.classList.add('toast-exit');
+    setTimeout(() => toast.remove(), 350);
+}
+
+// ── Form validation enhancements ───────────────────────────────
+function validateField(field) {
+    const value = field.value.trim();
+    const isValid = field.checkValidity();
+
+    if (!isValid) {
+        field.classList.add('is-invalid');
+    } else {
+        field.classList.remove('is-invalid');
+    }
+
+    return isValid;
+}
+
+function setupFormValidation(form) {
+    const fields = form.querySelectorAll('input[required], textarea[required], select[required]');
+
+    fields.forEach(field => {
+        field.addEventListener('blur', () => validateField(field));
+        field.addEventListener('input', () => {
+            if (field.classList.contains('is-invalid') && validateField(field)) {
+                field.classList.remove('is-invalid');
+            }
+        });
+    });
+
+    form.addEventListener('submit', (e) => {
+        let valid = true;
+        fields.forEach(field => {
+            if (!validateField(field)) valid = false;
+        });
+
+        if (!valid) {
+            e.preventDefault();
+            showToast('Please fill all required fields', 'error');
+        }
+    });
+}
+
+// ── Table sorting utility ─────────────────────────────────────
+function makeSortable(table) {
+    const headers = table.querySelectorAll('th[data-sortable="true"]');
+
+    headers.forEach((header, index) => {
+        header.innerHTML += '<span class="sort-indicator">⇅</span>';
+        header.style.cursor = 'pointer';
+        header.addEventListener('click', () => {
+            const ascending = !header.classList.contains('asc');
+            sortTableByColumn(table, index, ascending);
+        });
+    });
+}
+
+function sortTableByColumn(table, colIndex, ascending) {
+    const tbody = table.tBodies[0];
+    const rows = Array.from(tbody.rows);
+
+    rows.sort((a, b) => {
+        const aText = a.cells[colIndex].textContent.trim();
+        const bText = b.cells[colIndex].textContent.trim();
+
+        if (/^\d/.test(aText)) {
+            return ascending ? parseFloat(aText) - parseFloat(bText) : parseFloat(bText) - parseFloat(aText);
+        }
+
+        return ascending ? aText.localeCompare(bText) : bText.localeCompare(aText);
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+
+    // Update indicators
+    table.querySelectorAll('.sort-indicator').forEach(i => i.classList.remove('asc'));
+    table.querySelector('th').classList.toggle('asc', ascending);
+}
+
 // ── Convert auto-dismiss alerts into floating toasts ─────────
 document.addEventListener('DOMContentLoaded', function () {
     var alerts = document.querySelectorAll('.alert.auto-dismiss');
@@ -50,8 +185,22 @@ document.addEventListener('DOMContentLoaded', function () {
             dismissToast(toast);
         });
 
-        // Auto dismiss after 4s
-        setTimeout(function () { dismissToast(toast); }, 4000);
+        // Auto dismiss after 4s with hover-pause
+        var duration = 4000;
+        var remaining = duration;
+        var startTime = Date.now();
+        var timer = setTimeout(function () { dismissToast(toast); }, remaining);
+
+        toast.addEventListener('mouseenter', function () {
+            clearTimeout(timer);
+            remaining -= Date.now() - startTime;
+            toast.classList.add('toast-paused');
+        });
+        toast.addEventListener('mouseleave', function () {
+            toast.classList.remove('toast-paused');
+            startTime = Date.now();
+            timer = setTimeout(function () { dismissToast(toast); }, remaining);
+        });
 
         // Remove the original inline alert
         el.remove();
@@ -66,7 +215,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // ── Set today as default in date inputs ─────────────────────
 document.addEventListener('DOMContentLoaded', function () {
-    const today = new Date().toISOString().split('T')[0];
+    // Use local date (IST) — toISOString() would give UTC which can be a day behind
+    const now   = new Date();
+    const today = now.getFullYear() + '-'
+        + String(now.getMonth() + 1).padStart(2, '0') + '-'
+        + String(now.getDate()).padStart(2, '0');
     document.querySelectorAll('input[type="date"][data-today]').forEach(function (inp) {
         if (!inp.value) inp.value = today;
     });

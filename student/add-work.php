@@ -29,18 +29,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($end <= $start) { setFlash('error','End time must be after start time.'); }
             else {
                 $hours = round(($end - $start) / 3600, 1);
-                if ($hours > 12) { setFlash('error','Work duration cannot exceed 12 hours.'); }
+                if ($hours > 4) { setFlash('error','A single work entry cannot exceed 4 hours per day.'); }
                 else {
-                    // Check monthly entry limit (max 20 per month)
-                    $monthCount = $pdo->prepare("SELECT COUNT(*) FROM student_work WHERE student_id=? AND MONTH(work_date)=MONTH(?) AND YEAR(work_date)=YEAR(?)");
-                    $monthCount->execute([$uid, $date, $date]);
-                    if ((int)$monthCount->fetchColumn() >= 20) {
-                        setFlash('error','Maximum 20 work entries allowed per month. You have already reached the limit.');
+                    // Check 4-hour daily limit
+                    $daySum = $pdo->prepare("SELECT COALESCE(SUM(hours),0) FROM student_work WHERE student_id=? AND work_date=?");
+                    $daySum->execute([$uid, $date]);
+                    $existingHours = (float)$daySum->fetchColumn();
+                    if (($existingHours + $hours) > 4) {
+                        $remaining = round(4 - $existingHours, 1);
+                        setFlash('error', "Daily limit is 4 hours. You have already logged {$existingHours} hrs today.");
                     } else {
-                        $pdo->prepare("INSERT INTO student_work (student_id,work_date,hours,start_time,end_time,description) VALUES (?,?,?,?,?,?)")
-                            ->execute([$uid,$date,$hours,$stime,$etime,$desc]);
-                        logActivity($pdo,$uid,'add_work',"Added $hours hrs on $date ($stime–$etime)");
-                        setFlash('success','Work entry added.');
+                        // Check monthly entry limit (max 20 per month)
+                        $monthCount = $pdo->prepare("SELECT COUNT(*) FROM student_work WHERE student_id=? AND MONTH(work_date)=MONTH(?) AND YEAR(work_date)=YEAR(?)");
+                        $monthCount->execute([$uid, $date, $date]);
+                        if ((int)$monthCount->fetchColumn() >= 20) {
+                            setFlash('error','Maximum 20 work entries allowed per month. You have already reached the limit.');
+                        } else {
+                            $pdo->prepare("INSERT INTO student_work (student_id,work_date,hours,start_time,end_time,description) VALUES (?,?,?,?,?,?)")
+                                ->execute([$uid,$date,$hours,$stime,$etime,$desc]);
+                            logActivity($pdo,$uid,'add_work',"Added $hours hrs on $date ($stime–$etime)");
+                            setFlash('success','Work entry added.');
+                        }
                     }
                 }
             }
@@ -83,13 +92,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     setFlash('error','End time must be after start time.');
                 } else {
                     $hours = round(($end - $start) / 3600, 1);
-                    if ($hours > 12) {
-                        setFlash('error','Work duration cannot exceed 12 hours.');
+                    if ($hours > 4) {
+                        setFlash('error','A single work entry cannot exceed 4 hours per day.');
                     } else {
-                        $pdo->prepare("UPDATE student_work SET work_date=?, hours=?, start_time=?, end_time=?, description=? WHERE id=? AND student_id=?")
-                            ->execute([$date,$hours,$stime,$etime,$desc,$id,$uid]);
-                        logActivity($pdo,$uid,'edit_work',"Edited work entry #$id: $hours hrs on $date");
-                        setFlash('success','Work entry updated.');
+                        // Check 4-hour daily limit (exclude the current entry being edited)
+                        $daySum = $pdo->prepare("SELECT COALESCE(SUM(hours),0) FROM student_work WHERE student_id=? AND work_date=? AND id != ?");
+                        $daySum->execute([$uid, $date, $id]);
+                        $existingHours = (float)$daySum->fetchColumn();
+                        if (($existingHours + $hours) > 4) {
+                            $remaining = round(4 - $existingHours, 1);
+                            setFlash('error', "Daily limit is 4 hours. Other entries on this date total {$existingHours} hrs. You can log at most {$remaining} more hr(s).");
+                        } else {
+                            $pdo->prepare("UPDATE student_work SET work_date=?, hours=?, start_time=?, end_time=?, description=? WHERE id=? AND student_id=?")
+                                ->execute([$date,$hours,$stime,$etime,$desc,$id,$uid]);
+                            logActivity($pdo,$uid,'edit_work',"Edited work entry #$id: $hours hrs on $date");
+                            setFlash('success','Work entry updated.');
+                        }
                     }
                 }
             }
@@ -189,8 +207,8 @@ renderHead('Work Log');
                 <div class="card-body" style="padding:.8rem">
                     <form method="GET" style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap">
                         <div class="form-group" style="margin:0">
-                            <label>Month</label>
-                            <select name="month" class="form-control" style="width:130px">
+                            <label for="filter_month">Month</label>
+                            <select id="filter_month" name="month" class="form-control" style="width:130px">
                                 <option value="">All</option>
                                 <?php for($m=1;$m<=12;$m++): ?>
                                 <option value="<?= $m ?>" <?= $fm==$m?'selected':'' ?>><?= date('F',mktime(0,0,0,$m,1)) ?></option>
@@ -198,8 +216,8 @@ renderHead('Work Log');
                             </select>
                         </div>
                         <div class="form-group" style="margin:0">
-                            <label>Year</label>
-                            <select name="year" class="form-control" style="width:100px">
+                            <label for="filter_year">Year</label>
+                            <select id="filter_year" name="year" class="form-control" style="width:100px">
                                 <?php for($y=date('Y');$y>=date('Y')-2;$y--): ?>
                                 <option value="<?= $y ?>" <?= $fy==$y?'selected':'' ?>><?= $y ?></option>
                                 <?php endfor; ?>
@@ -290,18 +308,27 @@ renderHead('Work Log');
             <input type="hidden" name="fm" value="<?= $fm ?>">
             <input type="hidden" name="fy" value="<?= $fy ?>">
             <div class="modal-body">
-                <div class="form-group"><label>Date <span style="color:red">*</span></label><input type="date" name="work_date" class="form-control" data-today required max="<?= date('Y-m-d') ?>"></div>
+                <div class="form-group">
+                    <label for="work_date_add">Date <span style="color:red">*</span></label>
+                    <input type="date" id="work_date_add" name="work_date" class="form-control" data-today required max="<?= date('Y-m-d') ?>">
+                </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-                    <div class="form-group"><label>Start Time <span style="color:red">*</span></label><input type="time" name="start_time" class="form-control" required></div>
-                    <div class="form-group"><label>End Time <span style="color:red">*</span></label><input type="time" name="end_time" class="form-control" required></div>
+                    <div class="form-group">
+                        <label for="start_time_add">Start Time <span style="color:red">*</span></label>
+                        <input type="time" id="start_time_add" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_time_add">End Time <span style="color:red">*</span></label>
+                        <input type="time" id="end_time_add" name="end_time" class="form-control" required>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label>Description / Particulars of Work <span style="color:red">*</span></label>
+                    <label for="desc-add-input">Description / Particulars of Work <span style="color:red">*</span></label>
                     <input type="text" name="description" id="desc-add-input" class="form-control" maxlength="50"
                            placeholder="e.g. Library book sorting, Lab maintenance..."
                            oninput="updateCharCount(this, 'desc-add-count')" required>
                     <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:4px">
-                        <span>Max 50 characters (fits on 1 line on A4 printed bill)</span>
+                        <span>Max 50 characters limit</span>
                         <span><span id="desc-add-count">0</span>/50</span>
                     </div>
                 </div>
@@ -329,30 +356,30 @@ renderHead('Work Log');
             <input type="hidden" name="fy" value="<?= $fy ?>">
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Date <span style="color:red">*</span></label>
-                    <input type="date" name="work_date" class="form-control" required
+                    <label for="work_date_edit_<?= $w['id'] ?>">Date <span style="color:red">*</span></label>
+                    <input type="date" id="work_date_edit_<?= $w['id'] ?>" name="work_date" class="form-control" required
                            max="<?= date('Y-m-d') ?>" value="<?= e($w['work_date']) ?>">
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
                     <div class="form-group">
-                        <label>Start Time <span style="color:red">*</span></label>
-                        <input type="time" name="start_time" class="form-control" required
+                        <label for="start_time_edit_<?= $w['id'] ?>">Start Time <span style="color:red">*</span></label>
+                        <input type="time" id="start_time_edit_<?= $w['id'] ?>" name="start_time" class="form-control" required
                                value="<?= e($w['start_time']) ?>">
                     </div>
                     <div class="form-group">
-                        <label>End Time <span style="color:red">*</span></label>
-                        <input type="time" name="end_time" class="form-control" required
+                        <label for="end_time_edit_<?= $w['id'] ?>">End Time <span style="color:red">*</span></label>
+                        <input type="time" id="end_time_edit_<?= $w['id'] ?>" name="end_time" class="form-control" required
                                value="<?= e($w['end_time']) ?>">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Description / Particulars of Work <span style="color:red">*</span></label>
-                    <input type="text" name="description" class="form-control" maxlength="50"
+                    <label for="desc_edit_<?= $w['id'] ?>">Description / Particulars of Work <span style="color:red">*</span></label>
+                    <input type="text" id="desc_edit_<?= $w['id'] ?>" name="description" class="form-control" maxlength="50"
                            placeholder="e.g. Library book sorting, Lab maintenance..."
                            value="<?= e($w['description'] ?? '') ?>"
                            oninput="updateCharCount(this, 'desc-edit-count-<?= $w['id'] ?>')" required>
                     <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:4px">
-                        <span>Max 50 characters (fits on 1 line on A4 printed bill)</span>
+                        <span>Max 50 characters limit</span>
                         <span><span id="desc-edit-count-<?= $w['id'] ?>"><?= mb_strlen($w['description'] ?? '') ?></span>/50</span>
                     </div>
                 </div>

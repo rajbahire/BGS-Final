@@ -175,7 +175,8 @@ $msg = $_GET['msg'] ?? '';
                         autocomplete="current-password"
                     >
                     <button type="button" class="pw-toggle"
-                            onclick="togglePw('password','pw-eye')">
+                            onclick="togglePw('password','pw-eye')"
+                            aria-label="Toggle password visibility">
                         <span id="pw-eye" data-on='<?= svgIcon('eye') ?>' data-off='<?= svgIcon('eye-off') ?>'><?= svgIcon('eye') ?></span>
                     </button>
                 </div>
