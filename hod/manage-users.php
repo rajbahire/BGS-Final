@@ -56,36 +56,88 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'edit') {
-        $id         = (int)$_POST['id'];
-        $name       = trim($_POST['name']              ?? '');
-        $email      = trim($_POST['email']             ?? '');
-        $phone      = trim($_POST['phone']             ?? '');
-        $enrollment = trim($_POST['enrollment_number'] ?? '');
-        $active     = (int)$_POST['is_active'];
-        $type       = $_POST['teacher_type']  ?? null;
-        $mode       = $_POST['teacher_mode']  ?? null;
-        $subj       = (int)($_POST['subject_id'] ?? 0);
-        $subj2      = (int)($_POST['subject_id_2'] ?? 0);
-        $rateT      = (float)($_POST['rate_theory']     ?? 0);
-        $rateP      = (float)($_POST['rate_practical']   ?? 0);
-        $rateO      = (float)($_POST['rate_other']       ?? 0);
-        $rateH      = (float)($_POST['rate_per_hour']    ?? 0);
-        $appNo      = trim($_POST['appointment_order_no']?? '');
+        $id      = (int)($_POST['id'] ?? 0);
+        $tab     = $_POST['tab'] ?? 'teachers';
+        $name    = trim($_POST['name']  ?? '');
+        $email   = trim($_POST['email'] ?? '');
+        $phone   = trim($_POST['phone'] ?? '');
+        $active  = isset($_POST['is_active']) ? (int)$_POST['is_active'] : 1;
+        $newPass = trim($_POST['password'] ?? '');
 
-        // Email uniqueness check (exclude current user)
-        if ($email) {
-            $dup = $pdo->prepare("SELECT id FROM users WHERE email=? AND id!=?");
-            $dup->execute([$email, $id]);
-            if ($dup->fetch()) {
-                setFlash('error','Email already exists for another user.');
-                header('Location: manage-users.php?tab='.($_POST['tab']??'teachers')); exit;
-            }
+        if (!$id || !$name || !$email) {
+            setFlash('error', 'Name and email are required.');
+            header('Location: manage-users.php?tab=' . $tab); exit;
         }
 
-        $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,is_active=?,teacher_type=?,teacher_mode=?,subject_id=?,subject_id_2=?,rate_theory=?,rate_practical=?,rate_other=?,rate_per_hour=?,appointment_order_no=?,enrollment_number=? WHERE id=? AND department_id=?")
-            ->execute([$name,$email,$phone,$active,$type?:null,$mode?:null,$subj?:null,$subj2?:null,$rateT,$rateP,$rateO,$rateH,$appNo,$enrollment,$id,$deptId]);
-        logActivity($pdo,$user['id'],'edit_user',"Updated user: $name");
-        setFlash('success','User updated.');
+        // Verify target user belongs to this HOD's department
+        $check = $pdo->prepare("SELECT id, role, name FROM users WHERE id=? AND department_id=?");
+        $check->execute([$id, $deptId]);
+        $targetUser = $check->fetch();
+        if (!$targetUser) {
+            setFlash('error', 'User not found or access denied.');
+            header('Location: manage-users.php?tab=' . $tab); exit;
+        }
+
+        // Email uniqueness check (exclude current user)
+        $dup = $pdo->prepare("SELECT id FROM users WHERE email=? AND id!=?");
+        $dup->execute([$email, $id]);
+        if ($dup->fetch()) {
+            setFlash('error', 'Email already exists for another user.');
+            header('Location: manage-users.php?tab=' . $tab); exit;
+        }
+
+        if ($targetUser['role'] === 'student') {
+            $enrollment = trim($_POST['enrollment_number'] ?? '');
+            $classId    = !empty($_POST['class_id']) ? (int)$_POST['class_id'] : null;
+            $rateH      = (float)($_POST['rate_per_hour'] ?? 0);
+
+            if (!$classId) {
+                setFlash('error', 'Please select a valid class for the student.');
+                header('Location: manage-users.php?tab=students'); exit;
+            }
+
+            // Verify class belongs to this department
+            $chkClass = $pdo->prepare("SELECT id FROM classes WHERE id=? AND department_id=?");
+            $chkClass->execute([$classId, $deptId]);
+            if (!$chkClass->fetch()) {
+                setFlash('error', 'Selected class does not exist or does not belong to your department.');
+                header('Location: manage-users.php?tab=students'); exit;
+            }
+
+            if ($newPass !== '') {
+                $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,enrollment_number=?,class_id=?,rate_per_hour=?,is_active=?,password=? WHERE id=? AND department_id=?")
+                    ->execute([$name, $email, $phone, $enrollment ?: null, $classId, $rateH, $active, password_hash($newPass, PASSWORD_DEFAULT), $id, $deptId]);
+            } else {
+                $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,enrollment_number=?,class_id=?,rate_per_hour=?,is_active=? WHERE id=? AND department_id=?")
+                    ->execute([$name, $email, $phone, $enrollment ?: null, $classId, $rateH, $active, $id, $deptId]);
+            }
+
+            logActivity($pdo, $user['id'], 'edit_student', "Updated student: $name");
+            setFlash('success', "Student \"$name\" updated successfully.");
+            header('Location: manage-users.php?tab=students'); exit;
+        } else {
+            // Teacher
+            $type   = $_POST['teacher_type'] ?? 'regular';
+            $mode   = $_POST['teacher_mode'] ?? 'theory';
+            $subj   = !empty($_POST['subject_id']) ? (int)$_POST['subject_id'] : null;
+            $subj2  = ($mode === 'theory & practical' && !empty($_POST['subject_id_2'])) ? (int)$_POST['subject_id_2'] : null;
+            $rateT  = (float)($_POST['rate_theory'] ?? 0);
+            $rateP  = (float)($_POST['rate_practical'] ?? 0);
+            $rateO  = (float)($_POST['rate_other'] ?? 0);
+            $appNo  = trim($_POST['appointment_order_no'] ?? '');
+
+            if ($newPass !== '') {
+                $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,teacher_type=?,teacher_mode=?,subject_id=?,subject_id_2=?,rate_theory=?,rate_practical=?,rate_other=?,appointment_order_no=?,is_active=?,password=? WHERE id=? AND department_id=?")
+                    ->execute([$name, $email, $phone, $type ?: null, $mode ?: null, $subj, $subj2, $rateT, $rateP, $rateO, $appNo, $active, password_hash($newPass, PASSWORD_DEFAULT), $id, $deptId]);
+            } else {
+                $pdo->prepare("UPDATE users SET name=?,email=?,phone=?,teacher_type=?,teacher_mode=?,subject_id=?,subject_id_2=?,rate_theory=?,rate_practical=?,rate_other=?,appointment_order_no=?,is_active=? WHERE id=? AND department_id=?")
+                    ->execute([$name, $email, $phone, $type ?: null, $mode ?: null, $subj, $subj2, $rateT, $rateP, $rateO, $appNo, $active, $id, $deptId]);
+            }
+
+            logActivity($pdo, $user['id'], 'edit_teacher', "Updated teacher: $name");
+            setFlash('success', "Teacher \"$name\" updated successfully.");
+            header('Location: manage-users.php?tab=teachers'); exit;
+        }
     }
 
     if ($action === 'reset_password') {
@@ -157,6 +209,7 @@ $tPage    = currentPage();
 $tOffset  = paginationOffset($tPage, $tPerPage);
 $tTotal   = count($teachers);
 $tPages   = totalPages($tTotal, $tPerPage);
+$allTeachers = $teachers;
 $teachers = array_slice($teachers, $tOffset, $tPerPage);
 
 // Pagination config for students
@@ -181,14 +234,15 @@ $allDeptSubjects = $allDeptSubjects->fetchAll();
 
 // subjectId => list of teacher ids who already hold that subject (either slot)
 $subjectOwners = [];
-foreach ($teachers as $t) {
+foreach ($allTeachers as $t) {
     if (!empty($t['subject_id']))   $subjectOwners[(int)$t['subject_id']][]   = (int)$t['id'];
     if (!empty($t['subject_id_2'])) $subjectOwners[(int)$t['subject_id_2']][] = (int)$t['id'];
 }
 foreach ($subjectOwners as $sid => $owners) $subjectOwners[$sid] = array_values(array_unique($owners));
 
-$classes = $pdo->prepare("SELECT * FROM classes WHERE department_id=? AND is_active=1 ORDER BY year,semester");
-$classes->execute([$deptId]); $classes=$classes->fetchAll();
+$allClasses = $pdo->prepare("SELECT * FROM classes WHERE department_id=? ORDER BY year,semester");
+$allClasses->execute([$deptId]); $allClasses=$allClasses->fetchAll();
+$classes = array_values(array_filter($allClasses, fn($c) => (int)$c['is_active'] === 1));
 
 renderHead('Manage Users');
 ?>
@@ -426,6 +480,7 @@ renderHead('Manage Users');
                     <div class="form-group"><label for="edit_t_rate_other_<?= $t['id'] ?>">Rate Other (₹) <span style="color:red">*</span></label><input type="number" id="edit_t_rate_other_<?= $t['id'] ?>" name="rate_other" class="form-control" step="0.01" min="0" value="<?= $t['rate_other']??0 ?>"></div>
                 </div>
                 <div class="form-group"><label for="edit_t_status_<?= $t['id'] ?>">Status</label><select id="edit_t_status_<?= $t['id'] ?>" name="is_active" class="form-control"><option value="1" <?= $t['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$t['is_active']?'selected':'' ?>>Inactive</option></select></div>
+                <div class="form-group"><label for="edit_t_password_<?= $t['id'] ?>">New Password <span class="text-xs text-muted">(leave blank to keep unchanged)</span></label><input type="text" id="edit_t_password_<?= $t['id'] ?>" name="password" class="form-control" placeholder="Leave blank to keep unchanged" autocomplete="new-password"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-teacher-<?= $t['id'] ?>-edit')">Cancel</button>
@@ -448,19 +503,25 @@ renderHead('Manage Users');
             <input type="hidden" name="tab" value="students">
             <div class="modal-body">
                 <div class="form-group"><label for="add_s_name">Full Name <span style="color:red">*</span></label><input type="text" id="add_s_name" name="name" class="form-control" placeholder="Enter Full Name" required autocomplete="name"></div>
-                <div class="form-group"><label for="add_s_email">Email <span style="color:red">*</span></label><input type="email" id="add_s_email" name="email" class="form-control" required placeholder="student@gcea.edu" autocomplete="email"></div>
-                <div class="form-group"><label for="add_s_enrollment">Enrollment Number</label><input type="text" id="add_s_enrollment" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001"></div>
-                <div class="form-group"><label for="add_s_password">Password</label><input type="text" id="add_s_password" name="password" class="form-control" value="student@1234" autocomplete="new-password"></div>
-                <div class="form-group"><label for="add_s_phone">Phone</label><input type="text" id="add_s_phone" name="phone" class="form-control" placeholder="Phone Number" autocomplete="tel"></div>
-                <div class="form-group"><label for="add_s_class">Class <span style="color:red">*</span></label>
-                    <select id="add_s_class" name="class_id" class="form-control" required>
-                        <option value="">— Select Class —</option>
-                        <?php foreach($classes as $c): ?>
-                        <option value="<?= $c['id'] ?>"><?= e($c['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group"><label for="add_s_email">Email <span style="color:red">*</span></label><input type="email" id="add_s_email" name="email" class="form-control" required placeholder="student@gcea.edu" autocomplete="email"></div>
+                    <div class="form-group"><label for="add_s_phone">Phone</label><input type="text" id="add_s_phone" name="phone" class="form-control" placeholder="Phone Number" autocomplete="tel"></div>
                 </div>
-                <div class="form-group"><label for="add_s_rate">Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" id="add_s_rate" name="rate_per_hour" class="form-control" step="0.01" min="0" value="50" required></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group"><label for="add_s_enrollment">Enrollment Number</label><input type="text" id="add_s_enrollment" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001"></div>
+                    <div class="form-group"><label for="add_s_class">Class <span style="color:red">*</span></label>
+                        <select id="add_s_class" name="class_id" class="form-control" required>
+                            <option value="">— Select Class —</option>
+                            <?php foreach($classes as $c): ?>
+                            <option value="<?= $c['id'] ?>"><?= e($c['label']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group"><label for="add_s_password">Password</label><input type="text" id="add_s_password" name="password" class="form-control" value="student@1234" autocomplete="new-password"></div>
+                    <div class="form-group"><label for="add_s_rate">Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" id="add_s_rate" name="rate_per_hour" class="form-control" step="0.01" min="0" value="50" required></div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-student-add')">Cancel</button>
@@ -484,19 +545,34 @@ renderHead('Manage Users');
             <input type="hidden" name="id" value="<?= $s['id'] ?>">
             <div class="modal-body">
                 <div class="form-group"><label for="edit_s_name_<?= $s['id'] ?>">Full Name <span style="color:red">*</span></label><input type="text" id="edit_s_name_<?= $s['id'] ?>" name="name" class="form-control" required value="<?= e($s['name']) ?>" autocomplete="name"></div>
-                <div class="form-group"><label for="edit_s_email_<?= $s['id'] ?>">Email <span style="color:red">*</span></label><input type="email" id="edit_s_email_<?= $s['id'] ?>" name="email" class="form-control" required placeholder="student@gcea.edu" value="<?= e($s['email']) ?>" autocomplete="email"></div>
-                <div class="form-group"><label for="edit_s_enrollment_<?= $s['id'] ?>">Enrollment Number</label><input type="text" id="edit_s_enrollment_<?= $s['id'] ?>" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001" value="<?= e($s['enrollment_number']??'') ?>"></div>
-                <div class="form-group"><label for="edit_s_phone_<?= $s['id'] ?>">Phone</label><input type="text" id="edit_s_phone_<?= $s['id'] ?>" name="phone" class="form-control" value="<?= e($s['phone']??'') ?>" autocomplete="tel"></div>
-                <div class="form-group"><label for="edit_s_class_<?= $s['id'] ?>">Class <span style="color:red">*</span></label>
-                    <select id="edit_s_class_<?= $s['id'] ?>" name="class_id" class="form-control" required>
-                        <option value="">— Select Class —</option>
-                        <?php foreach($classes as $c): ?>
-                        <option value="<?= $c['id'] ?>" <?= (($s['class_id']??0)==$c['id'])?'selected':'' ?>><?= e($c['label']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group"><label for="edit_s_email_<?= $s['id'] ?>">Email <span style="color:red">*</span></label><input type="email" id="edit_s_email_<?= $s['id'] ?>" name="email" class="form-control" required placeholder="student@gcea.edu" value="<?= e($s['email']) ?>" autocomplete="email"></div>
+                    <div class="form-group"><label for="edit_s_phone_<?= $s['id'] ?>">Phone</label><input type="text" id="edit_s_phone_<?= $s['id'] ?>" name="phone" class="form-control" value="<?= e($s['phone']??'') ?>" autocomplete="tel"></div>
                 </div>
-                <div class="form-group"><label for="edit_s_rate_<?= $s['id'] ?>">Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" id="edit_s_rate_<?= $s['id'] ?>" name="rate_per_hour" class="form-control" step="0.01" min="0" value="<?= $s['rate_per_hour'] ?>" required></div>
-                <div class="form-group"><label for="edit_s_status_<?= $s['id'] ?>">Status</label><select id="edit_s_status_<?= $s['id'] ?>" name="is_active" class="form-control"><option value="1" <?= $s['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$s['is_active']?'selected':'' ?>>Inactive</option></select></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group"><label for="edit_s_enrollment_<?= $s['id'] ?>">Enrollment Number</label><input type="text" id="edit_s_enrollment_<?= $s['id'] ?>" name="enrollment_number" class="form-control" placeholder="e.g. 2023CSE001" value="<?= e($s['enrollment_number']??'') ?>"></div>
+                    <div class="form-group"><label for="edit_s_class_<?= $s['id'] ?>">Class <span style="color:red">*</span></label>
+                        <select id="edit_s_class_<?= $s['id'] ?>" name="class_id" class="form-control" required>
+                            <option value="">— Select Class —</option>
+                            <?php 
+                            $classFound = false;
+                            foreach($classes as $c): 
+                                $isSelected = (($s['class_id']??0) == $c['id']);
+                                if ($isSelected) $classFound = true;
+                            ?>
+                            <option value="<?= $c['id'] ?>" <?= $isSelected ? 'selected' : '' ?>><?= e($c['label']) ?></option>
+                            <?php endforeach; ?>
+                            <?php if (!$classFound && !empty($s['class_id']) && !empty($s['class_label'])): ?>
+                            <option value="<?= $s['class_id'] ?>" selected><?= e($s['class_label']) ?> (Inactive)</option>
+                            <?php endif; ?>
+                        </select>
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                    <div class="form-group"><label for="edit_s_rate_<?= $s['id'] ?>">Rate per Hour (₹) <span style="color:red">*</span></label><input type="number" id="edit_s_rate_<?= $s['id'] ?>" name="rate_per_hour" class="form-control" step="0.01" min="0" value="<?= htmlspecialchars((string)($s['rate_per_hour'] ?? 0)) ?>" required></div>
+                    <div class="form-group"><label for="edit_s_status_<?= $s['id'] ?>">Status</label><select id="edit_s_status_<?= $s['id'] ?>" name="is_active" class="form-control"><option value="1" <?= $s['is_active']?'selected':'' ?>>Active</option><option value="0" <?= !$s['is_active']?'selected':'' ?>>Inactive</option></select></div>
+                </div>
+                <div class="form-group"><label for="edit_s_password_<?= $s['id'] ?>">New Password <span class="text-xs text-muted">(leave blank to keep unchanged)</span></label><input type="text" id="edit_s_password_<?= $s['id'] ?>" name="password" class="form-control" placeholder="Leave blank to keep unchanged" autocomplete="new-password"></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline" onclick="closeModal('modal-student-<?= $s['id'] ?>-edit')">Cancel</button>
