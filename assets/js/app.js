@@ -416,51 +416,110 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 // ── Mobile Sidebar Drawer Toggle ─────────────────────────────
-document.addEventListener('DOMContentLoaded', function () {
-    var toggleBtn = document.getElementById('sidebarToggle');
-    var closeBtn  = document.getElementById('sidebarClose');
-    var sidebar   = document.getElementById('appSidebar') || document.querySelector('.sidebar');
-    var backdrop  = document.getElementById('sidebarBackdrop');
+function getMobileSidebarEl() {
+    return document.getElementById('appSidebar') || document.querySelector('.sidebar');
+}
 
-    function openSidebar() {
-        if (sidebar) sidebar.classList.add('open');
-        if (backdrop) backdrop.classList.add('active');
-        document.body.classList.add('sidebar-open');
-    }
+function getMobileBackdropEl() {
+    return document.getElementById('sidebarBackdrop') || document.querySelector('.sidebar-backdrop');
+}
 
-    function closeSidebar() {
-        if (sidebar) sidebar.classList.remove('open');
-        if (backdrop) backdrop.classList.remove('active');
-        document.body.classList.remove('sidebar-open');
-    }
+var _sidebarLock = false;
 
-    if (toggleBtn) toggleBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        openSidebar();
-    });
-
-    if (closeBtn) closeBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        closeSidebar();
-    });
-
-    if (backdrop) backdrop.addEventListener('click', closeSidebar);
-
-    // Auto-close drawer when clicking on any nav link on mobile
+function openMobileSidebar() {
+    var sidebar  = getMobileSidebarEl();
+    var backdrop = getMobileBackdropEl();
     if (sidebar) {
-        sidebar.querySelectorAll('.nav-item').forEach(function (link) {
-            link.addEventListener('click', function () {
-                if (window.innerWidth <= 768) {
-                    closeSidebar();
-                }
-            });
-        });
+        sidebar.classList.add('open');
+        sidebar.setAttribute('aria-expanded', 'true');
+        sidebar.style.setProperty('transform', 'translateX(0)', 'important');
+        sidebar.style.setProperty('visibility', 'visible', 'important');
+        sidebar.style.setProperty('pointer-events', 'auto', 'important');
+    }
+    if (backdrop) {
+        backdrop.classList.add('active');
+        backdrop.style.setProperty('opacity', '1', 'important');
+        backdrop.style.setProperty('visibility', 'visible', 'important');
+        backdrop.style.setProperty('pointer-events', 'auto', 'important');
+    }
+    document.body.classList.add('sidebar-open');
+}
+
+function closeMobileSidebar() {
+    var sidebar  = getMobileSidebarEl();
+    var backdrop = getMobileBackdropEl();
+    if (sidebar) {
+        sidebar.classList.remove('open');
+        sidebar.setAttribute('aria-expanded', 'false');
+        sidebar.style.removeProperty('transform');
+        sidebar.style.removeProperty('visibility');
+        sidebar.style.removeProperty('pointer-events');
+    }
+    if (backdrop) {
+        backdrop.classList.remove('active');
+        backdrop.style.removeProperty('opacity');
+        backdrop.style.removeProperty('visibility');
+        backdrop.style.removeProperty('pointer-events');
+    }
+    document.body.classList.remove('sidebar-open');
+}
+
+function toggleMobileSidebar(e) {
+    if (e && e.stopPropagation) {
+        e.stopPropagation();
+    }
+    if (_sidebarLock) return;
+    _sidebarLock = true;
+    setTimeout(function () { _sidebarLock = false; }, 300);
+
+    var sidebar = getMobileSidebarEl();
+    if (sidebar && (sidebar.classList.contains('open') || document.body.classList.contains('sidebar-open'))) {
+        closeMobileSidebar();
+    } else {
+        openMobileSidebar();
+    }
+}
+
+// Expose globally so onclick="" always works even if event listeners fail
+window.openMobileSidebar   = openMobileSidebar;
+window.closeMobileSidebar  = closeMobileSidebar;
+window.toggleMobileSidebar = toggleMobileSidebar;
+
+// Global event delegation for clicks and touch taps
+document.addEventListener('click', function (e) {
+    var toggle = e.target.closest('#sidebarToggle, .sidebar-toggle-btn');
+    if (toggle) {
+        e.preventDefault();
+        e.stopPropagation();
+        toggleMobileSidebar(e);
+        return;
     }
 
-    // Close on escape key
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
-            closeSidebar();
-        }
-    });
+    var close = e.target.closest('#sidebarClose, .sidebar-close-btn');
+    if (close) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileSidebar();
+        return;
+    }
+
+    if (e.target.matches('#sidebarBackdrop, .sidebar-backdrop')) {
+        e.preventDefault();
+        e.stopPropagation();
+        closeMobileSidebar();
+        return;
+    }
+
+    // Auto-close when clicking any link inside sidebar on mobile screens
+    var navLink = e.target.closest('.sidebar .nav-item, .sidebar .btn-logout');
+    if (navLink && window.innerWidth <= 768) {
+        closeMobileSidebar();
+    }
+});
+
+// Close on escape key
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') {
+        closeMobileSidebar();
+    }
 });

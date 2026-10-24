@@ -156,14 +156,70 @@ function renderHead(string $title, int $depth = 1): void {
     <title><?= e($title) ?> — BGS | GCEA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=7">
+    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=12">
+    <script>
+    var _sidebarLock = false;
+    function openMobileSidebar() {
+        var s = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+        var b = document.getElementById('sidebarBackdrop') || document.querySelector('.sidebar-backdrop');
+        if (s) {
+            s.classList.add('open');
+            s.setAttribute('aria-expanded', 'true');
+            s.style.setProperty('transform', 'translateX(0)', 'important');
+            s.style.setProperty('visibility', 'visible', 'important');
+            s.style.setProperty('pointer-events', 'auto', 'important');
+        }
+        if (b) {
+            b.classList.add('active');
+            b.style.setProperty('opacity', '1', 'important');
+            b.style.setProperty('visibility', 'visible', 'important');
+            b.style.setProperty('pointer-events', 'auto', 'important');
+        }
+        document.body.classList.add('sidebar-open');
+    }
+
+    function closeMobileSidebar() {
+        var s = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+        var b = document.getElementById('sidebarBackdrop') || document.querySelector('.sidebar-backdrop');
+        if (s) {
+            s.classList.remove('open');
+            s.setAttribute('aria-expanded', 'false');
+            s.style.removeProperty('transform');
+            s.style.removeProperty('visibility');
+            s.style.removeProperty('pointer-events');
+        }
+        if (b) {
+            b.classList.remove('active');
+            b.style.removeProperty('opacity');
+            b.style.removeProperty('visibility');
+            b.style.removeProperty('pointer-events');
+        }
+        document.body.classList.remove('sidebar-open');
+    }
+
+    function toggleMobileSidebar(e) {
+        if (e && e.stopPropagation) {
+            e.stopPropagation();
+        }
+        if (_sidebarLock) return;
+        _sidebarLock = true;
+        setTimeout(function() { _sidebarLock = false; }, 300);
+
+        var s = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+        if (s && (s.classList.contains('open') || document.body.classList.contains('sidebar-open'))) {
+            closeMobileSidebar();
+        } else {
+            openMobileSidebar();
+        }
+    }
+    </script>
 </head>
 <body>
 <!-- TOP NAVBAR -->
 <!-- Navbar -->
 <nav class="navbar">
     <div class="navbar-brand">
-        <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle navigation">
+        <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle navigation" onclick="toggleMobileSidebar(event);">
             <svg class="icon" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
         </button>
         <img src="<?= $asset ?>images/logo.png" alt="GCEA Logo" class="navbar-logo"
@@ -172,7 +228,6 @@ function renderHead(string $title, int $depth = 1): void {
 
         <div class="navbar-titles">
             <span class="navbar-college-en">Government College of Engineering, Chhatrapati Sambhajinagar</span>
-            <span class="navbar-college-short">GCEA | Bill System</span>
             <span class="navbar-college-hi">शासकीय अभियांत्रिकी महाविद्यालय, छत्रपती संभाजीनगर</span>
         </div>
     </div>
@@ -189,7 +244,7 @@ function renderHead(string $title, int $depth = 1): void {
 function renderFooter(int $depth = 1): void {
     $asset = $depth === 0 ? 'assets/' : str_repeat('../', $depth) . 'assets/';
     ?>
-    <script src="<?= $asset ?>js/app.js?v=7"></script>
+    <script src="<?= $asset ?>js/app.js?v=12"></script>
 </body>
 </html>
     <?php
@@ -266,11 +321,11 @@ function renderSidebar(string $active, string $role, array $user): void {
         default   => ucfirst($role),
     };
     ?>
-    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar();"></div>
     <aside class="sidebar" id="appSidebar">
         <div class="sidebar-mobile-header">
             <span class="sidebar-mobile-title"><?= $roleLabel ?> Menu</span>
-            <button type="button" class="sidebar-close-btn" id="sidebarClose" aria-label="Close menu">&times;</button>
+            <button type="button" class="sidebar-close-btn" id="sidebarClose" aria-label="Close menu" onclick="closeMobileSidebar();">&times;</button>
         </div>
         <div class="sidebar-user">
             <div class="user-avatar"><?php if($profilePhoto): ?><img src="../assets/uploads/profiles/<?= e($profilePhoto) ?>" alt="Photo" class="user-avatar-img"><?php else: ?><?= e($initials) ?><?php endif; ?></div>
@@ -284,7 +339,8 @@ function renderSidebar(string $active, string $role, array $user): void {
             <div class="nav-label">Menu</div>
             <?php foreach ($items as $item): ?>
             <a href="<?= e($item['href']) ?>"
-               class="nav-item <?= $active === $item['key'] ? 'active' : '' ?>">
+               class="nav-item <?= $active === $item['key'] ? 'active' : '' ?>"
+               onclick="if(window.innerWidth<=768)closeMobileSidebar();">
                 <span class="nav-icon"><?= $item['icon'] ?></span>
                 <?= e($item['label']) ?>
             </a>

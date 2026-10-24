@@ -107,7 +107,7 @@ $msg = $_GET['msg'] ?? '';
     <title>Login — BGS | GCEA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css?v=7">
+    <link rel="stylesheet" href="assets/css/style.css?v=11">
 </head>
 <body>
 
@@ -120,7 +120,6 @@ $msg = $_GET['msg'] ?? '';
 
         <div class="navbar-titles">
             <span class="navbar-college-en">Government College of Engineering, Chhatrapati Sambhajinagar</span>
-            <span class="navbar-college-short">GCEA | Bill System</span>
             <span class="navbar-college-hi">शासकीय अभियांत्रिकी महाविद्यालय, छत्रपती संभाजीनगर</span>
         </div>
     </div>
