@@ -7,12 +7,25 @@
 // Set timezone to Indian Standard Time (IST = UTC+5:30)
 date_default_timezone_set('Asia/Kolkata');
 
-// Environment overrides (read by tests/seed.php + Playwright's test server, see
-// README-TESTING.md). Unset locally → identical XAMPP defaults as before.
-define('DB_HOST',    getenv('BGS_DB_HOST') ?: 'localhost');
-define('DB_NAME',    getenv('BGS_DB_NAME') ?: 'college_bill_system');
-define('DB_USER',    getenv('BGS_DB_USER') ?: 'root');
-define('DB_PASS',    (string)getenv('BGS_DB_PASS'));   // XAMPP default: empty
+// Detect if running locally (XAMPP) or on InfinityFree live hosting
+$httpHost = $_SERVER['HTTP_HOST'] ?? 'localhost';
+$isLocal  = in_array($httpHost, ['localhost', '127.0.0.1']) 
+            || str_starts_with($httpHost, 'localhost:')
+            || (php_sapi_name() === 'cli' && !getenv('BGS_DB_HOST'));
+
+if ($isLocal) {
+    // Localhost XAMPP Settings
+    define('DB_HOST',    getenv('BGS_DB_HOST') ?: 'localhost');
+    define('DB_NAME',    getenv('BGS_DB_NAME') ?: 'college_bill_system');
+    define('DB_USER',    getenv('BGS_DB_USER') ?: 'root');
+    define('DB_PASS',    (string)getenv('BGS_DB_PASS'));   // XAMPP default: empty
+} else {
+    // InfinityFree Live Hosting Settings
+    define('DB_HOST',    'sql313.infinityfree.com');
+    define('DB_NAME',    'if0_43263982_bgs');
+    define('DB_USER',    'if0_43263982');
+    define('DB_PASS',    'Rajbahire1972');
+}
 define('DB_CHARSET', 'utf8mb4');
 
 $dsn = sprintf('mysql:host=%s;dbname=%s;charset=%s', DB_HOST, DB_NAME, DB_CHARSET);
