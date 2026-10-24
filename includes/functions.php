@@ -156,27 +156,31 @@ function renderHead(string $title, int $depth = 1): void {
     <title><?= e($title) ?> — BGS | GCEA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=6">
+    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=7">
 </head>
 <body>
 <!-- TOP NAVBAR -->
 <!-- Navbar -->
 <nav class="navbar">
     <div class="navbar-brand">
-        <img src="../assets/images/logo.png" alt="GCEA Logo" class="navbar-logo"
+        <button type="button" class="sidebar-toggle-btn" id="sidebarToggle" aria-label="Toggle navigation">
+            <svg class="icon" viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" fill="none" stroke-width="2" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <img src="<?= $asset ?>images/logo.png" alt="GCEA Logo" class="navbar-logo"
              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
         <div class="navbar-logo-fallback" style="display:none"><?= svgIcon('dashboard') ?></div>
 
         <div class="navbar-titles">
             <span class="navbar-college-en">Government College of Engineering, Chhatrapati Sambhajinagar</span>
+            <span class="navbar-college-short">GCEA | Bill System</span>
             <span class="navbar-college-hi">शासकीय अभियांत्रिकी महाविद्यालय, छत्रपती संभाजीनगर</span>
         </div>
     </div>
 
     <div class="navbar-emblems">
-        <img src="../assets/images/img2.gif"  alt="Maharashtra Skill Development Department" class="navbar-emblem">
-        <img src="../assets/images/img3.png"    alt="Government of Maharashtra Seal" class="navbar-emblem navbar-emblem--crop">
-        <img src="../assets/images/img4.jpg"  alt="Government of India Emblem" class="navbar-emblem">
+        <img src="<?= $asset ?>images/img2.gif"  alt="Maharashtra Skill Development Department" class="navbar-emblem">
+        <img src="<?= $asset ?>images/img3.png"    alt="Government of Maharashtra Seal" class="navbar-emblem navbar-emblem--crop">
+        <img src="<?= $asset ?>images/img4.jpg"  alt="Government of India Emblem" class="navbar-emblem">
     </div>
 </nav>
     <?php
@@ -185,7 +189,7 @@ function renderHead(string $title, int $depth = 1): void {
 function renderFooter(int $depth = 1): void {
     $asset = $depth === 0 ? 'assets/' : str_repeat('../', $depth) . 'assets/';
     ?>
-    <script src="<?= $asset ?>js/app.js"></script>
+    <script src="<?= $asset ?>js/app.js?v=7"></script>
 </body>
 </html>
     <?php
@@ -262,7 +266,12 @@ function renderSidebar(string $active, string $role, array $user): void {
         default   => ucfirst($role),
     };
     ?>
-    <aside class="sidebar">
+    <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+    <aside class="sidebar" id="appSidebar">
+        <div class="sidebar-mobile-header">
+            <span class="sidebar-mobile-title"><?= $roleLabel ?> Menu</span>
+            <button type="button" class="sidebar-close-btn" id="sidebarClose" aria-label="Close menu">&times;</button>
+        </div>
         <div class="sidebar-user">
             <div class="user-avatar"><?php if($profilePhoto): ?><img src="../assets/uploads/profiles/<?= e($profilePhoto) ?>" alt="Photo" class="user-avatar-img"><?php else: ?><?= e($initials) ?><?php endif; ?></div>
             <div class="user-info">

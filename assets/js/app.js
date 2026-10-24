@@ -414,3 +414,53 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+
+// ── Mobile Sidebar Drawer Toggle ─────────────────────────────
+document.addEventListener('DOMContentLoaded', function () {
+    var toggleBtn = document.getElementById('sidebarToggle');
+    var closeBtn  = document.getElementById('sidebarClose');
+    var sidebar   = document.getElementById('appSidebar') || document.querySelector('.sidebar');
+    var backdrop  = document.getElementById('sidebarBackdrop');
+
+    function openSidebar() {
+        if (sidebar) sidebar.classList.add('open');
+        if (backdrop) backdrop.classList.add('active');
+        document.body.classList.add('sidebar-open');
+    }
+
+    function closeSidebar() {
+        if (sidebar) sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('active');
+        document.body.classList.remove('sidebar-open');
+    }
+
+    if (toggleBtn) toggleBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        openSidebar();
+    });
+
+    if (closeBtn) closeBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        closeSidebar();
+    });
+
+    if (backdrop) backdrop.addEventListener('click', closeSidebar);
+
+    // Auto-close drawer when clicking on any nav link on mobile
+    if (sidebar) {
+        sidebar.querySelectorAll('.nav-item').forEach(function (link) {
+            link.addEventListener('click', function () {
+                if (window.innerWidth <= 768) {
+                    closeSidebar();
+                }
+            });
+        });
+    }
+
+    // Close on escape key
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && sidebar && sidebar.classList.contains('open')) {
+            closeSidebar();
+        }
+    });
+});
