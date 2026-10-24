@@ -189,13 +189,13 @@ $msg = $_GET['msg'] ?? '';
         </form>
 
         <!-- Demo credentials -->
-        <div class="demo-box">
+        <!-- <div class="demo-box">
             <strong style="color:var(--text)">Demo credentials:</strong><br>
             Admin &nbsp;→ <span class="demo-fill" onclick="fillDemo('admin@gcea.edu','admin@1234')">admin@gcea.edu / admin@1234</span><br>
             HOD &nbsp;&nbsp;&nbsp;→ <span class="demo-fill" onclick="fillDemo('hod.cse@gcea.edu','hod@1234')">hod.cse@gcea.edu / hod@1234</span><br>
             Teacher → <span class="demo-fill" onclick="fillDemo('anjali@gcea.edu','teacher@1234')">anjali@gcea.edu / teacher@1234</span><br>
             Student → <span class="demo-fill" onclick="fillDemo('rahul@gcea.edu','student@1234')">rahul@gcea.edu / student@1234</span>
-        </div>
+        </div> -->
 
     </div>
 </div>
