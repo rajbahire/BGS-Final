@@ -2648,6 +2648,14 @@ body {
         border-radius: var(--radius-sm);
     }
 
+    /* Grid items default to min-width:auto, which stretches a card to the
+       table's 580px min-width and hides the overflow past the screen edge.
+       Let columns shrink so .table-wrap scrolls inside itself instead. */
+    div[style*="display:grid"] > *,
+    div[style*="display: grid"] > * {
+        min-width: 0;
+    }
+
     /* Form grids */
     .form-grid {
         grid-template-columns: 1fr !important;
