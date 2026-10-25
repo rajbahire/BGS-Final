@@ -73,8 +73,8 @@ renderHead('My Bills');
                     <td><?= number_format($b['total_practical_hrs'],1) ?></td>
                     <td><?= number_format($b['total_other_hrs'],1) ?></td>
                     <td class="fw-600"><?= formatINR($b['total_amount']) ?></td>
-                    <td><?= statusBadge($b['status']) ?></td>
-                    <td class="text-sm text-muted"><?= fmtDate($b['submitted_at'],'d M Y') ?></td>
+                    <td style="white-space:nowrap"><?= statusBadge($b['status']) ?></td>
+                    <td class="text-sm text-muted" style="white-space:nowrap"><?= fmtDate($b['submitted_at'],'d M Y') ?></td>
                     <td>
                         <div class="d-flex gap-8">
                             <a href="bill-detail.php?id=<?= $b['id'] ?>" class="btn btn-outline btn-sm">View</a>

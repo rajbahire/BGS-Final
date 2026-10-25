@@ -73,13 +73,13 @@ renderHead('My Bills');
                     <td><?= number_format($b['total_hours'],1) ?></td>
                     <td><?= formatINR($b['rate_per_hour']) ?></td>
                     <td class="fw-600"><?= formatINR($b['total_amount']) ?></td>
-                    <td>
+                    <td style="white-space:nowrap">
                         <?= statusBadge($b['status']) ?>
                         <?php if($b['status']==='rejected' && $b['rejection_reason']): ?>
-                        <div class="text-xs text-muted" style="margin-top:3px"><?= e($b['rejection_reason']) ?></div>
+                        <div class="text-xs text-muted" style="margin-top:3px;white-space:normal"><?= e($b['rejection_reason']) ?></div>
                         <?php endif; ?>
                     </td>
-                    <td class="text-sm text-muted"><?= fmtDate($b['submitted_at'],'d M Y') ?></td>
+                    <td class="text-sm text-muted" style="white-space:nowrap"><?= fmtDate($b['submitted_at'],'d M Y') ?></td>
                     <td>
                         <div class="d-flex gap-8">
                             <a href="bill-detail.php?id=<?= $b['id'] ?>" class="btn btn-outline btn-sm">View</a>

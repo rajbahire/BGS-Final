@@ -68,12 +68,12 @@ function logActivity(PDO $pdo, int $userId, string $action, string $desc = ''): 
 // ── Badges ───────────────────────────────────────────────────
 function statusBadge(string $status): string {
     $map = [
-        'draft'     => ['badge-draft',     '● Draft'],
-        'pending'   => ['badge-pending',   '● Pending'],
-        'approved'  => ['badge-approved',  '● Approved'],
-        'rejected'  => ['badge-rejected',  '● Rejected'],
-        'finalized' => ['badge-approved',  '● Generated'],
-        'generated' => ['badge-approved',  '● Generated'],
+        'draft'     => ['badge-draft',     '●&nbsp;Draft'],
+        'pending'   => ['badge-pending',   '●&nbsp;Pending'],
+        'approved'  => ['badge-approved',  '●&nbsp;Approved'],
+        'rejected'  => ['badge-rejected',  '●&nbsp;Rejected'],
+        'finalized' => ['badge-approved',  '●&nbsp;Generated'],
+        'generated' => ['badge-approved',  '●&nbsp;Generated'],
     ];
     [$cls, $label] = $map[$status] ?? ['badge-pending', ucfirst($status)];
     return '<span class="badge ' . $cls . '">' . $label . '</span>';
@@ -156,7 +156,7 @@ function renderHead(string $title, int $depth = 1): void {
     <title><?= e($title) ?> — BGS | GCEA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=12">
+    <link rel="stylesheet" href="<?= $asset ?>css/style.css?v=14">
     <script>
     var _sidebarLock = false;
     function openMobileSidebar() {
@@ -244,7 +244,7 @@ function renderHead(string $title, int $depth = 1): void {
 function renderFooter(int $depth = 1): void {
     $asset = $depth === 0 ? 'assets/' : str_repeat('../', $depth) . 'assets/';
     ?>
-    <script src="<?= $asset ?>js/app.js?v=12"></script>
+    <script src="<?= $asset ?>js/app.js?v=14"></script>
 </body>
 </html>
     <?php

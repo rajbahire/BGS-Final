@@ -107,7 +107,7 @@ $msg = $_GET['msg'] ?? '';
     <title>Login — BGS | GCEA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="assets/css/style.css?v=11">
+    <link rel="stylesheet" href="assets/css/style.css?v=14">
 </head>
 <body>
 
@@ -200,6 +200,6 @@ $msg = $_GET['msg'] ?? '';
     </div>
 </div>
 
-<script src="assets/js/app.js"></script>
+<script src="assets/js/app.js?v=14"></script>
 </body>
 </html>

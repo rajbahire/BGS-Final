@@ -780,12 +780,16 @@ tbody tr:hover {
 .badge {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     padding: 3px 10px;
     border-radius: 20px;
-    font-size: 0.71rem;
+    font-size: 0.72rem;
     font-weight: 600;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.02em;
+    white-space: nowrap !important;
+    line-height: 1.35;
+    flex-shrink: 0;
 }
 
 .badge-draft {
@@ -2639,8 +2643,18 @@ body {
     }
 
     .table-wrap table {
-        min-width: 580px;
+        min-width: 620px;
         /* Preserve table structure and column widths */
+    }
+
+    .table-wrap th,
+    .table-wrap td {
+        vertical-align: middle;
+    }
+
+    .table-wrap td .badge {
+        white-space: nowrap !important;
+        display: inline-flex !important;
     }
 
     .table-wrap {
