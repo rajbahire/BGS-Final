@@ -730,7 +730,7 @@ svg.icon {
     min-height: 0;
 }
 
-.card-body > *:last-child {
+.card-body>*:last-child {
     margin-top: auto;
 }
 
@@ -1060,6 +1060,7 @@ tbody tr:hover {
 .form-control.is-invalid {
     border-color: var(--rejected);
 }
+
 .form-control.is-invalid:focus {
     border-color: var(--rejected);
     box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
@@ -1083,6 +1084,7 @@ select.form-control {
 .alert.auto-dismiss {
     display: none;
 }
+
 .alert {
     padding: 10px 14px;
     border-radius: var(--radius-sm);
@@ -1154,41 +1156,41 @@ select.form-control {
     align-items: center;
     gap: 10px;
     line-height: 1.45;
-    box-shadow: 0 8px 30px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.06);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, .12), 0 2px 8px rgba(0, 0, 0, .06);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     position: relative;
     overflow: hidden;
-    animation: toastSlideIn .4s cubic-bezier(.22,.68,0,1.1) forwards;
+    animation: toastSlideIn .4s cubic-bezier(.22, .68, 0, 1.1) forwards;
 }
 
 .toast.toast-exit {
-    animation: toastSlideOut .35s cubic-bezier(.4,0,1,1) forwards;
+    animation: toastSlideOut .35s cubic-bezier(.4, 0, 1, 1) forwards;
 }
 
 .toast-success {
-    background: rgba(236,253,245,.95);
+    background: rgba(236, 253, 245, .95);
     border: 1px solid #A7F3D0;
     color: #065F46;
     border-left: 4px solid #10B981;
 }
 
 .toast-error {
-    background: rgba(254,242,242,.95);
+    background: rgba(254, 242, 242, .95);
     border: 1px solid #FECACA;
     color: #991B1B;
     border-left: 4px solid #EF4444;
 }
 
 .toast-warning {
-    background: rgba(255,251,235,.95);
+    background: rgba(255, 251, 235, .95);
     border: 1px solid #FDE68A;
     color: #92400E;
     border-left: 4px solid #F59E0B;
 }
 
 .toast-info {
-    background: rgba(239,246,255,.95);
+    background: rgba(239, 246, 255, .95);
     border: 1px solid #BFDBFE;
     color: #1E40AF;
     border-left: 4px solid #3B82F6;
@@ -1222,7 +1224,7 @@ select.form-control {
 
 .toast .toast-close:hover {
     opacity: 1;
-    background: rgba(0,0,0,.06);
+    background: rgba(0, 0, 0, .06);
 }
 
 /* Progress bar timer */
@@ -1235,28 +1237,64 @@ select.form-control {
     animation: toastProgress 4s linear forwards;
 }
 
-.toast-success .toast-progress { background: #10B981; }
-.toast-error   .toast-progress { background: #EF4444; }
-.toast-warning .toast-progress { background: #F59E0B; }
-.toast-info    .toast-progress { background: #3B82F6; }
+.toast-success .toast-progress {
+    background: #10B981;
+}
+
+.toast-error .toast-progress {
+    background: #EF4444;
+}
+
+.toast-warning .toast-progress {
+    background: #F59E0B;
+}
+
+.toast-info .toast-progress {
+    background: #3B82F6;
+}
 
 /* Pause progress bar & highlight on hover */
-.toast.toast-paused .toast-progress { animation-play-state: paused; }
-.toast.toast-paused { box-shadow: 0 0 0 2px rgba(255,255,255,0.25), var(--shadow-lg); cursor: default; }
+.toast.toast-paused .toast-progress {
+    animation-play-state: paused;
+}
+
+.toast.toast-paused {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25), var(--shadow-lg);
+    cursor: default;
+}
 
 @keyframes toastSlideIn {
-    from { transform: translateX(120%); opacity: 0; }
-    to   { transform: translateX(0);    opacity: 1; }
+    from {
+        transform: translateX(120%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
 }
 
 @keyframes toastSlideOut {
-    from { transform: translateX(0);    opacity: 1; }
-    to   { transform: translateX(120%); opacity: 0; }
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+
+    to {
+        transform: translateX(120%);
+        opacity: 0;
+    }
 }
 
 @keyframes toastProgress {
-    from { width: 100%; }
-    to   { width: 0%; }
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
 }
 
 /* =============================================
@@ -1427,15 +1465,15 @@ select.form-control {
     align-items: center;
     justify-content: center;
     padding: 1rem;
-    background: rgba(0,0,0,.4);
+    background: rgba(0, 0, 0, .4);
     z-index: 400;
     opacity: 0;
     visibility: hidden;
     transition: opacity .25s ease;
 }
 
-body.modal-open{
-    overflow:hidden;
+body.modal-open {
+    overflow: hidden;
 }
 
 .modal-backdrop.open {
@@ -1449,7 +1487,7 @@ body.modal-open{
     width: 100%;
     max-width: 500px;
     max-height: calc(100vh - 2rem);
-    box-shadow: 0 20px 40px rgba(0,0,0,.15);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, .15);
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -1464,7 +1502,7 @@ body.modal-open{
     max-width: 560px;
 }
 
-.modal-backdrop.open .modal{
+.modal-backdrop.open .modal {
     transform: translateY(0);
     opacity: 1;
 }
@@ -1630,7 +1668,7 @@ body.modal-open{
     }
 
     .topbar {
-        top: 0;
+        top: var(--navbar-h);
     }
 
     .stats-grid {
@@ -1713,6 +1751,7 @@ body.modal-open{
     .pagination {
         gap: 6px;
     }
+
     .page-link {
         min-width: 32px;
         height: 32px;
@@ -2042,19 +2081,23 @@ body.modal-open{
     .profile-id-row {
         margin-top: -38px;
     }
+
     .profile-avatar-lg {
         width: 72px;
         height: 72px;
         font-size: 1.4rem;
     }
+
     .profile-status {
         margin-left: 0;
         width: 100%;
         min-width: 0;
     }
+
     .id-block .btn {
         margin-left: 0;
     }
+
     .form-pair {
         grid-template-columns: 1fr;
     }
@@ -2235,8 +2278,8 @@ td .btn {
     text-align: left;
 }
 
-.profile-hero-card > *,
-.profile-hero-card > *:last-child {
+.profile-hero-card>*,
+.profile-hero-card>*:last-child {
     margin-top: 0 !important;
     margin-bottom: 0 !important;
 }
@@ -2269,6 +2312,7 @@ td .btn {
         padding: 2rem 1.5rem !important;
         gap: 1.25rem !important;
     }
+
     .profile-hero-info {
         align-items: center !important;
         text-align: center !important;
@@ -2333,7 +2377,8 @@ body.sidebar-open {
 }
 
 /* Prevent horizontal overflow globally */
-html, body {
+html,
+body {
     overflow-x: hidden;
     max-width: 100vw;
 }
@@ -2364,6 +2409,7 @@ html, body {
 
 /* Mobile Screens (<= 768px) */
 @media (max-width: 768px) {
+
     /* Navbar */
     .navbar {
         padding: 0 0.85rem;
@@ -2447,7 +2493,8 @@ html, body {
     }
 
     .navbar-emblems {
-        display: none !important; /* Hide emblems on mobile to prevent navbar blowout */
+        display: none !important;
+        /* Hide emblems on mobile to prevent navbar blowout */
     }
 
     /* Layout & Sidebar Drawer */
@@ -2587,11 +2634,13 @@ html, body {
     /* Tables */
     td:first-child,
     th:first-child {
-        position: static !important; /* Disable sticky first column on mobile for fluid scroll */
+        position: static !important;
+        /* Disable sticky first column on mobile for fluid scroll */
     }
 
-    table {
-        min-width: 580px; /* Preserve table structure and column widths */
+    .table-wrap table {
+        min-width: 580px;
+        /* Preserve table structure and column widths */
     }
 
     .table-wrap {

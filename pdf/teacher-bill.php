@@ -102,6 +102,7 @@ function cross(){
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teacher Bill <?= h($billNumber) ?> — <?= h($bill['tname']) ?></title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -115,6 +116,13 @@ body{font-family:'Times New Roman',Times,serif;color:#000;background:#ccc}
 .page{width:210mm;min-height:297mm;padding:13mm 14mm 12mm;margin:0 auto 14px;background:#fff;page-break-after:always;position:relative}
 @media screen{body{padding-top:50px}.page{box-shadow:0 2px 10px rgba(0,0,0,.3)}}
 @media print{.pbar{display:none!important}body{background:#fff;padding-top:0}.page{box-shadow:none;margin:0}}
+/* Phone preview: fit the A4 sheet to the screen (print output above is untouched) */
+@media screen and (max-width:720px){
+body{padding-top:84px}
+.pbar{flex-wrap:wrap;gap:6px 10px;padding:8px 12px}
+.pbar span:first-child{min-width:0;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.page{width:auto;min-height:0;padding:8mm 5mm;margin:0 6px 12px}
+}
 .c{text-align:center}.b{font-weight:bold}.u{text-decoration:underline}.j{text-align:justify}
 .hdr h1{font-size:11.5pt;font-weight:bold;text-align:center;line-height:1.4}
 .hdr h2{font-size:10pt;font-weight:bold;text-align:center}
